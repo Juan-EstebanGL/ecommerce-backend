@@ -17,6 +17,12 @@ const productSelect = {
   stock: true,
 };
 
+const cartItemInclude = {
+  product: {
+    select: productSelect,
+  },
+};
+
 const addToCart = async (req, res) => {
   try {
     const productId = parsePositiveInteger(req.body.productId);
@@ -78,11 +84,7 @@ const addToCart = async (req, res) => {
               increment: quantity,
             },
           },
-          include: {
-            product: {
-              select: productSelect,
-            },
-          },
+          include: cartItemInclude,
         })
       : await prisma.cartItem.create({
           data: {
@@ -90,11 +92,7 @@ const addToCart = async (req, res) => {
             productId,
             quantity,
           },
-          include: {
-            product: {
-              select: productSelect,
-            },
-          },
+          include: cartItemInclude,
         });
 
     return res.status(existingCartItem ? 200 : 201).json(cartItem);
@@ -113,11 +111,7 @@ const getCart = async (req, res) => {
       where: {
         userId: req.userId,
       },
-      include: {
-        product: {
-          select: productSelect,
-        },
-      },
+      include: cartItemInclude,
       orderBy: {
         createdAt: "asc",
       },
@@ -135,7 +129,129 @@ const getCart = async (req, res) => {
   }
 };
 
+const updateCartItem = async (req, res) => {
+  try {
+    const id = parsePositiveInteger(req.params.id);
+    const quantity = parsePositiveInteger(req.body.quantity);
+
+    if (!id) {
+      return res.status(400).json({
+        message: "id debe ser un entero positivo",
+      });
+    }
+
+    if (!quantity) {
+      return res.status(400).json({
+        message: "quantity debe ser un entero mayor a 0",
+      });
+    }
+
+    const cartItem = await prisma.cartItem.findUnique({
+      where: {
+        id,
+      },
+      include: cartItemInclude,
+    });
+
+    if (!cartItem) {
+      return res.status(404).json({
+        message: "Item del carrito no encontrado",
+      });
+    }
+
+    if (cartItem.userId !== req.userId) {
+      return res.status(403).json({
+        message: "No autorizado",
+      });
+    }
+
+    if (quantity > cartItem.product.stock) {
+      return res.status(400).json({
+        message: "Stock insuficiente",
+      });
+    }
+
+    const updatedCartItem = await prisma.cartItem.update({
+      where: {
+        id,
+      },
+      data: {
+        quantity,
+      },
+      include: cartItemInclude,
+    });
+
+    return res.json(updatedCartItem);
+  } catch (error) {
+    console.log(error);
+
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        message: "Item del carrito no encontrado",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Error actualizando item del carrito",
+    });
+  }
+};
+
+const deleteCartItem = async (req, res) => {
+  try {
+    const id = parsePositiveInteger(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({
+        message: "id debe ser un entero positivo",
+      });
+    }
+
+    const cartItem = await prisma.cartItem.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!cartItem) {
+      return res.status(404).json({
+        message: "Item del carrito no encontrado",
+      });
+    }
+
+    if (cartItem.userId !== req.userId) {
+      return res.status(403).json({
+        message: "No autorizado",
+      });
+    }
+
+    await prisma.cartItem.delete({
+      where: {
+        id,
+      },
+    });
+
+    return res.json({
+      message: "Item eliminado del carrito",
+    });
+  } catch (error) {
+    console.log(error);
+
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        message: "Item del carrito no encontrado",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Error eliminando item del carrito",
+    });
+  }
+};
+
 module.exports = {
   addToCart,
   getCart,
+  updateCartItem,
+  deleteCartItem,
 };
