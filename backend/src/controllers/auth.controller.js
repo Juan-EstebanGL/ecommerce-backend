@@ -28,17 +28,10 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // crear usuario
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-      },
-    });
-
-    // crear carrito automáticamente
-    await prisma.cart.create({
-      data: {
-        userId: user.id,
       },
     });
 
@@ -71,7 +64,7 @@ const login = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
-        message: "Credenciales inválidas",
+        message: "Credenciales invalidas",
       });
     }
 
@@ -83,7 +76,7 @@ const login = async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(400).json({
-        message: "Credenciales inválidas",
+        message: "Credenciales invalidas",
       });
     }
 
