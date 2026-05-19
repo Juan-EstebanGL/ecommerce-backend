@@ -13,6 +13,8 @@ model User {
   createdAt DateTime   @default(now())
   products  Product[]
   cartItems CartItem[]
+
+  orders Order[]
 }
 
 model Product {
@@ -36,4 +38,29 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, productId])
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  total      Float
+
+  user       User        @relation(fields: [userId], references: [id])
+  userId     Int
+
+  items      OrderItem[]
+
+  createdAt  DateTime    @default(now())
+}
+
+model OrderItem {
+  id           Int      @id @default(autoincrement())
+
+  productId    Int
+  productName  String
+  productPrice Float
+
+  quantity     Int
+
+  order        Order    @relation(fields: [orderId], references: [id])
+  orderId      Int
 }
