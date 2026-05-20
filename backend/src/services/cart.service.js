@@ -1,15 +1,5 @@
 const prisma = require("../lib/prisma");
 
-const parsePositiveInteger = (value) => {
-  const parsedValue = Number(value);
-
-  if (!Number.isInteger(parsedValue) || parsedValue <= 0) {
-    return null;
-  }
-
-  return parsedValue;
-};
-
 const productSelect = {
   id: true,
   name: true,
@@ -30,16 +20,7 @@ const createServiceError = (statusCode, message) => {
 };
 
 const addToCart = async (userId, payload) => {
-  const productId = parsePositiveInteger(payload.productId);
-  const quantity = parsePositiveInteger(payload.quantity);
-
-  if (!productId) {
-    throw createServiceError(400, "productId debe ser un entero positivo");
-  }
-
-  if (!quantity) {
-    throw createServiceError(400, "quantity debe ser un entero mayor a 0");
-  }
+  const { productId, quantity } = payload;
 
   const product = await prisma.product.findUnique({
     where: {
@@ -111,16 +92,8 @@ const getCart = async (userId) => {
 };
 
 const updateCartItem = async (userId, cartItemId, payload) => {
-  const id = parsePositiveInteger(cartItemId);
-  const quantity = parsePositiveInteger(payload.quantity);
-
-  if (!id) {
-    throw createServiceError(400, "id debe ser un entero positivo");
-  }
-
-  if (!quantity) {
-    throw createServiceError(400, "quantity debe ser un entero mayor a 0");
-  }
+  const id = cartItemId;
+  const { quantity } = payload;
 
   const cartItem = await prisma.cartItem.findUnique({
     where: {
@@ -161,11 +134,7 @@ const updateCartItem = async (userId, cartItemId, payload) => {
 };
 
 const deleteCartItem = async (userId, cartItemId) => {
-  const id = parsePositiveInteger(cartItemId);
-
-  if (!id) {
-    throw createServiceError(400, "id debe ser un entero positivo");
-  }
+  const id = cartItemId;
 
   const cartItem = await prisma.cartItem.findUnique({
     where: {

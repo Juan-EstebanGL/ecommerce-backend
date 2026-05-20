@@ -1,4 +1,12 @@
 const cartService = require("../services/cart.service");
+const {
+  addToCartSchema,
+  updateCartItemSchema,
+  cartItemParamsSchema,
+} = require("../validations/cart.validation");
+const {
+  getZodErrorMessage,
+} = require("../validations/validation.helper");
 
 const handleError = (res, error, fallbackMessage) => {
   console.log(error);
@@ -16,9 +24,19 @@ const handleError = (res, error, fallbackMessage) => {
 
 const addToCart = async (req, res) => {
   try {
+    const validation = addToCartSchema.safeParse({
+      body: req.body || {},
+    });
+
+    if (!validation.success) {
+      return res.status(400).json({
+        message: getZodErrorMessage(validation.error),
+      });
+    }
+
     const { cartItem, statusCode } = await cartService.addToCart(
       req.userId,
-      req.body
+      validation.data.body
     );
 
     return res.status(statusCode).json(cartItem);
@@ -41,10 +59,21 @@ const getCart = async (req, res) => {
 
 const updateCartItem = async (req, res) => {
   try {
+    const validation = updateCartItemSchema.safeParse({
+      params: req.params,
+      body: req.body || {},
+    });
+
+    if (!validation.success) {
+      return res.status(400).json({
+        message: getZodErrorMessage(validation.error),
+      });
+    }
+
     const updatedCartItem = await cartService.updateCartItem(
       req.userId,
-      req.params.id,
-      req.body
+      validation.data.params.id,
+      validation.data.body
     );
 
     return res.json(updatedCartItem);
@@ -55,9 +84,19 @@ const updateCartItem = async (req, res) => {
 
 const deleteCartItem = async (req, res) => {
   try {
+    const validation = cartItemParamsSchema.safeParse({
+      params: req.params,
+    });
+
+    if (!validation.success) {
+      return res.status(400).json({
+        message: getZodErrorMessage(validation.error),
+      });
+    }
+
     const result = await cartService.deleteCartItem(
       req.userId,
-      req.params.id
+      validation.data.params.id
     );
 
     return res.json(result);

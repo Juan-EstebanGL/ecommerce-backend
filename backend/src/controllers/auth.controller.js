@@ -1,17 +1,25 @@
 const prisma = require("../lib/prisma");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {
+  registerSchema,
+  loginSchema,
+} = require("../validations/auth.validation");
+const {
+  getZodErrorMessage,
+} = require("../validations/validation.helper");
 
 const register = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const validation = registerSchema.safeParse(req.body || {});
 
-    // validar campos
-    if (!email || !password) {
+    if (!validation.success) {
       return res.status(400).json({
-        message: "Email y password son requeridos",
+        message: getZodErrorMessage(validation.error),
       });
     }
+
+    const { email, password } = validation.data;
 
     // verificar si usuario existe
     const existingUser = await prisma.user.findUnique({
@@ -49,13 +57,15 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const validation = loginSchema.safeParse(req.body || {});
 
-    if (!email || !password) {
+    if (!validation.success) {
       return res.status(400).json({
-        message: "Email y password son requeridos",
+        message: getZodErrorMessage(validation.error),
       });
     }
+
+    const { email, password } = validation.data;
 
     // buscar usuario
     const user = await prisma.user.findUnique({
