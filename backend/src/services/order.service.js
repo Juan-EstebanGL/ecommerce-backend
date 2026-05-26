@@ -1,23 +1,27 @@
 const prisma = require("../lib/prisma");
 
-const parsePositiveInteger = (value) => {
-  const parsedValue = Number(value);
-
-  if (!Number.isInteger(parsedValue) || parsedValue <= 0) {
-    return null;
-  }
-
-  return parsedValue;
-};
-
 const orderInclude = {
   items: true,
+};
+
+const ORDER_STATUS = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  CANCELLED: "CANCELLED",
 };
 
 const createServiceError = (statusCode, message) => {
   const error = new Error(message);
   error.statusCode = statusCode;
   return error;
+};
+
+const canTransitionOrderStatus = (currentStatus, nextStatus) => {
+  return (
+    currentStatus === ORDER_STATUS.PENDING &&
+    (nextStatus === ORDER_STATUS.PAID ||
+      nextStatus === ORDER_STATUS.CANCELLED)
+  );
 };
 
 const createOrder = async (userId) => {
@@ -81,6 +85,7 @@ const createOrder = async (userId) => {
     const createdOrder = await tx.order.create({
       data: {
         total,
+        status: ORDER_STATUS.PENDING,
         userId,
         items: {
           create: cartItems.map((item) => ({
@@ -117,11 +122,7 @@ const getMyOrders = async (userId) => {
 };
 
 const getOrderById = async (userId, orderId) => {
-  const id = parsePositiveInteger(orderId);
-
-  if (!id) {
-    throw createServiceError(400, "id debe ser un entero positivo");
-  }
+  const id = orderId;
 
   const order = await prisma.order.findUnique({
     where: {
@@ -141,8 +142,42 @@ const getOrderById = async (userId, orderId) => {
   return order;
 };
 
+const updateOrderStatus = async (userId, orderId, status) => {
+  const id = orderId;
+
+  const order = await prisma.order.findUnique({
+    where: {
+      id,
+    },
+    include: orderInclude,
+  });
+
+  if (!order) {
+    throw createServiceError(404, "Orden no encontrada");
+  }
+
+  if (order.userId !== userId) {
+    throw createServiceError(403, "No autorizado");
+  }
+
+  if (!canTransitionOrderStatus(order.status, status)) {
+    throw createServiceError(400, "Transicion de estado invalida");
+  }
+
+  return prisma.order.update({
+    where: {
+      id,
+    },
+    data: {
+      status,
+    },
+    include: orderInclude,
+  });
+};
+
 module.exports = {
   createOrder,
   getMyOrders,
   getOrderById,
+  updateOrderStatus,
 };

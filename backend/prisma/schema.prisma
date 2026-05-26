@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
 model User {
   id        Int        @id @default(autoincrement())
   email     String     @unique
@@ -41,26 +47,27 @@ model CartItem {
 }
 
 model Order {
-  id         Int         @id @default(autoincrement())
-  total      Float
+  id     Int         @id @default(autoincrement())
+  total  Float
+  status OrderStatus @default(PENDING)
 
-  user       User        @relation(fields: [userId], references: [id])
-  userId     Int
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
 
-  items      OrderItem[]
+  items OrderItem[]
 
-  createdAt  DateTime    @default(now())
+  createdAt DateTime @default(now())
 }
 
 model OrderItem {
-  id           Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
   productId    Int
   productName  String
   productPrice Float
 
-  quantity     Int
+  quantity Int
 
-  order        Order    @relation(fields: [orderId], references: [id])
-  orderId      Int
+  order   Order @relation(fields: [orderId], references: [id])
+  orderId Int
 }

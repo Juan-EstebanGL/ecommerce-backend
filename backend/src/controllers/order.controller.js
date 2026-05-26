@@ -1,4 +1,11 @@
 const orderService = require("../services/order.service");
+const {
+  orderIdParamsSchema,
+  updateOrderStatusSchema,
+} = require("../validations/order.validation");
+const {
+  getZodErrorMessage,
+} = require("../validations/validation.helper");
 
 const handleError = (res, error, fallbackMessage) => {
   console.log(error);
@@ -41,9 +48,19 @@ const getMyOrders = async (req, res) => {
 
 const getOrderById = async (req, res) => {
   try {
+    const validation = orderIdParamsSchema.safeParse({
+      params: req.params,
+    });
+
+    if (!validation.success) {
+      return res.status(400).json({
+        message: getZodErrorMessage(validation.error),
+      });
+    }
+
     const order = await orderService.getOrderById(
       req.userId,
-      req.params.id
+      validation.data.params.id
     );
 
     return res.json({
@@ -54,8 +71,37 @@ const getOrderById = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  try {
+    const validation = updateOrderStatusSchema.safeParse({
+      params: req.params,
+      body: req.body || {},
+    });
+
+    if (!validation.success) {
+      return res.status(400).json({
+        message: getZodErrorMessage(validation.error),
+      });
+    }
+
+    const order = await orderService.updateOrderStatus(
+      req.userId,
+      validation.data.params.id,
+      validation.data.body.status
+    );
+
+    return res.json({
+      message: "Estado de orden actualizado",
+      order,
+    });
+  } catch (error) {
+    return handleError(res, error, "Error actualizando estado de orden");
+  }
+};
+
 module.exports = {
   createOrder,
   getMyOrders,
   getOrderById,
+  updateOrderStatus,
 };
