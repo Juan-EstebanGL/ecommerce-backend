@@ -142,7 +142,7 @@ const getOrderById = async (userId, orderId) => {
   return order;
 };
 
-const updateOrderStatus = async (userId, orderId, status) => {
+const updateOrderStatus = async (userId, userRole, orderId, status) => {
   const id = orderId;
 
   const order = await prisma.order.findUnique({
@@ -156,7 +156,7 @@ const updateOrderStatus = async (userId, orderId, status) => {
     throw createServiceError(404, "Orden no encontrada");
   }
 
-  if (order.userId !== userId) {
+  if (userRole !== "ADMIN" && order.userId !== userId) {
     throw createServiceError(403, "No autorizado");
   }
 

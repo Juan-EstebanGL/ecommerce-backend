@@ -108,7 +108,7 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    if (existingProduct.userId !== req.userId) {
+    if (req.userRole !== "ADMIN" && existingProduct.userId !== req.userId) {
       return res.status(403).json({
         message: "No autorizado",
       });
@@ -204,7 +204,7 @@ const patchProduct = async (req, res) => {
       });
     }
 
-    if (existingProduct.userId !== req.userId) {
+    if (req.userRole !== "ADMIN" && existingProduct.userId !== req.userId) {
       return res.status(403).json({
         message: "No autorizado",
       });
@@ -249,7 +249,7 @@ const deleteProduct = async (req, res) => {
       });
     }
 
-    if (existingProduct.userId !== req.userId) {
+    if (req.userRole !== "ADMIN" && existingProduct.userId !== req.userId) {
       return res.status(403).json({
         message: "Usuario no autorizado",
       });

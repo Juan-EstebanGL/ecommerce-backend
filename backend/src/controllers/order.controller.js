@@ -86,6 +86,7 @@ const updateOrderStatus = async (req, res) => {
 
     const order = await orderService.updateOrderStatus(
       req.userId,
+      req.userRole,
       validation.data.params.id,
       validation.data.body.status
     );
