@@ -1,4 +1,5 @@
 const prisma = require("../lib/prisma");
+const AppError = require("../utils/AppError");
 
 const productSelect = {
   id: true,
@@ -13,12 +14,6 @@ const cartItemInclude = {
   },
 };
 
-const createServiceError = (statusCode, message) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-};
-
 const addToCart = async (userId, payload) => {
   const { productId, quantity } = payload;
 
@@ -29,7 +24,7 @@ const addToCart = async (userId, payload) => {
   });
 
   if (!product) {
-    throw createServiceError(404, "Producto no encontrado");
+    throw new AppError("Producto no encontrado", 404);
   }
 
   const existingCartItem = await prisma.cartItem.findUnique({
@@ -46,7 +41,7 @@ const addToCart = async (userId, payload) => {
     : quantity;
 
   if (nextQuantity > product.stock) {
-    throw createServiceError(400, "Stock insuficiente");
+    throw new AppError("Stock insuficiente", 400);
   }
 
   const cartItem = existingCartItem
@@ -103,15 +98,15 @@ const updateCartItem = async (userId, cartItemId, payload) => {
   });
 
   if (!cartItem) {
-    throw createServiceError(404, "Item del carrito no encontrado");
+    throw new AppError("Item del carrito no encontrado", 404);
   }
 
   if (cartItem.userId !== userId) {
-    throw createServiceError(403, "No autorizado");
+    throw new AppError("No autorizado", 403);
   }
 
   if (quantity > cartItem.product.stock) {
-    throw createServiceError(400, "Stock insuficiente");
+    throw new AppError("Stock insuficiente", 400);
   }
 
   try {
@@ -126,7 +121,7 @@ const updateCartItem = async (userId, cartItemId, payload) => {
     });
   } catch (error) {
     if (error.code === "P2025") {
-      throw createServiceError(404, "Item del carrito no encontrado");
+      throw new AppError("Item del carrito no encontrado", 404);
     }
 
     throw error;
@@ -143,11 +138,11 @@ const deleteCartItem = async (userId, cartItemId) => {
   });
 
   if (!cartItem) {
-    throw createServiceError(404, "Item del carrito no encontrado");
+    throw new AppError("Item del carrito no encontrado", 404);
   }
 
   if (cartItem.userId !== userId) {
-    throw createServiceError(403, "No autorizado");
+    throw new AppError("No autorizado", 403);
   }
 
   try {
@@ -158,7 +153,7 @@ const deleteCartItem = async (userId, cartItemId) => {
     });
   } catch (error) {
     if (error.code === "P2025") {
-      throw createServiceError(404, "Item del carrito no encontrado");
+      throw new AppError("Item del carrito no encontrado", 404);
     }
 
     throw error;

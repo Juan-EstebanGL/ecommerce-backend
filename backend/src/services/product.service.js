@@ -1,14 +1,9 @@
 const prisma = require("../lib/prisma");
-
-const createServiceError = (statusCode, message) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-};
+const AppError = require("../utils/AppError");
 
 const ensureProductAccess = (product, userId, userRole, message) => {
   if (userRole !== "ADMIN" && product.userId !== userId) {
-    throw createServiceError(403, message);
+    throw new AppError(message, 403);
   }
 };
 
@@ -20,7 +15,7 @@ const getProductById = async (id) => {
   });
 
   if (!product) {
-    throw createServiceError(404, "Producto no encontrado");
+    throw new AppError("Producto no encontrado", 404);
   }
 
   return product;
@@ -62,7 +57,7 @@ const updateProduct = async (userId, userRole, id, data) => {
     });
   } catch (error) {
     if (error.code === "P2025") {
-      throw createServiceError(404, "Producto no encontrado");
+      throw new AppError("Producto no encontrado", 404);
     }
 
     throw error;
@@ -91,7 +86,7 @@ const deleteProduct = async (userId, userRole, id) => {
     });
   } catch (error) {
     if (error.code === "P2025") {
-      throw createServiceError(404, "Producto no encontrado");
+      throw new AppError("Producto no encontrado", 404);
     }
 
     throw error;

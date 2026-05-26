@@ -1,4 +1,6 @@
 const cartService = require("../services/cart.service");
+const AppError = require("../utils/AppError");
+const asyncHandler = require("../utils/asyncHandler");
 const {
   addToCartSchema,
   updateCartItemSchema,
@@ -8,102 +10,66 @@ const {
   getZodErrorMessage,
 } = require("../validations/validation.helper");
 
-const handleError = (res, error, fallbackMessage) => {
-  console.log(error);
-
-  if (error.statusCode) {
-    return res.status(error.statusCode).json({
-      message: error.message,
-    });
-  }
-
-  return res.status(500).json({
-    message: fallbackMessage,
+const addToCart = asyncHandler(async (req, res) => {
+  const validation = addToCartSchema.safeParse({
+    body: req.body || {},
   });
-};
 
-const addToCart = async (req, res) => {
-  try {
-    const validation = addToCartSchema.safeParse({
-      body: req.body || {},
-    });
-
-    if (!validation.success) {
-      return res.status(400).json({
-        message: getZodErrorMessage(validation.error),
-      });
-    }
-
-    const { cartItem, statusCode } = await cartService.addToCart(
-      req.userId,
-      validation.data.body
-    );
-
-    return res.status(statusCode).json(cartItem);
-  } catch (error) {
-    return handleError(res, error, "Error agregando producto al carrito");
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
   }
-};
 
-const getCart = async (req, res) => {
-  try {
-    const items = await cartService.getCart(req.userId);
+  const { cartItem, statusCode } = await cartService.addToCart(
+    req.userId,
+    validation.data.body
+  );
 
-    return res.json({
-      items,
-    });
-  } catch (error) {
-    return handleError(res, error, "Error obteniendo carrito");
+  return res.status(statusCode).json(cartItem);
+}, "Error agregando producto al carrito");
+
+const getCart = asyncHandler(async (req, res) => {
+  const items = await cartService.getCart(req.userId);
+
+  return res.json({
+    items,
+  });
+}, "Error obteniendo carrito");
+
+const updateCartItem = asyncHandler(async (req, res) => {
+  const validation = updateCartItemSchema.safeParse({
+    params: req.params,
+    body: req.body || {},
+  });
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
   }
-};
 
-const updateCartItem = async (req, res) => {
-  try {
-    const validation = updateCartItemSchema.safeParse({
-      params: req.params,
-      body: req.body || {},
-    });
+  const updatedCartItem = await cartService.updateCartItem(
+    req.userId,
+    validation.data.params.id,
+    validation.data.body
+  );
 
-    if (!validation.success) {
-      return res.status(400).json({
-        message: getZodErrorMessage(validation.error),
-      });
-    }
+  return res.json(updatedCartItem);
+}, "Error actualizando item del carrito");
 
-    const updatedCartItem = await cartService.updateCartItem(
-      req.userId,
-      validation.data.params.id,
-      validation.data.body
-    );
+const deleteCartItem = asyncHandler(async (req, res) => {
+  const validation = cartItemParamsSchema.safeParse({
+    params: req.params,
+  });
 
-    return res.json(updatedCartItem);
-  } catch (error) {
-    return handleError(res, error, "Error actualizando item del carrito");
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
   }
-};
 
-const deleteCartItem = async (req, res) => {
-  try {
-    const validation = cartItemParamsSchema.safeParse({
-      params: req.params,
-    });
+  const result = await cartService.deleteCartItem(
+    req.userId,
+    validation.data.params.id
+  );
 
-    if (!validation.success) {
-      return res.status(400).json({
-        message: getZodErrorMessage(validation.error),
-      });
-    }
-
-    const result = await cartService.deleteCartItem(
-      req.userId,
-      validation.data.params.id
-    );
-
-    return res.json(result);
-  } catch (error) {
-    return handleError(res, error, "Error eliminando item del carrito");
-  }
-};
+  return res.json(result);
+}, "Error eliminando item del carrito");
 
 module.exports = {
   addToCart,

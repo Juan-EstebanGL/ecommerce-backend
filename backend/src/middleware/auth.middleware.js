@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const AppError = require("../utils/AppError");
 
 const authMiddleware = (req, res, next) => {
   try {
@@ -6,9 +7,7 @@ const authMiddleware = (req, res, next) => {
 
     // verificar header
     if (!authHeader) {
-      return res.status(401).json({
-        message: "Token requerido",
-      });
+      return next(new AppError("Token requerido", 401));
     }
 
     // formato: Bearer token
@@ -26,9 +25,7 @@ const authMiddleware = (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.status(401).json({
-      message: "Token inválido",
-    });
+    return next(new AppError("Token inválido", 401));
   }
 };
 

@@ -1,4 +1,5 @@
 const prisma = require("../lib/prisma");
+const AppError = require("../utils/AppError");
 
 const orderInclude = {
   items: true,
@@ -8,12 +9,6 @@ const ORDER_STATUS = {
   PENDING: "PENDING",
   PAID: "PAID",
   CANCELLED: "CANCELLED",
-};
-
-const createServiceError = (statusCode, message) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
 };
 
 const canTransitionOrderStatus = (currentStatus, nextStatus) => {
@@ -39,18 +34,18 @@ const createOrder = async (userId) => {
     });
 
     if (cartItems.length === 0) {
-      throw createServiceError(400, "El carrito esta vacio");
+      throw new AppError("El carrito esta vacio", 400);
     }
 
     for (const item of cartItems) {
       if (!item.product) {
-        throw createServiceError(404, "Producto no encontrado");
+        throw new AppError("Producto no encontrado", 404);
       }
 
       if (item.quantity > item.product.stock) {
-        throw createServiceError(
-          400,
-          `Stock insuficiente para ${item.product.name}`
+        throw new AppError(
+          `Stock insuficiente para ${item.product.name}`,
+          400
         );
       }
     }
@@ -75,9 +70,9 @@ const createOrder = async (userId) => {
       });
 
       if (updatedProduct.count === 0) {
-        throw createServiceError(
-          400,
-          `Stock insuficiente para ${item.product.name}`
+        throw new AppError(
+          `Stock insuficiente para ${item.product.name}`,
+          400
         );
       }
     }
@@ -132,11 +127,11 @@ const getOrderById = async (userId, orderId) => {
   });
 
   if (!order) {
-    throw createServiceError(404, "Orden no encontrada");
+    throw new AppError("Orden no encontrada", 404);
   }
 
   if (order.userId !== userId) {
-    throw createServiceError(403, "No autorizado");
+    throw new AppError("No autorizado", 403);
   }
 
   return order;
@@ -153,15 +148,15 @@ const updateOrderStatus = async (userId, userRole, orderId, status) => {
   });
 
   if (!order) {
-    throw createServiceError(404, "Orden no encontrada");
+    throw new AppError("Orden no encontrada", 404);
   }
 
   if (userRole !== "ADMIN" && order.userId !== userId) {
-    throw createServiceError(403, "No autorizado");
+    throw new AppError("No autorizado", 403);
   }
 
   if (!canTransitionOrderStatus(order.status, status)) {
-    throw createServiceError(400, "Transicion de estado invalida");
+    throw new AppError("Transicion de estado invalida", 400);
   }
 
   return prisma.order.update({

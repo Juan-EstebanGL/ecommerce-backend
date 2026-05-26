@@ -1,8 +1,8 @@
+const AppError = require("../utils/AppError");
+
 const adminMiddleware = (req, res, next) => {
   if (req.userRole !== "ADMIN") {
-    return res.status(403).json({
-      message: "Acceso denegado",
-    });
+    return next(new AppError("Acceso denegado", 403));
   }
 
   next();
