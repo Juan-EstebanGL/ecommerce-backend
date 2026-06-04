@@ -40,6 +40,4 @@ app.get("/", (req, res) => {
 
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
-});
+module.exports = app;
