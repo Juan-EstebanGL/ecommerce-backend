@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/auth";
+import useAuth from "../hooks/useAuth";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -8,6 +8,7 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   async function handleSubmit(event) {
     event.preventDefault();
