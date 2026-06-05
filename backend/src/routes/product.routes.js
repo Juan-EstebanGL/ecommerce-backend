@@ -7,6 +7,7 @@ const adminMiddleware = require("../middleware/admin.middleware");
 const {
   createProduct,
   getProducts,
+  getProductById,
   updateProduct,
   patchProduct,
   deleteProduct,
@@ -47,6 +48,37 @@ const {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/", getProducts);
+
+/**
+ * @swagger
+ * /products/{id}:
+ *   get:
+ *     summary: Obtener detalle de un producto
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Detalle del producto
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 1
+ *               name: Mouse gamer
+ *               price: 49.99
+ *               stock: 10
+ *               userId: 2
+ *       400:
+ *         description: Id invalido
+ *       404:
+ *         description: Producto no encontrado
+ */
+router.get("/:id", getProductById);
 
 /**
  * @swagger

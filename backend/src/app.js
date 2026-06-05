@@ -24,7 +24,10 @@ const allowedOrigins = env.FRONTEND_URL
   : localOrigins;
 
 console.log("[app] Iniciando servidor Express...");
-console.log("[app] Rutas registradas: /auth, /test, /products, /cart, /orders");
+console.log(
+  "[app] Rutas registradas: /auth, /products, /cart, /orders" +
+    (env.NODE_ENV === "development" ? ", /test" : "")
+);
 
 app.use(
   cors({
@@ -46,7 +49,11 @@ app.use((req, res, next) => {
 });
 
 app.use("/auth", authRoutes);
-app.use("/test", testRoutes);
+
+if (env.NODE_ENV === "development") {
+  app.use("/test", testRoutes);
+}
+
 app.use("/products", productRoutes);
 app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);

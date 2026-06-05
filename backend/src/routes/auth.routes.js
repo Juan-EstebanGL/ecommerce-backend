@@ -88,6 +88,10 @@ router.post("/register", register);
  *           application/json:
  *             example:
  *               token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *               user:
+ *                 id: 1
+ *                 email: user@test.com
+ *                 role: USER
  *       400:
  *         description: Credenciales invalidas
  *         content:

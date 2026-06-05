@@ -76,9 +76,15 @@ describe("Auth integration tests", () => {
       .expect(200);
 
     expect(response.body).toHaveProperty("token");
+    expect(response.body.user).toEqual({
+      id: expect.any(Number),
+      email: testUser.email,
+      role: "USER",
+    });
+
     const decoded = jwt.verify(response.body.token, process.env.JWT_SECRET);
 
-    expect(decoded).toHaveProperty("userId");
+    expect(decoded).toHaveProperty("userId", response.body.user.id);
     expect(decoded).toHaveProperty("role", "USER");
   });
 

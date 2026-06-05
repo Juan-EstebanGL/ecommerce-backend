@@ -29,7 +29,7 @@ const getProductById = async (id) => {
     throw new AppError("Producto no encontrado", 404);
   }
 
-  return product;
+  return formatProduct(product);
 };
 
 const createProduct = async (userId, data) => {
@@ -117,6 +117,7 @@ const deleteProduct = async (userId, userRole, id) => {
 module.exports = {
   createProduct,
   getProducts,
+  getProductById,
   updateProduct,
   patchProduct,
   deleteProduct,

@@ -102,6 +102,49 @@ describe("Products integration tests", () => {
     });
   });
 
+  test("GET /products/:id debe devolver un producto existente sin autenticacion", async () => {
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Monitor 27",
+      price: 249.99,
+      stock: 8,
+    }).expect(201);
+
+    const productId = productResponse.body.id;
+
+    const response = await request(app)
+      .get(`/products/${productId}`)
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      id: productId,
+      name: "Monitor 27",
+      price: 249.99,
+      stock: 8,
+      userId: expect.any(Number),
+    });
+  });
+
+  test("GET /products/:id debe devolver 404 si el producto no existe", async () => {
+    const response = await request(app).get("/products/99999").expect(404);
+
+    expect(response.body).toEqual({
+      message: "Producto no encontrado",
+    });
+  });
+
+  test("GET /products/:id debe devolver 400 con id invalido", async () => {
+    const response = await request(app).get("/products/abc").expect(400);
+
+    expect(response.body).toEqual({
+      message: "id debe ser un entero positivo",
+    });
+  });
+
   test("POST /products USER autenticado debe recibir 403", async () => {
     await registerUser(userCredentials.email, userCredentials.password);
     const token = await loginUser(userCredentials.email, userCredentials.password);

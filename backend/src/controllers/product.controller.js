@@ -34,6 +34,22 @@ const getProducts = asyncHandler(async (req, res) => {
   return res.json(products);
 }, "Error obteniendo productos");
 
+const getProductById = asyncHandler(async (req, res) => {
+  const validation = productParamsSchema.safeParse({
+    params: req.params,
+  });
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
+  }
+
+  const product = await productService.getProductById(
+    validation.data.params.id
+  );
+
+  return res.json(product);
+}, "Error obteniendo producto");
+
 const updateProduct = asyncHandler(async (req, res) => {
   const validation = updateProductSchema.safeParse({
     params: req.params,
@@ -95,6 +111,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 module.exports = {
   createProduct,
   getProducts,
+  getProductById,
   updateProduct,
   patchProduct,
   deleteProduct,

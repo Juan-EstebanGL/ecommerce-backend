@@ -87,6 +87,11 @@ const login = asyncHandler(async (req, res) => {
 
   return res.json({
     token,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
   });
 }, "Error interno del servidor");
 
