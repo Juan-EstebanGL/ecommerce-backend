@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getCart, updateCartItem, removeCartItem } from "../api/cart";
 
 function Cart() {
@@ -6,6 +7,7 @@ function Cart() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [actionId, setActionId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadCart() {
@@ -113,6 +115,11 @@ function Cart() {
       {items.length > 0 && (
         <div style={{ marginTop: "1rem", fontWeight: "bold" }}>
           Total: {total.toFixed(2)}
+          <div style={{ marginTop: "1rem" }}>
+            <button type="button" onClick={() => navigate("/checkout")}>
+              Confirmar compra
+            </button>
+          </div>
         </div>
       )}
     </main>

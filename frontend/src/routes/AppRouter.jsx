@@ -5,7 +5,9 @@ import RegisterPage from "../pages/RegisterPage";
 import Products from "../pages/Products";
 import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
-import OrdersPage from "../pages/OrdersPage";
+import Checkout from "../pages/Checkout";
+import Orders from "../pages/Orders";
+import OrderDetail from "../pages/OrderDetail";
 
 function AppRouter() {
   return (
@@ -16,7 +18,9 @@ function AppRouter() {
       <Route path="/products" element={<Products />} />
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/orders" element={<Orders />} />
+      <Route path="/orders/:id" element={<OrderDetail />} />
     </Routes>
   );
 }
