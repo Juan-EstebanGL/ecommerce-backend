@@ -7,6 +7,17 @@ const ensureProductAccess = (product, userId, userRole, message) => {
   }
 };
 
+const formatProduct = (product) => {
+  if (!product) {
+    return product;
+  }
+
+  return {
+    ...product,
+    price: Number(product.price),
+  };
+};
+
 const getProductById = async (id) => {
   const product = await prisma.product.findUnique({
     where: {
@@ -22,16 +33,18 @@ const getProductById = async (id) => {
 };
 
 const createProduct = async (userId, data) => {
-  return prisma.product.create({
+  const product = await prisma.product.create({
     data: {
       ...data,
       userId,
     },
   });
+
+  return formatProduct(product);
 };
 
 const getProducts = async () => {
-  return prisma.product.findMany({
+  const products = await prisma.product.findMany({
     include: {
       user: {
         select: {
@@ -41,6 +54,8 @@ const getProducts = async () => {
       },
     },
   });
+
+  return products.map(formatProduct);
 };
 
 const updateProduct = async (userId, userRole, id, data) => {
@@ -49,12 +64,14 @@ const updateProduct = async (userId, userRole, id, data) => {
   ensureProductAccess(existingProduct, userId, userRole, "No autorizado");
 
   try {
-    return await prisma.product.update({
+    const product = await prisma.product.update({
       where: {
         id,
       },
       data,
     });
+
+    return formatProduct(product);
   } catch (error) {
     if (error.code === "P2025") {
       throw new AppError("Producto no encontrado", 404);

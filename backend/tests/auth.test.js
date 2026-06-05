@@ -5,6 +5,7 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const app = require("../src/app");
 const prisma = require("../src/lib/prisma");
+const { assertSafeTestDatabase } = require("./testSafety");
 
 const testUser = {
   email: "user@example.com",
@@ -12,6 +13,8 @@ const testUser = {
 };
 
 const clearDatabase = async () => {
+  assertSafeTestDatabase();
+
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.cartItem.deleteMany();

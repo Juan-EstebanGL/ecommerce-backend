@@ -11,6 +11,23 @@ const ORDER_STATUS = {
   CANCELLED: "CANCELLED",
 };
 
+const formatOrder = (order) => {
+  if (!order) {
+    return order;
+  }
+
+  return {
+    ...order,
+    total: Number(order.total),
+    items: order.items
+      ? order.items.map((item) => ({
+          ...item,
+          productPrice: Number(item.productPrice),
+        }))
+      : order.items,
+  };
+};
+
 const canTransitionOrderStatus = (currentStatus, nextStatus) => {
   return (
     currentStatus === ORDER_STATUS.PENDING &&
@@ -100,12 +117,12 @@ const createOrder = async (userId) => {
       },
     });
 
-    return createdOrder;
+    return formatOrder(createdOrder);
   });
 };
 
 const getMyOrders = async (userId) => {
-  return prisma.order.findMany({
+  const orders = await prisma.order.findMany({
     where: {
       userId,
     },
@@ -114,6 +131,8 @@ const getMyOrders = async (userId) => {
       createdAt: "desc",
     },
   });
+
+  return orders.map(formatOrder);
 };
 
 const getOrderById = async (userId, orderId) => {
@@ -134,7 +153,7 @@ const getOrderById = async (userId, orderId) => {
     throw new AppError("No autorizado", 403);
   }
 
-  return order;
+  return formatOrder(order);
 };
 
 const updateOrderStatus = async (userId, userRole, orderId, status) => {
@@ -159,7 +178,7 @@ const updateOrderStatus = async (userId, userRole, orderId, status) => {
     throw new AppError("Transicion de estado invalida", 400);
   }
 
-  return prisma.order.update({
+  const updatedOrder = await prisma.order.update({
     where: {
       id,
     },
@@ -168,6 +187,8 @@ const updateOrderStatus = async (userId, userRole, orderId, status) => {
     },
     include: orderInclude,
   });
+
+  return formatOrder(updatedOrder);
 };
 
 module.exports = {

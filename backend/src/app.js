@@ -1,8 +1,7 @@
-require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
+const env = require("./config/env");
 
 const authRoutes = require("./routes/auth.routes");
 const testRoutes = require("./routes/test.routes");
@@ -14,11 +13,30 @@ const swaggerSpec = require("./config/swagger");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const localOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:5173",
+];
+const allowedOrigins = env.FRONTEND_URL
+  ? [env.FRONTEND_URL, ...localOrigins]
+  : localOrigins;
 
 console.log("[app] Iniciando servidor Express...");
 console.log("[app] Rutas registradas: /auth, /test, /products, /cart, /orders");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Origen no permitido por CORS"));
+    },
+  })
+);
 app.use(express.json());
 
 // Log temporal para depurar que rutas entran al backend

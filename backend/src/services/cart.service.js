@@ -14,6 +14,22 @@ const cartItemInclude = {
   },
 };
 
+const formatCartItem = (cartItem) => {
+  if (!cartItem) {
+    return cartItem;
+  }
+
+  return {
+    ...cartItem,
+    product: cartItem.product
+      ? {
+          ...cartItem.product,
+          price: Number(cartItem.product.price),
+        }
+      : cartItem.product,
+  };
+};
+
 const addToCart = async (userId, payload) => {
   const { productId, quantity } = payload;
 
@@ -69,13 +85,13 @@ const addToCart = async (userId, payload) => {
       });
 
   return {
-    cartItem,
+    cartItem: formatCartItem(cartItem),
     statusCode: existingCartItem ? 200 : 201,
   };
 };
 
 const getCart = async (userId) => {
-  return prisma.cartItem.findMany({
+  const items = await prisma.cartItem.findMany({
     where: {
       userId,
     },
@@ -84,6 +100,8 @@ const getCart = async (userId) => {
       createdAt: "asc",
     },
   });
+
+  return items.map(formatCartItem);
 };
 
 const updateCartItem = async (userId, cartItemId, payload) => {
@@ -110,7 +128,7 @@ const updateCartItem = async (userId, cartItemId, payload) => {
   }
 
   try {
-    return await prisma.cartItem.update({
+    const updatedCartItem = await prisma.cartItem.update({
       where: {
         id,
       },
@@ -119,6 +137,8 @@ const updateCartItem = async (userId, cartItemId, payload) => {
       },
       include: cartItemInclude,
     });
+
+    return formatCartItem(updatedCartItem);
   } catch (error) {
     if (error.code === "P2025") {
       throw new AppError("Item del carrito no encontrado", 404);
