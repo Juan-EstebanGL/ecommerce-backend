@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCart, updateCartItem, removeCartItem } from "../api/cart";
+import Button from "../components/Button";
+import Loader from "../components/Loader";
 
 function Cart() {
   const [items, setItems] = useState([]);
@@ -67,9 +69,13 @@ function Cart() {
   return (
     <main>
       <h1>Carrito</h1>
-      {loading && <p>Cargando carrito...</p>}
+      {loading && <Loader />}
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && !error && items.length === 0 && <p>El carrito está vacío.</p>}
+      {!loading && !error && items.length === 0 && (
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <p>El carrito está vacío.</p>
+        </div>
+      )}
       <div style={{ display: "grid", gap: "1rem" }}>
         {items.map((item) => (
           <div
@@ -79,47 +85,49 @@ function Cart() {
               border: "1px solid #ddd",
               borderRadius: "4px",
               background: "#fff",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "1rem",
             }}
           >
-            <h2>{item.product?.name || "Producto"}</h2>
-            <p>Precio: {item.product?.price ?? "-"}</p>
-            <p>Cantidad: {item.quantity}</p>
-            <p>Subtotal: {(item.product?.price || 0) * item.quantity}</p>
+            <div>
+              <h3>{item.product?.name || "Producto"}</h3>
+              <p>Precio: ${item.product?.price ?? "-"}</p>
+              <p>Cantidad: {item.quantity}</p>
+              <p>Subtotal: ${((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
+              <p style={{ fontSize: "0.9em", color: "#666" }}>Stock disponible: {item.product?.stock ?? "-"}</p>
+            </div>
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              <button
-                type="button"
+              <Button
                 disabled={actionId === item.id || item.quantity <= 1}
                 onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
               >
                 -
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 disabled={actionId === item.id || item.quantity >= (item.product?.stock || Infinity)}
                 onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
               >
                 +
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 disabled={actionId === item.id}
                 onClick={() => handleRemoveItem(item.id)}
               >
                 Eliminar
-              </button>
+              </Button>
             </div>
-            <p>Stock disponible: {item.product?.stock ?? "-"}</p>
           </div>
         ))}
       </div>
       {items.length > 0 && (
-        <div style={{ marginTop: "1rem", fontWeight: "bold" }}>
-          Total: {total.toFixed(2)}
-          <div style={{ marginTop: "1rem" }}>
-            <button type="button" onClick={() => navigate("/checkout")}>
-              Confirmar compra
-            </button>
-          </div>
+        <div style={{ marginTop: "2rem", padding: "1rem", border: "1px solid #ddd", borderRadius: "4px", background: "#f9f9f9" }}>
+          <h2 style={{ marginBottom: "1rem" }}>Total: ${total.toFixed(2)}</h2>
+          <Button onClick={() => navigate("/checkout")}>
+            Confirmar compra
+          </Button>
         </div>
       )}
     </main>

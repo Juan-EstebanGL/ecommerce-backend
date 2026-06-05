@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getOrders } from "../api/orders";
+import Button from "../components/Button";
+import Loader from "../components/Loader";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
@@ -26,13 +28,29 @@ function Orders() {
     loadOrders();
   }, []);
 
+  const getStatusColor = (status) => {
+    const colors = {
+      PENDING: "#ffc107",
+      PAID: "#28a745",
+      PROCESSING: "#17a2b8",
+      SHIPPED: "#007bff",
+      DELIVERED: "#6f42c1",
+      CANCELLED: "#dc3545",
+    };
+    return colors[status] || "#6c757d";
+  };
+
   return (
     <main>
       <h1>Órdenes</h1>
-      {loading && <p>Cargando órdenes...</p>}
+      {loading && <Loader />}
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && !error && orders.length === 0 && <p>No hay órdenes.</p>}
-      <div style={{ display: "grid", gap: "1rem" }}>
+      {!loading && !error && orders.length === 0 && (
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <p>No hay órdenes.</p>
+        </div>
+      )}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1rem" }}>
         {orders.map((order) => (
           <div
             key={order.id}
@@ -41,15 +59,22 @@ function Orders() {
               border: "1px solid #ddd",
               borderRadius: "4px",
               background: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.5rem",
             }}
           >
-            <h2>Orden #{order.id}</h2>
-            <p>Fecha: {new Date(order.createdAt).toLocaleString()}</p>
-            <p>Total: {order.total}</p>
-            <p>Estado: {order.status}</p>
-            <button type="button" onClick={() => navigate(`/orders/${order.id}`)}>
+            <h3>Orden #{order.id}</h3>
+            <p style={{ fontSize: "0.9em", color: "#666" }}>
+              Fecha: {new Date(order.createdAt).toLocaleDateString()}
+            </p>
+            <p>Total: ${order.total.toFixed(2)}</p>
+            <p>
+              Estado: <span style={{ color: getStatusColor(order.status), fontWeight: "bold" }}>{order.status}</span>
+            </p>
+            <Button onClick={() => navigate(`/orders/${order.id}`)}>
               Ver detalle
-            </button>
+            </Button>
           </div>
         ))}
       </div>
