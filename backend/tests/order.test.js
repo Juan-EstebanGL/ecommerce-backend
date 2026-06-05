@@ -630,4 +630,123 @@ describe("Orders integration tests", () => {
       message: "Acceso denegado",
     });
   });
+
+  test("Admin no puede cancelar una orden por PATCH /status", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const userToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Auriculares",
+      price: 79.99,
+      stock: 6,
+    }).expect(201);
+
+    const productId = productResponse.body.id;
+
+    await addProductToCart(userToken, productId, 2).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    const response = await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "CANCELLED" })
+      .expect(400);
+
+    expect(response.body).toEqual({
+      message: "status invalido",
+    });
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    expect(order.status).toBe("PENDING");
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    expect(product.stock).toBe(4);
+  });
+
+  test("Cancelacion por PATCH /cancel restaura stock y /status no lo hace", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const userToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Teclado compacto",
+      price: 39.99,
+      stock: 8,
+    }).expect(201);
+
+    const productId = productResponse.body.id;
+
+    await addProductToCart(userToken, productId, 3).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    const productAfterCheckout = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    expect(productAfterCheckout.stock).toBe(5);
+
+    await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "CANCELLED" })
+      .expect(400);
+
+    const productAfterFailedStatusCancel = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    expect(productAfterFailedStatusCancel.stock).toBe(5);
+
+    const cancelResponse = await request(app)
+      .patch(`/orders/${orderId}/cancel`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(200);
+
+    expect(cancelResponse.body).toMatchObject({
+      message: "Orden cancelada correctamente",
+      order: {
+        id: orderId,
+        status: "CANCELLED",
+      },
+    });
+
+    const productAfterCancel = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    expect(productAfterCancel.stock).toBe(8);
+  });
 });

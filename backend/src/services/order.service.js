@@ -32,7 +32,7 @@ const formatOrder = (order) => {
 };
 
 const ORDER_STATUS_TRANSITIONS = {
-  [ORDER_STATUS.PENDING]: [ORDER_STATUS.PAID, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.PENDING]: [ORDER_STATUS.PAID],
   [ORDER_STATUS.PAID]: [ORDER_STATUS.PROCESSING],
   [ORDER_STATUS.PROCESSING]: [ORDER_STATUS.SHIPPED],
   [ORDER_STATUS.SHIPPED]: [ORDER_STATUS.DELIVERED],
@@ -178,6 +178,13 @@ const updateOrderStatus = async (userId, userRole, orderId, status) => {
 
   if (userRole !== "ADMIN" && order.userId !== userId) {
     throw new AppError("No autorizado", 403);
+  }
+
+  if (status === ORDER_STATUS.CANCELLED) {
+    throw new AppError(
+      "La cancelacion debe realizarse por PATCH /orders/:id/cancel",
+      400
+    );
   }
 
   if (!canTransitionOrderStatus(order.status, status)) {
