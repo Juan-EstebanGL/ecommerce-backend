@@ -9,6 +9,7 @@ function Navbar() {
       <div className="nav-left">
         <Link to="/" className="brand">E-Shop</Link>
         <nav className="nav-links">
+          <Link to="/">Inicio</Link>
           <Link to="/products">Productos</Link>
           <Link to="/cart">Carrito</Link>
           {user && <Link to="/orders">Órdenes</Link>}
