@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getProductById } from "../api/products";
+import Loader from "../components/Loader";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -31,25 +32,25 @@ function ProductDetail() {
 
   if (loading) {
     return (
-      <main>
+      <main className="app-container">
         <h1>Detalle del producto</h1>
-        <p>Cargando producto...</p>
+        <Loader />
       </main>
     );
   }
 
   if (error) {
     return (
-      <main>
+      <main className="app-container">
         <h1>Detalle del producto</h1>
-        <p style={{ color: "red" }}>{error}</p>
+        <p className="form-error">{error}</p>
       </main>
     );
   }
 
   if (!product) {
     return (
-      <main>
+      <main className="app-container">
         <h1>Detalle del producto</h1>
         <p>Producto no encontrado.</p>
       </main>
@@ -57,11 +58,18 @@ function ProductDetail() {
   }
 
   return (
-    <main>
-      <h1>{product.name}</h1>
-      {product.description && <p>{product.description}</p>}
-      <p>Precio: {product.price}</p>
-      <p>Stock: {product.stock}</p>
+    <main className="app-container">
+      <div className="card" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+        <div className="product-media">
+          {product.imageUrl ? <img src={product.imageUrl} alt={product.name} /> : <div style={{padding:20}}>{product.name?.slice(0,1)}</div>}
+        </div>
+        <div>
+          <h1 style={{marginTop:0}}>{product.name}</h1>
+          {product.description && <p>{product.description}</p>}
+          <p className="product-price">${product.price}</p>
+          <p className="product-stock">Stock: {product.stock}</p>
+        </div>
+      </div>
     </main>
   );
 }

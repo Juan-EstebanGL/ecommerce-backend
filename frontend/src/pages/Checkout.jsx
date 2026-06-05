@@ -49,34 +49,30 @@ function Checkout() {
   );
 
   return (
-    <main>
+    <main className="app-container">
       <h1>Checkout</h1>
       {loading && <p>Cargando resumen del carrito...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
       {!loading && !error && items.length === 0 && <p>El carrito está vacío.</p>}
       {items.length > 0 && (
-        <div style={{ display: "grid", gap: "1rem" }}>
+        <div style={{display:'grid',gap:12}}>
           {items.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                padding: "1rem",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-                background: "#fff",
-              }}
-            >
-              <h2>{item.product?.name || "Producto"}</h2>
+            <div key={item.id} className="card">
+              <h2 style={{margin:0}}>{item.product?.name || "Producto"}</h2>
               <p>Precio: {item.product?.price ?? "-"}</p>
               <p>Cantidad: {item.quantity}</p>
               <p>Subtotal: {(item.product?.price || 0) * item.quantity}</p>
             </div>
           ))}
-          <div style={{ fontWeight: "bold" }}>Total: {total.toFixed(2)}</div>
-          {checkoutError && <p style={{ color: "red" }}>{checkoutError}</p>}
-          <button type="button" onClick={handleCheckout} disabled={checkoutLoading}>
-            {checkoutLoading ? "Procesando..." : "Confirmar compra"}
-          </button>
+          <div className="card" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div style={{fontWeight:'bold'}}>Total: {total.toFixed(2)}</div>
+            <div>
+              {checkoutError && <p className="form-error">{checkoutError}</p>}
+              <button className="btn btn--primary" type="button" onClick={handleCheckout} disabled={checkoutLoading}>
+                {checkoutLoading ? "Procesando..." : "Confirmar compra"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

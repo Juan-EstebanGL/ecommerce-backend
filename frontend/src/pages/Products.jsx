@@ -47,21 +47,18 @@ function Products() {
 
   return (
     <main>
+      <div className="app-container">
       <h1>Productos</h1>
       {loading && <Loader />}
       {error && <p style={{ color: "red" }}>{error}</p>}
       {cartMessage && <p style={{ color: "green" }}>{cartMessage}</p>}
       {cartError && <p style={{ color: "red" }}>{cartError}</p>}
       {!loading && !error && products.length === 0 && <p>No hay productos disponibles.</p>}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1rem" }}>
+      <div className="product-grid">
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onAddToCart={handleAddToCart}
-            addingId={addingId}
-          />
+          <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} addingId={addingId} />
         ))}
+      </div>
       </div>
     </main>
   );

@@ -1,18 +1,8 @@
-function Button({ children, disabled = false, onClick, type = "button" }) {
+function Button({ children, disabled = false, onClick, type = "button", variant = "primary" }) {
+  const cls = `btn ${variant === 'ghost' ? 'btn--ghost' : 'btn--primary'}`;
+
   return (
-    <button
-      type={type}
-      disabled={disabled}
-      onClick={onClick}
-      style={{
-        padding: "0.5rem 1rem",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-        background: "#fff",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.6 : 1,
-      }}
-    >
+    <button type={type} disabled={disabled} onClick={onClick} className={cls}>
       {children}
     </button>
   );

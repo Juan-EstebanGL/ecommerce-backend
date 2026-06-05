@@ -5,39 +5,30 @@ function Navbar() {
   const { user, logout } = useAuth();
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "1rem 2rem",
-        borderBottom: "1px solid #ddd",
-        background: "#fafafa",
-      }}
-    >
-      <div style={{ display: "flex", gap: "1rem" }}>
+    <header className="navbar app-container">
+      <div className="nav-left">
+        <Link to="/" className="brand">E-Shop</Link>
+        <nav className="nav-links">
+          <Link to="/products">Productos</Link>
+          <Link to="/cart">Carrito</Link>
+          {user && <Link to="/orders">Órdenes</Link>}
+        </nav>
+      </div>
+
+      <div className="nav-user">
         {user ? (
           <>
-            <Link to="/products">Products</Link>
-            <Link to="/cart">Cart</Link>
-            <Link to="/orders">Orders</Link>
+            <div className="user-bubble">{user.email}</div>
+            <button className="btn btn--ghost" type="button" onClick={logout}>Logout</button>
           </>
         ) : (
-          <>
+          <div className="nav-links">
             <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </>
+            <Link to="/register">Registro</Link>
+          </div>
         )}
       </div>
-      {user && (
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span>{user.email}</span>
-          <button type="button" onClick={logout}>
-            Logout
-          </button>
-        </div>
-      )}
-    </nav>
+    </header>
   );
 }
 

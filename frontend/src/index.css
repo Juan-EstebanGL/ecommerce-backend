@@ -6,5 +6,99 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: var(--text);
 }
+
+:root{
+  /* Palette */
+  --brand: #0ea5a4;
+  --brand-700: #0b8f8d;
+  --accent: #7c3aed;
+  --bg: #f6f7fb;
+  --card-bg: #ffffff;
+  --muted: #6b7280;
+  --danger: #dc2626;
+
+  /* Typography */
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --fs-base: 16px;
+  --fs-lg: 20px;
+  --fs-sm: 14px;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+
+  /* Radius / shadows */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.04);
+  --shadow-md: 0 6px 18px rgba(13,19,38,0.08);
+}
+
+/* Layout helpers */
+.app-container{max-width:1200px;margin:0 auto;padding:var(--space-lg);}
+.container{padding:var(--space-md);}
+
+/* Cards */
+.card{background:var(--card-bg);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);padding:var(--space-md);}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:8px;padding:10px 14px;border:1px solid transparent;cursor:pointer;font-weight:600}
+.btn:disabled{opacity:0.6;cursor:not-allowed}
+.btn--primary{background:linear-gradient(90deg,var(--brand),var(--brand-700));color:#fff}
+.btn--ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text)}
+
+/* Forms */
+.form-card{max-width:420px;margin:40px auto;padding:28px;border-radius:12px;background:var(--card-bg);box-shadow:var(--shadow-md)}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.input{padding:10px 12px;border-radius:8px;border:1px solid #e6e9ef;background:transparent;font-size:var(--fs-base)}
+.input:focus{outline:none;box-shadow:0 0 0 4px rgba(14,165,164,0.08);border-color:var(--brand-700)}
+.form-error{color:var(--danger);font-size:0.95em}
+
+/* Navbar */
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.nav-left{display:flex;align-items:center;gap:16px}
+.brand{font-weight:700;font-size:1.25rem;color:var(--brand)}
+.nav-links{display:flex;gap:12px;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;padding:6px 8px;border-radius:8px}
+.nav-links a:hover{background:rgba(0,0,0,0.03);color:var(--text)}
+.nav-user{display:flex;align-items:center;gap:12px}
+.user-bubble{padding:6px 10px;border-radius:999px;background:rgba(0,0,0,0.04);font-size:0.95rem}
+
+/* Product grid */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.product-card{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:10px;background:var(--card-bg);box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s}
+.product-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md)}
+.product-media{height:160px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.product-media img{max-width:100%;max-height:100%;object-fit:cover}
+.product-title{font-weight:600}
+.product-price{color:var(--brand);font-weight:700}
+.product-stock{font-size:0.9em;color:var(--muted)}
+
+/* Order badges */
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:0.85rem}
+.badge--PENDING{background:#fff4e5;color:#b45309}
+.badge--PAID{background:#ecfdf5;color:#16a34a}
+.badge--PROCESSING{background:#e6f7ff;color:#055160}
+.badge--SHIPPED{background:#eef2ff;color:#3730a3}
+.badge--DELIVERED{background:#f3e8ff;color:#6b21a8}
+.badge--CANCELLED{background:#fff1f2;color:#b91c1c}
+
+/* Responsive tweaks */
+@media (max-width: 768px){
+  .app-container{padding:16px}
+  .product-media{height:140px}
+  .form-card{margin:24px 12px}
+}
+
+/* Loader */
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:12px}
+.spinner{width:40px;height:40px;border-radius:50%;border:4px solid rgba(0,0,0,0.08);border-top-color:var(--brand);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+

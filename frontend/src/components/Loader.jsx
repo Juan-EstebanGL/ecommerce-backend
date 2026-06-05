@@ -1,7 +1,8 @@
 function Loader() {
   return (
-    <div style={{ textAlign: "center", padding: "2rem" }}>
-      <p>Cargando...</p>
+    <div className="loader">
+      <div className="spinner" aria-hidden></div>
+      <div>Cargando...</div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getOrderById } from "../api/orders";
+import Badge from "../components/Badge";
 
 function OrderDetail() {
   const { id } = useParams();
@@ -30,7 +31,7 @@ function OrderDetail() {
 
   if (loading) {
     return (
-      <main>
+      <main className="app-container">
         <h1>Detalle de orden</h1>
         <p>Cargando orden...</p>
       </main>
@@ -39,16 +40,16 @@ function OrderDetail() {
 
   if (error) {
     return (
-      <main>
+      <main className="app-container">
         <h1>Detalle de orden</h1>
-        <p style={{ color: "red" }}>{error}</p>
+        <p className="form-error">{error}</p>
       </main>
     );
   }
 
   if (!order) {
     return (
-      <main>
+      <main className="app-container">
         <h1>Detalle de orden</h1>
         <p>Orden no encontrada.</p>
       </main>
@@ -56,22 +57,16 @@ function OrderDetail() {
   }
 
   return (
-    <main>
-      <h1>Orden #{order.id}</h1>
-      <p>Estado: {order.status}</p>
+    <main className="app-container">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
+        <h1 style={{margin:0}}>Orden #{order.id}</h1>
+        <Badge status={order.status}>{order.status}</Badge>
+      </div>
       <p>Total: {order.total}</p>
       <div style={{ display: "grid", gap: "1rem", marginTop: "1rem" }}>
         {order.items?.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              padding: "1rem",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-              background: "#fff",
-            }}
-          >
-            <h2>{item.productName}</h2>
+          <div key={item.id} className="card">
+            <h2 style={{margin:0}}>{item.productName}</h2>
             <p>Precio: {item.productPrice}</p>
             <p>Cantidad: {item.quantity}</p>
             <p>Subtotal: {item.productPrice * item.quantity}</p>

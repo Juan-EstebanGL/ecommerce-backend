@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "../api/auth";
+import Input from "../components/Input";
+import Button from "../components/Button";
 
 function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -34,35 +36,25 @@ function RegisterPage() {
   }
 
   return (
-    <main className="register-page">
-      <h1>Registro</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Contraseña</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? "Registrando..." : "Registrarse"}
-        </button>
-      </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+    <main>
+      <div className="form-card">
+        <h2 style={{marginTop:0}}>Registro</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Contraseña</label>
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+          <div style={{display:'flex',justifyContent:'flex-end'}}>
+            <Button type="submit" disabled={loading}>{loading ? 'Registrando...' : 'Registrarse'}</Button>
+          </div>
+        </form>
+        {error && <p className="form-error">{error}</p>}
+        {successMessage && <p style={{color:'green'}}>{successMessage}</p>}
+      </div>
     </main>
   );
 }
