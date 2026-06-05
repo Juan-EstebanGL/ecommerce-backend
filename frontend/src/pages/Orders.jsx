@@ -29,41 +29,90 @@ function Orders() {
     loadOrders();
   }, []);
 
-  const getStatusColor = (status) => {
-    // kept for compatibility with logic that might use it elsewhere
-    const colors = {
-      PENDING: "#ffc107",
-      PAID: "#28a745",
-      PROCESSING: "#17a2b8",
-      SHIPPED: "#007bff",
-      DELIVERED: "#6f42c1",
-      CANCELLED: "#dc3545",
-    };
-    return colors[status] || "#6c757d";
-  };
-
   return (
     <main>
-      <h1>Órdenes</h1>
-      {loading && <Loader />}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && !error && orders.length === 0 && (
-        <div style={{ padding: "2rem", textAlign: "center" }}>
-          <p>No hay órdenes.</p>
+      <div className="app-container">
+        {/* Header */}
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ margin: "0 0 8px 0" }}>Mis órdenes</h1>
+          <p style={{ color: "var(--muted)", margin: 0 }}>
+            Historial y estado de tus compras
+          </p>
         </div>
-      )}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:12}}>
-        {orders.map((order) => (
-          <div key={order.id} className="card">
-            <h3 style={{margin:0}}>Orden #{order.id}</h3>
-            <p style={{ fontSize: "0.9em", color: "#666" }}>Fecha: {new Date(order.createdAt).toLocaleDateString()}</p>
-            <p style={{margin:'6px 0'}}>Total: ${order.total.toFixed(2)}</p>
-            <p style={{margin:'6px 0'}}>Estado: <Badge status={order.status}>{order.status}</Badge></p>
-            <div style={{display:'flex',justifyContent:'flex-end'}}>
-              <Button onClick={() => navigate(`/orders/${order.id}`)} variant="ghost">Ver detalle</Button>
-            </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div>
+            <p style={{ color: "var(--muted)", marginBottom: 12 }}>Cargando tus órdenes...</p>
+            <Loader />
           </div>
-        ))}
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="card" style={{ padding: 24, textAlign: "center" }}>
+            <p className="form-error">{error}</p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && orders.length === 0 && (
+          <div className="empty-state">
+            <div style={{ fontSize: "3rem", marginBottom: 16 }}>📦</div>
+            <h2 style={{ marginBottom: 8 }}>Sin órdenes aún</h2>
+            <p style={{ color: "var(--muted)", marginBottom: 24 }}>
+              Comienza a comprar y tus órdenes aparecerán aquí
+            </p>
+            <Button onClick={() => navigate("/products")}>Ir a productos</Button>
+          </div>
+        )}
+
+        {/* Orders Grid */}
+        {!loading && !error && orders.length > 0 && (
+          <div className="orders-grid">
+            {orders.map((order) => (
+              <div key={order.id} className="order-card">
+                {/* Order Header */}
+                <div className="order-card__header">
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Orden #{order.id}</h3>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "0.9rem", color: "var(--muted)" }}>
+                      {new Date(order.createdAt).toLocaleDateString("es-ES", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
+                  <Badge status={order.status}>{order.status}</Badge>
+                </div>
+
+                {/* Order Details */}
+                <div className="order-card__body">
+                  <div className="order-meta">
+                    <div>
+                      <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--muted)" }}>Total</p>
+                      <p className="order-total">${order.total.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--muted)" }}>Productos</p>
+                      <p style={{ margin: "4px 0 0 0", fontSize: "1.1rem", fontWeight: 600 }}>
+                        {order.items?.length || 0}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Footer */}
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+                  <Button onClick={() => navigate(`/orders/${order.id}`)} variant="ghost">
+                    Ver detalles
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
