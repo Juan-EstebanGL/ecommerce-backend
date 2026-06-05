@@ -68,9 +68,31 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   });
 }, "Error actualizando estado de orden");
 
+const cancelOrder = asyncHandler(async (req, res) => {
+  const validation = orderIdParamsSchema.safeParse({
+    params: req.params,
+  });
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
+  }
+
+  const order = await orderService.cancelOrder(
+    req.userId,
+    req.userRole,
+    validation.data.params.id
+  );
+
+  return res.json({
+    message: "Orden cancelada correctamente",
+    order,
+  });
+}, "Error cancelando orden");
+
 module.exports = {
   createOrder,
   getMyOrders,
   getOrderById,
   updateOrderStatus,
+  cancelOrder,
 };

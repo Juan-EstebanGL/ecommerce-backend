@@ -9,6 +9,7 @@ const {
   getMyOrders,
   getOrderById,
   updateOrderStatus,
+  cancelOrder,
 } = require("../controllers/order.controller");
 
 /**
@@ -142,6 +143,8 @@ router.get("/", authMiddleware, getMyOrders);
  *         description: Orden no encontrada
  */
 router.patch("/:id/status", authMiddleware, adminMiddleware, updateOrderStatus);
+
+router.patch("/:id/cancel", authMiddleware, cancelOrder);
 
 /**
  * @swagger

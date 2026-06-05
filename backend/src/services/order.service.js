@@ -8,6 +8,9 @@ const orderInclude = {
 const ORDER_STATUS = {
   PENDING: "PENDING",
   PAID: "PAID",
+  PROCESSING: "PROCESSING",
+  SHIPPED: "SHIPPED",
+  DELIVERED: "DELIVERED",
   CANCELLED: "CANCELLED",
 };
 
@@ -28,12 +31,15 @@ const formatOrder = (order) => {
   };
 };
 
+const ORDER_STATUS_TRANSITIONS = {
+  [ORDER_STATUS.PENDING]: [ORDER_STATUS.PAID, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.PAID]: [ORDER_STATUS.PROCESSING],
+  [ORDER_STATUS.PROCESSING]: [ORDER_STATUS.SHIPPED],
+  [ORDER_STATUS.SHIPPED]: [ORDER_STATUS.DELIVERED],
+};
+
 const canTransitionOrderStatus = (currentStatus, nextStatus) => {
-  return (
-    currentStatus === ORDER_STATUS.PENDING &&
-    (nextStatus === ORDER_STATUS.PAID ||
-      nextStatus === ORDER_STATUS.CANCELLED)
-  );
+  return (ORDER_STATUS_TRANSITIONS[currentStatus] || []).includes(nextStatus);
 };
 
 const createOrder = async (userId) => {
@@ -191,9 +197,62 @@ const updateOrderStatus = async (userId, userRole, orderId, status) => {
   return formatOrder(updatedOrder);
 };
 
+const cancelOrder = async (userId, userRole, orderId) => {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      include: orderInclude,
+    });
+
+    if (!order) {
+      throw new AppError("Orden no encontrada", 404);
+    }
+
+    if (userRole !== "ADMIN" && order.userId !== userId) {
+      throw new AppError("No autorizado", 403);
+    }
+
+    if (order.status !== ORDER_STATUS.PENDING) {
+      throw new AppError("Solo se pueden cancelar ordenes pendientes", 400);
+    }
+
+    for (const item of order.items) {
+      const updatedProduct = await tx.product.updateMany({
+        where: {
+          id: item.productId,
+        },
+        data: {
+          stock: {
+            increment: item.quantity,
+          },
+        },
+      });
+
+      if (updatedProduct.count === 0) {
+        throw new AppError("Producto no encontrado para restaurar stock", 404);
+      }
+    }
+
+    const cancelledOrder = await tx.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status: ORDER_STATUS.CANCELLED,
+      },
+      include: orderInclude,
+    });
+
+    return formatOrder(cancelledOrder);
+  });
+};
+
 module.exports = {
   createOrder,
   getMyOrders,
   getOrderById,
   updateOrderStatus,
+  cancelOrder,
 };

@@ -292,4 +292,342 @@ describe("Orders integration tests", () => {
     });
     expect(response.body.orders[0].items).toHaveLength(1);
   });
+
+  test("Usuario dueÃ±o puede cancelar orden pendiente y restaurar stock", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const userToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Tablet",
+      price: 299.99,
+      stock: 5,
+    }).expect(201);
+
+    const productId = productResponse.body.id;
+
+    await addProductToCart(userToken, productId, 2).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    const response = await request(app)
+      .patch(`/orders/${orderId}/cancel`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(200);
+
+    expect(response.body).toHaveProperty(
+      "message",
+      "Orden cancelada correctamente"
+    );
+    expect(response.body.order).toMatchObject({
+      id: orderId,
+      status: "CANCELLED",
+    });
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    expect(product.stock).toBe(5);
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    expect(order).not.toBeNull();
+    expect(order.status).toBe("CANCELLED");
+  });
+
+  test("Admin puede cancelar orden pendiente de otro usuario", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const userToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Impresora",
+      price: 189.99,
+      stock: 4,
+    }).expect(201);
+
+    const productId = productResponse.body.id;
+
+    await addProductToCart(userToken, productId, 1).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    const response = await request(app)
+      .patch(`/orders/${orderId}/cancel`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(response.body.order).toMatchObject({
+      id: orderId,
+      status: "CANCELLED",
+    });
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    expect(product.stock).toBe(4);
+  });
+
+  test("Usuario que no es dueÃ±o no puede cancelar una orden", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const ownerToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    await registerUser("other-order-user@example.com", "password123");
+    const otherUserToken = await loginUser(
+      "other-order-user@example.com",
+      "password123"
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Router",
+      price: 99.99,
+      stock: 3,
+    }).expect(201);
+
+    const productId = productResponse.body.id;
+
+    await addProductToCart(ownerToken, productId, 1).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${ownerToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    const response = await request(app)
+      .patch(`/orders/${orderId}/cancel`)
+      .set("Authorization", `Bearer ${otherUserToken}`)
+      .expect(403);
+
+    expect(response.body).toEqual({
+      message: "No autorizado",
+    });
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    expect(product.stock).toBe(2);
+  });
+
+  test("No permite cancelar una orden que no esta pendiente", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const userToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Disco externo",
+      price: 89.99,
+      stock: 6,
+    }).expect(201);
+
+    const productId = productResponse.body.id;
+
+    await addProductToCart(userToken, productId, 2).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "PAID" })
+      .expect(200);
+
+    const response = await request(app)
+      .patch(`/orders/${orderId}/cancel`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(400);
+
+    expect(response.body).toEqual({
+      message: "Solo se pueden cancelar ordenes pendientes",
+    });
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    expect(product.stock).toBe(4);
+  });
+
+  test("Admin puede avanzar una orden por estados de fulfillment", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const userToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Laptop",
+      price: 899.99,
+      stock: 3,
+    }).expect(201);
+
+    await addProductToCart(userToken, productResponse.body.id, 1).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "PAID" })
+      .expect(200);
+
+    await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "PROCESSING" })
+      .expect(200);
+
+    await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "SHIPPED" })
+      .expect(200);
+
+    const response = await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "DELIVERED" })
+      .expect(200);
+
+    expect(response.body.order).toMatchObject({
+      id: orderId,
+      status: "DELIVERED",
+    });
+  });
+
+  test("No permite transicion invalida de estado", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const userToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Parlante",
+      price: 59.99,
+      stock: 5,
+    }).expect(201);
+
+    await addProductToCart(userToken, productResponse.body.id, 1).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    const response = await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "SHIPPED" })
+      .expect(400);
+
+    expect(response.body).toEqual({
+      message: "Transicion de estado invalida",
+    });
+  });
+
+  test("Usuario no admin no puede actualizar estado de orden", async () => {
+    await registerUser(userCredentials.email, userCredentials.password);
+    const userToken = await loginUser(
+      userCredentials.email,
+      userCredentials.password
+    );
+
+    const adminToken = await createAdminUser(
+      adminCredentials.email,
+      adminCredentials.password
+    );
+
+    const productResponse = await createProduct(adminToken, {
+      name: "Microfono",
+      price: 49.99,
+      stock: 4,
+    }).expect(201);
+
+    await addProductToCart(userToken, productResponse.body.id, 1).expect(201);
+
+    const orderResponse = await request(app)
+      .post("/orders/checkout")
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(201);
+
+    const orderId = orderResponse.body.order.id;
+
+    const response = await request(app)
+      .patch(`/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .send({ status: "PAID" })
+      .expect(403);
+
+    expect(response.body).toEqual({
+      message: "Acceso denegado",
+    });
+  });
 });
