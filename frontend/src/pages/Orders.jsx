@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getOrders } from "../api/orders";
-import Button from "../components/Button";
 import Loader from "../components/Loader";
-import Badge from "../components/Badge";
+
+const STATUS_LABELS = {
+  PENDING: "Pendiente",
+  PAID: "Pagado",
+  PROCESSING: "Procesando",
+  SHIPPED: "Enviado",
+  DELIVERED: "Entregado",
+  CANCELLED: "Cancelado",
+};
+
+function Badge({ status, children }) {
+  const cls = `badge ${status ? `badge--${status}` : ""}`;
+  return <span className={cls}>{children}</span>;
+}
 
 function Orders() {
   const [orders, setOrders] = useState([]);
@@ -30,84 +42,100 @@ function Orders() {
   }, []);
 
   return (
-    <main>
+    <main className="or-page">
       <div className="app-container">
-        {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ margin: "0 0 8px 0" }}>Mis órdenes</h1>
-          <p style={{ color: "var(--muted)", margin: 0 }}>
-            Historial y estado de tus compras
-          </p>
-        </div>
-
-        {/* Loading State */}
-        {loading && (
+        <header className="or-header">
           <div>
-            <p style={{ color: "var(--muted)", marginBottom: 12 }}>Cargando tus órdenes...</p>
+            <h1 className="or-header__title">Mis pedidos</h1>
+            <p className="or-header__sub">
+              Consulta el historial y el estado de todas tus compras.
+            </p>
+          </div>
+          {!loading && !error && orders.length > 0 && (
+            <span className="or-header__count">
+              {orders.length} {orders.length === 1 ? "pedido realizado" : "pedidos realizados"}
+            </span>
+          )}
+        </header>
+
+        {loading && (
+          <div className="or-loading">
+            <p className="or-loading__text">Cargando tus órdenes...</p>
             <Loader />
           </div>
         )}
 
-        {/* Error State */}
         {error && !loading && (
-          <div className="card" style={{ padding: 24, textAlign: "center" }}>
-            <p className="form-error">{error}</p>
+          <div className="or-error">
+            <p className="or-error__text">{error}</p>
           </div>
         )}
 
-        {/* Empty State */}
         {!loading && !error && orders.length === 0 && (
-          <div className="empty-state">
-            <div style={{ fontSize: "3rem", marginBottom: 16 }}>📦</div>
-            <h2 style={{ marginBottom: 8 }}>Sin órdenes aún</h2>
-            <p style={{ color: "var(--muted)", marginBottom: 24 }}>
-              Comienza a comprar y tus órdenes aparecerán aquí
+          <div className="or-empty">
+            <div className="or-empty__icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 01-8 0" />
+              </svg>
+            </div>
+            <h2 className="or-empty__title">Todavía no has realizado ninguna compra.</h2>
+            <p className="or-empty__desc">
+              Explora nuestros productos y encuentra lo que necesitas. Tus pedidos aparecerán aquí una vez que realices tu primera compra.
             </p>
-            <Button onClick={() => navigate("/products")}>Ir a productos</Button>
+            <button className="or-empty__btn" onClick={() => navigate("/products")}>
+              Explorar productos
+            </button>
           </div>
         )}
 
-        {/* Orders Grid */}
         {!loading && !error && orders.length > 0 && (
-          <div className="orders-grid">
+          <div className="or-list">
             {orders.map((order) => (
-              <div key={order.id} className="order-card">
-                {/* Order Header */}
-                <div className="order-card__header">
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Orden #{order.id}</h3>
-                    <p style={{ margin: "4px 0 0 0", fontSize: "0.9rem", color: "var(--muted)" }}>
-                      {new Date(order.createdAt).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </p>
-                  </div>
-                  <Badge status={order.status}>{order.status}</Badge>
+              <div key={order.id} className="or-card">
+                <div className="or-card__info">
+                  <span className="or-card__number">Pedido #{order.id}</span>
+                  <span className="or-card__date">
+                    {new Date(order.createdAt).toLocaleDateString("es-ES", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
                 </div>
 
-                {/* Order Details */}
-                <div className="order-card__body">
-                  <div className="order-meta">
-                    <div>
-                      <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--muted)" }}>Total</p>
-                      <p className="order-total">${order.total.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--muted)" }}>Productos</p>
-                      <p style={{ margin: "4px 0 0 0", fontSize: "1.1rem", fontWeight: 600 }}>
-                        {order.items?.length || 0}
-                      </p>
-                    </div>
+                <div className="or-card__badge">
+                  <Badge status={order.status}>
+                    {STATUS_LABELS[order.status] || order.status}
+                  </Badge>
+                </div>
+
+                <div className="or-card__stats">
+                  <div className="or-card__stat">
+                    <span className="or-card__stat-label">Productos</span>
+                    <span className="or-card__stat-value">
+                      {order.items?.length || 0}
+                    </span>
+                  </div>
+                  <div className="or-card__stat">
+                    <span className="or-card__stat-label">Total</span>
+                    <span className="or-card__stat-value or-card__stat-value--price">
+                      ${order.total.toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
-                {/* Card Footer */}
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-                  <Button onClick={() => navigate(`/orders/${order.id}`)} variant="ghost">
-                    Ver detalles
-                  </Button>
+                <div className="or-card__action">
+                  <button
+                    className="or-card__btn"
+                    onClick={() => navigate(`/orders/${order.id}`)}
+                  >
+                    Ver detalle
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             ))}

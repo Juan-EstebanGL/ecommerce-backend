@@ -3,6 +3,7 @@ import { getProducts } from "../api/products";
 import { addToCart } from "../api/cart";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
+import { useCartContext } from "../context/CartContext";
 import Input from "../components/Input";
 import { showSuccess, showError, showWarning } from "../utils/alerts";
 
@@ -14,6 +15,7 @@ function Products() {
   const [addingId, setAddingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  const { refreshCartCount } = useCartContext();
 
   useEffect(() => {
     async function loadProducts() {
@@ -65,6 +67,7 @@ function Products() {
 
     try {
       await addToCart(productId, quantity);
+      refreshCartCount();
       const msg = `${quantity} ${quantity === 1 ? "producto" : "productos"} agregado${quantity !== 1 ? "s" : ""} al carrito`;
       showSuccess(msg);
     } catch (err) {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { getCart } from "../api/cart";
+import { useCartContext } from "../context/CartContext";
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -9,7 +9,7 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const { cartCount, refreshCartCount } = useCartContext();
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -19,13 +19,9 @@ function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!user) { setCartCount(0); return; }
-    getCart()
-      .then((res) => {
-        const items = res.data?.items || [];
-        setCartCount(items.reduce((sum, i) => sum + i.quantity, 0));
-      })
-      .catch(() => setCartCount(0));
+    if (user) {
+      refreshCartCount();
+    }
   }, [user]);
 
   useEffect(() => {

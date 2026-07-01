@@ -1,9 +1,73 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { getOrderById } from "../api/orders";
 import Loader from "../components/Loader";
-import Badge from "../components/Badge";
 import Button from "../components/Button";
+
+const STATUS_LABELS = {
+  PENDING: "Pendiente",
+  PAID: "Pagado",
+  PROCESSING: "Procesando",
+  SHIPPED: "Enviado",
+  DELIVERED: "Entregado",
+  CANCELLED: "Cancelado",
+};
+
+const TIMELINE_STEPS = [
+  { key: "PENDING", label: "Pedido recibido" },
+  { key: "PROCESSING", label: "Procesando" },
+  { key: "SHIPPED", label: "Enviado" },
+  { key: "DELIVERED", label: "Entregado" },
+];
+
+const STATUS_ORDER = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
+
+function Badge({ status, children }) {
+  const cls = `badge ${status ? `badge--${status}` : ""}`;
+  return <span className={cls}>{children}</span>;
+}
+
+function Timeline({ status }) {
+  const currentIndex = STATUS_ORDER.indexOf(status);
+  if (currentIndex === -1) return null;
+
+  return (
+    <div className="od-timeline">
+      {TIMELINE_STEPS.map((step, idx) => {
+        const isActive = idx <= currentIndex;
+        const isLast = idx === TIMELINE_STEPS.length - 1;
+
+        return (
+          <div key={step.key} className="od-timeline__step">
+            <div
+              className={`od-timeline__dot ${
+                isActive ? "od-timeline__dot--active" : "od-timeline__dot--future"
+              }`}
+            >
+              {isActive ? "✓" : idx + 1}
+            </div>
+            <span
+              className={`od-timeline__label ${
+                isActive ? "od-timeline__label--active" : "od-timeline__label--future"
+              }`}
+            >
+              {step.label}
+            </span>
+            {!isLast && (
+              <div
+                className={`od-timeline__connector ${
+                  isActive && currentIndex > idx
+                    ? "od-timeline__connector--active"
+                    : "od-timeline__connector--future"
+                }`}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function OrderDetail() {
   const { id } = useParams();
@@ -34,55 +98,67 @@ function OrderDetail() {
 
   if (loading) {
     return (
-      <main className="app-container">
-        <h1>Detalle de orden</h1>
-        <Loader />
+      <main className="od-page">
+        <div className="app-container">
+          <div className="od-loading">
+            <Loader />
+          </div>
+        </div>
       </main>
     );
   }
 
   if (error) {
     return (
-      <main className="app-container">
-        <h1>Detalle de orden</h1>
-        <p className="form-error">{error}</p>
+      <main className="od-page">
+        <div className="app-container">
+          <div className="od-error">
+            <p className="od-error__text">{error}</p>
+            <Button onClick={() => navigate("/orders")} variant="ghost">
+              ← Volver a mis pedidos
+            </Button>
+          </div>
+        </div>
       </main>
     );
   }
 
   if (!order) {
     return (
-      <main className="app-container">
-        <h1>Detalle de orden</h1>
-        <p>Orden no encontrada.</p>
+      <main className="od-page">
+        <div className="app-container">
+          <div className="od-not-found">
+            <p className="od-not-found__text">Orden no encontrada.</p>
+            <Button onClick={() => navigate("/orders")} variant="ghost">
+              ← Volver a mis pedidos
+            </Button>
+          </div>
+        </div>
       </main>
     );
   }
 
-  return (
-    <main>
-      <div className="app-container">
-        {/* Back Button */}
-        <div style={{ marginBottom: 24 }}>
-          <Button onClick={() => navigate("/orders")} variant="ghost">
-            ← Volver a mis órdenes
-          </Button>
-        </div>
+  const items = order.items || [];
+  const subtotal = items.reduce(
+    (sum, item) => sum + (item.productPrice || 0) * (item.quantity || 0),
+    0
+  );
 
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 16,
-            marginBottom: 32,
-            flexWrap: "wrap",
-          }}
-        >
+  return (
+    <main className="od-page">
+      <div className="app-container">
+        <nav className="breadcrumb">
+          <Link to="/">Inicio</Link>
+          <span className="breadcrumb__sep">›</span>
+          <Link to="/orders">Órdenes</Link>
+          <span className="breadcrumb__sep">›</span>
+          <span className="breadcrumb__current">Pedido #{order.id}</span>
+        </nav>
+
+        <header className="od-header">
           <div>
-            <h1 style={{ margin: 0 }}>Orden #{order.id}</h1>
-            <p style={{ color: "var(--muted)", margin: "8px 0 0 0" }}>
+            <h1 className="od-header__title">Pedido #{order.id}</h1>
+            <p className="od-header__date">
               {new Date(order.createdAt).toLocaleDateString("es-ES", {
                 year: "numeric",
                 month: "long",
@@ -92,96 +168,107 @@ function OrderDetail() {
               })}
             </p>
           </div>
-          <Badge status={order.status}>{order.status}</Badge>
-        </div>
+          <Badge status={order.status}>
+            {STATUS_LABELS[order.status] || order.status}
+          </Badge>
+        </header>
 
-        {/* Layout: Two columns */}
-        <div className="order-detail-layout">
-          {/* Left: Items */}
-          <div className="order-detail__items">
-            <h2 style={{ marginTop: 0, marginBottom: 16 }}>Productos</h2>
+        {order.status === "CANCELLED" ? (
+          <div className="od-cancelled">
+            <svg className="od-cancelled__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            <span>Este pedido fue cancelado.</span>
+          </div>
+        ) : (
+          <Timeline status={order.status} />
+        )}
 
-            {order.items && order.items.length > 0 ? (
-              <div className="order-items">
-                {order.items.map((item, idx) => (
-                  <div key={idx} className="order-item">
-                    {/* Item Media */}
-                    <div className="order-item__media">
-                      <div style={{ fontSize: "2.5rem", color: "#9ca3af" }}>
-                        {item.productName?.slice(0, 1) || "P"}
+        <div className="od-layout">
+          <div>
+            <h2 className="od-items__title">
+              Productos ({items.length})
+            </h2>
+
+            {items.length > 0 ? (
+              <div>
+                {items.map((item, idx) => {
+                  const imgSrc = item.product?.imageUrl || item.imageUrl;
+                  const name = item.productName || item.product?.name || "Producto";
+                  const unitPrice = item.productPrice || item.product?.price || 0;
+                  const qty = item.quantity || 0;
+
+                  return (
+                    <div key={idx} className="od-item">
+                      <div className="od-item__media">
+                        {imgSrc ? (
+                          <img src={imgSrc} alt={name} />
+                        ) : (
+                          <span className="od-item__placeholder">
+                            {name.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="od-item__info">
+                        <h4 className="od-item__name">{name}</h4>
+                        <div className="od-item__meta">
+                          <span className="od-item__meta-field">
+                            Cantidad: <strong>{qty}</strong>
+                          </span>
+                          <span className="od-item__meta-field">
+                            Precio: <strong>${unitPrice.toFixed(2)}</strong>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="od-item__subtotal">
+                        ${(unitPrice * qty).toFixed(2)}
                       </div>
                     </div>
-
-                    {/* Item Info */}
-                    <div className="order-item__info">
-                      <h3 style={{ margin: "0 0 8px 0" }}>{item.productName}</h3>
-                      <div style={{ display: "flex", gap: 16, fontSize: "0.95rem", color: "var(--muted)" }}>
-                        <span>Cantidad: <strong style={{ color: "var(--text)" }}>{item.quantity}</strong></span>
-                        <span>Precio: <strong style={{ color: "var(--text)" }}>${item.productPrice?.toFixed(2) || "0.00"}</strong></span>
-                      </div>
-                    </div>
-
-                    {/* Subtotal */}
-                    <div className="order-item__subtotal">
-                      ${(item.productPrice * item.quantity).toFixed(2)}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p style={{ color: "var(--muted)" }}>No hay productos en esta orden.</p>
             )}
           </div>
 
-          {/* Right: Summary */}
-          <aside className="order-summary">
-            <h2 style={{ marginTop: 0 }}>Resumen</h2>
+          <aside className="od-summary">
+            <h3 className="od-summary__title">Resumen del pedido</h3>
 
-            {/* Order Info */}
-            <div className="order-summary__info">
-              <div className="info-row">
-                <span>Número de orden</span>
-                <span style={{ fontWeight: 600 }}>#{order.id}</span>
+            <div className="od-summary__rows">
+              <div className="od-summary__row">
+                <span>Productos ({items.length})</span>
+                <span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className="info-row">
-                <span>Fecha</span>
-                <span style={{ fontWeight: 600 }}>
-                  {new Date(order.createdAt).toLocaleDateString("es-ES")}
-                </span>
+              <div className="od-summary__row">
+                <span>Envío</span>
+                <span className="od-summary__free">Gratis</span>
               </div>
-              <div className="info-row">
-                <span>Estado</span>
-                <Badge status={order.status}>{order.status}</Badge>
+              <div className="od-summary__row">
+                <span>Descuento</span>
+                <span>$0</span>
               </div>
             </div>
 
-            {/* Totals */}
-            <div style={{ marginTop: 24, paddingTop: 24, borderTop: "1px solid #e5e7eb" }}>
-              <div className="summary-row">
-                <span>Subtotal</span>
-                <span>${order.total.toFixed(2)}</span>
-              </div>
-              <div className="summary-row" style={{ marginTop: 8 }}>
-                <span style={{ fontWeight: 600 }}>Total</span>
-                <span
-                  style={{
-                    fontSize: "1.5rem",
-                    fontWeight: 700,
-                    color: "var(--brand)",
-                  }}
-                >
-                  ${order.total.toFixed(2)}
-                </span>
-              </div>
+            <div className="od-summary__total">
+              <span>TOTAL</span>
+              <span className="od-summary__total-value">
+                ${order.total.toFixed(2)}
+              </span>
             </div>
 
-            {/* Action */}
-            <Button
-              onClick={() => navigate("/products")}
-              style={{ width: "100%", padding: "12px 16px", marginTop: 24 }}
-            >
-              Seguir comprando
-            </Button>
+            <div className="od-summary__actions">
+              <Button onClick={() => navigate("/orders")} variant="ghost">
+                ← Volver a mis pedidos
+              </Button>
+              <Button onClick={() => navigate("/products")}>
+                Seguir comprando
+              </Button>
+            </div>
           </aside>
         </div>
       </div>

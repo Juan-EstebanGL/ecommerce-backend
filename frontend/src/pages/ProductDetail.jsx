@@ -8,6 +8,7 @@ import Card from "../components/Card";
 import ProductCard from "../components/ProductCard";
 import QuantityInput from "../components/QuantityInput";
 import { showSuccess, showError, showWarning } from "../utils/alerts";
+import { useCartContext } from "../context/CartContext";
 
 const benefits = [
   { icon: "🚚", title: "Envío rápido", desc: "Entrega en 2-3 días hábiles" },
@@ -40,6 +41,7 @@ function ProductDetail() {
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [cartLoading, setCartLoading] = useState(false);
+  const { refreshCartCount } = useCartContext();
 
   useEffect(() => {
     async function loadProduct() {
@@ -80,6 +82,7 @@ function ProductDetail() {
 
     try {
       await addToCart(product.id, quantity);
+      refreshCartCount();
       const msg = `${quantity} ${quantity === 1 ? "producto" : "productos"} agregados al carrito`;
       showSuccess(msg);
       setQuantity(1);
