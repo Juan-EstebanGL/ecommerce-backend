@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { getProductById, getProducts } from "../api/products";
 import { addToCart } from "../api/cart";
 import Loader from "../components/Loader";
 import Button from "../components/Button";
+import Card from "../components/Card";
 import ProductCard from "../components/ProductCard";
 
 function ProductDetail() {
@@ -28,7 +29,6 @@ function ProductDetail() {
         setProduct(response.data);
         setQuantity(1);
 
-        // Load related products
         try {
           const allProducts = await getProducts();
           const others = (allProducts.data || [])
@@ -79,10 +79,17 @@ function ProductDetail() {
     }
   };
 
+  const formatPrice = (price) => Number(price).toLocaleString("es-CO");
+
+  const getStockInfo = (stock) => {
+    if (stock === 0) return { text: "Agotado", className: "badge--CANCELLED" };
+    if (stock <= 5) return { text: "Pocas unidades", className: "badge--PENDING" };
+    return { text: "Disponible", className: "badge--PAID" };
+  };
+
   if (loading) {
     return (
       <main className="app-container">
-        <h1>Detalle del producto</h1>
         <Loader />
       </main>
     );
@@ -91,8 +98,9 @@ function ProductDetail() {
   if (error) {
     return (
       <main className="app-container">
-        <h1>Detalle del producto</h1>
-        <p className="form-error">{error}</p>
+        <Card className="error-state">
+          <p className="form-error">{error}</p>
+        </Card>
       </main>
     );
   }
@@ -100,143 +108,139 @@ function ProductDetail() {
   if (!product) {
     return (
       <main className="app-container">
-        <h1>Detalle del producto</h1>
-        <p>Producto no encontrado.</p>
+        <Card className="error-state">
+          <h2>Producto no encontrado</h2>
+          <p>El producto que buscas no existe o ha sido eliminado.</p>
+          <Button onClick={() => navigate("/products")}>Volver a productos</Button>
+        </Card>
       </main>
     );
   }
 
   const isAvailable = product.stock > 0;
+  const stockInfo = getStockInfo(product.stock);
 
   return (
     <main>
       <div className="app-container">
-        {/* Product Detail Section */}
-        <div className="product-detail">
-          {/* Left: Image */}
-          <div className="product-detail__media">
-            <div className="product-media" style={{ height: 400 }}>
+        <nav className="breadcrumb">
+          <Link to="/">Inicio</Link>
+          <span className="breadcrumb__sep">/</span>
+          <Link to="/products">Productos</Link>
+          <span className="breadcrumb__sep">/</span>
+          <span className="breadcrumb__current">{product.name}</span>
+        </nav>
+
+        <div className="product-layout">
+          <div className="product-gallery">
+            <div className="product-image">
               {product.imageUrl ? (
                 <img src={product.imageUrl} alt={product.name} />
               ) : (
-                <div style={{ textAlign: "center", color: "#9ca3af", fontSize: "3rem" }}>
+                <div className="product-image__placeholder" aria-hidden>
                   {product.name?.slice(0, 1) || "P"}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Right: Info & Actions */}
-          <div className="product-detail__info">
-            <h1 style={{ marginTop: 0, marginBottom: 12 }}>{product.name}</h1>
+          <div className="product-info">
+            <h1 className="product-info__name">{product.name}</h1>
 
-            {/* Availability Badge */}
-            <div style={{ marginBottom: 20 }}>
-              {isAvailable ? (
-                <span
-                  style={{
-                    display: "inline-block",
-                    padding: "6px 12px",
-                    borderRadius: "999px",
-                    background: "#ecfdf5",
-                    color: "#16a34a",
-                    fontSize: "0.9rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  ✓ Disponible
-                </span>
-              ) : (
-                <span
-                  style={{
-                    display: "inline-block",
-                    padding: "6px 12px",
-                    borderRadius: "999px",
-                    background: "#fff1f2",
-                    color: "#b91c1c",
-                    fontSize: "0.9rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  Sin stock
-                </span>
+            <div className="product-stock">
+              <span className={`badge ${stockInfo.className}`}>{stockInfo.text}</span>
+              {isAvailable && (
+                <span className="product-stock__count">{product.stock} en stock</span>
               )}
             </div>
 
-            {/* Price */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: "0.9rem", color: "var(--muted)", marginBottom: 4 }}>Precio</div>
-              <div className="product-price" style={{ fontSize: "2rem" }}>
-                ${product.price}
-              </div>
+            <div className="product-price">
+              <span className="product-price__value">${formatPrice(product.price)}</span>
             </div>
 
-            {/* Stock Info */}
-            <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid #e5e7eb" }}>
-              <p style={{ margin: 0, color: "var(--muted)", fontSize: "0.95rem" }}>
-                Stock disponible: <strong>{product.stock}</strong>
-              </p>
-            </div>
+            <p className="product-info__description">
+              {product.description || "Producto sin descripción."}
+            </p>
 
-            {/* Quantity Selector */}
             {isAvailable && (
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: "0.9rem", color: "var(--muted)", marginBottom: 8 }}>Cantidad</div>
-                <div className="quantity-selector">
+              <div className="product-info__actions">
+                <label className="quantity-label" id="quantity-label">Cantidad</label>
+                <div className="quantity-selector" role="group" aria-labelledby="quantity-label">
                   <button
                     className="quantity-btn"
                     onClick={() => handleQuantityChange(quantity - 1)}
                     disabled={quantity <= 1}
+                    aria-label="Disminuir cantidad"
                   >
                     −
                   </button>
-                  <div className="quantity-display">{quantity}</div>
+                  <div className="quantity-display" aria-live="polite">{quantity}</div>
                   <button
                     className="quantity-btn"
                     onClick={() => handleQuantityChange(quantity + 1)}
                     disabled={quantity >= product.stock}
+                    aria-label="Aumentar cantidad"
                   >
                     +
                   </button>
                 </div>
-              </div>
-            )}
 
-            {/* Messages */}
-            {cartSuccess && <p style={{ color: "#16a34a", marginBottom: 12 }}>✓ {cartSuccess}</p>}
-            {cartError && <p className="form-error" style={{ marginBottom: 12 }}>{cartError}</p>}
+                {cartSuccess && <p className="cart-success">✓ {cartSuccess}</p>}
+                {cartError && <p className="form-error">{cartError}</p>}
 
-            {/* Add to Cart Button */}
-            <Button
-              onClick={handleAddToCart}
-              disabled={!isAvailable || cartLoading}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                fontSize: "1rem",
-              }}
-            >
-              {!isAvailable
-                ? "No disponible"
-                : cartLoading
-                ? "Agregando..."
-                : `Agregar al carrito${quantity > 1 ? ` (${quantity})` : ""}`}
-            </Button>
-
-            {/* Description */}
-            {product.description && (
-              <div style={{ marginTop: 32, paddingTop: 32, borderTop: "1px solid #e5e7eb" }}>
-                <h3 style={{ marginTop: 0 }}>Descripción</h3>
-                <p style={{ color: "var(--muted)", lineHeight: 1.6 }}>{product.description}</p>
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={cartLoading}
+                  style={{
+                    width: "100%",
+                    padding: "14px 16px",
+                    fontSize: "1.05rem",
+                  }}
+                >
+                  {cartLoading ? "Agregando..." : `Agregar al carrito${quantity > 1 ? ` (${quantity})` : ""}`}
+                </Button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Related Products Section */}
+        <section className="product-extra">
+          <h2 className="product-extra__title">¿Por qué comprar este producto?</h2>
+          <div className="product-extra__grid">
+            <div className="product-extra__item">
+              <span className="product-extra__icon">✓</span>
+              <div>
+                <strong>Compra segura</strong>
+                <p>Pago 100% protegido</p>
+              </div>
+            </div>
+            <div className="product-extra__item">
+              <span className="product-extra__icon">✓</span>
+              <div>
+                <strong>Envío rápido</strong>
+                <p>Entrega en 2-3 días hábiles</p>
+              </div>
+            </div>
+            <div className="product-extra__item">
+              <span className="product-extra__icon">✓</span>
+              <div>
+                <strong>Garantía de calidad</strong>
+                <p>Productos verificados</p>
+              </div>
+            </div>
+            <div className="product-extra__item">
+              <span className="product-extra__icon">✓</span>
+              <div>
+                <strong>Soporte 24/7</strong>
+                <p>Atención al cliente siempre disponible</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {relatedProducts.length > 0 && (
-          <section style={{ marginTop: 60, paddingTop: 40, borderTop: "1px solid #e5e7eb" }}>
-            <h2 style={{ marginBottom: 24 }}>También te puede interesar</h2>
+          <section className="related-products">
+            <h2>También podría interesarte</h2>
             <div className="product-grid">
               {relatedProducts.map((p) => (
                 <ProductCard key={p.id} product={p} onAddToCart={null} addingId={null} />
