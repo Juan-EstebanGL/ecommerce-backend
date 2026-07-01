@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import Input from "../components/Input";
-import Button from "../components/Button";
 import { showWarning } from "../utils/alerts";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -10,6 +8,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -47,35 +46,130 @@ function LoginPage() {
   }
 
   return (
-    <main>
-      <div className="form-card">
-        <h2 style={{marginTop:0}}>Iniciar sesión</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
+    <main className="auth-page">
+      <div className="auth-left">
+        <div className="auth-left__bg">
+          <div className="auth-circle auth-circle--1" />
+          <div className="auth-circle auth-circle--2" />
+          <div className="auth-circle auth-circle--3" />
+          <div className="auth-circle auth-circle--4" />
+        </div>
+        <div className="auth-left__inner">
+          <h1 className="auth-left__title">Bienvenido a E-Shop</h1>
+          <p className="auth-left__desc">
+            Compra productos de calidad, administra tus pedidos y disfruta una experiencia moderna.
+          </p>
+          <ul className="auth-benefits">
+            <li className="auth-benefits__item">
+              <span className="auth-benefits__icon">✓</span>
+              <span>Compra segura</span>
+            </li>
+            <li className="auth-benefits__item">
+              <span className="auth-benefits__icon">✓</span>
+              <span>Envíos rápidos</span>
+            </li>
+            <li className="auth-benefits__item">
+              <span className="auth-benefits__icon">✓</span>
+              <span>Soporte 24/7</span>
+            </li>
+          </ul>
+          <p className="auth-left__footnote">Más de 1000 clientes satisfechos.</p>
+        </div>
+      </div>
+      <div className="auth-right">
+        <div className="auth-card">
+          <h2 className="auth-card__title">Iniciar sesión</h2>
+          <p className="auth-card__subtitle">Ingresa para continuar.</p>
+          {error && (
+            <div className="auth-card__error">
+              <span>✕</span> {error}
+            </div>
+          )}
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+            <div className="auth-field">
+              <label className="auth-field__label" htmlFor="login-email">
+                Email
+              </label>
+              <div className="auth-input-wrap">
+                <svg className="auth-input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="M22 4l-10 8L2 4" />
+                </svg>
+                <input
+                  id="login-email"
+                  className="auth-input"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@correo.com"
+                  autoComplete="email"
+                  required
+                  aria-label="Correo electrónico"
+                />
+              </div>
+            </div>
+            <div className="auth-field">
+              <label className="auth-field__label" htmlFor="login-password">
+                Contraseña
+              </label>
+              <div className="auth-input-wrap">
+                <svg className="auth-input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input
+                  id="login-password"
+                  className="auth-input"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                  aria-label="Contraseña"
+                />
+                <button
+                  type="button"
+                  className="auth-toggle-pw"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="auth-row">
+              <label className="auth-checkbox">
+                <input type="checkbox" />
+                <span>Recordarme</span>
+              </label>
+              <a href="#" className="auth-link" onClick={(e) => e.preventDefault()}>
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+            <button type="submit" className="auth-btn" disabled={loading}>
+              {loading ? "Ingresando..." : "Ingresar"}
+            </button>
+          </form>
+          <div className="auth-divider">
+            <span>¿No tienes cuenta?</span>
+            <Link to="/register" className="auth-link">
+              Crear cuenta
+            </Link>
           </div>
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-          </div>
-          <div style={{display:'flex',justifyContent:'flex-end'}}>
-            <Button type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Ingresar'}</Button>
-          </div>
-        </form>
-        {error && <p className="form-error">{error}</p>}
+        </div>
       </div>
     </main>
   );

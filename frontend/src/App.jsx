@@ -1,5 +1,6 @@
 import AppRouter from "./routes/AppRouter";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -7,6 +8,7 @@ function App() {
     <AuthProvider>
       <Navbar />
       <AppRouter />
+      <Footer />
     </AuthProvider>
   );
 }
