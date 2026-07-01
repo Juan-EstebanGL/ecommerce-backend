@@ -8,6 +8,7 @@ import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
 import OrderDetail from "../pages/OrderDetail";
+import Profile from "../pages/Profile";
 
 function AppRouter() {
   return (
@@ -21,6 +22,7 @@ function AppRouter() {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/orders/:id" element={<OrderDetail />} />
+      <Route path="/profile" element={<Profile />} />
     </Routes>
   );
 }

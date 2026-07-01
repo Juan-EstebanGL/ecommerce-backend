@@ -117,6 +117,14 @@ function Navbar() {
                     </div>
                     <div className="navbar__dropdown-divider" />
                     <Link
+                      to="/profile"
+                      className="navbar__dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                      role="menuitem"
+                    >
+                      Mi perfil
+                    </Link>
+                    <Link
                       to="/orders"
                       className="navbar__dropdown-item"
                       onClick={() => setDropdownOpen(false)}
@@ -189,13 +197,22 @@ function Navbar() {
             Carrito{cartCount > 0 && ` (${cartCount})`}
           </Link>
           {user && (
-            <Link
-              to="/orders"
-              className={`navbar__drawer-link${isActive("/orders") ? " navbar__drawer-link--active" : ""}`}
-              onClick={closeDrawer}
-            >
-              Órdenes
-            </Link>
+            <>
+              <Link
+                to="/profile"
+                className={`navbar__drawer-link${isActive("/profile") ? " navbar__drawer-link--active" : ""}`}
+                onClick={closeDrawer}
+              >
+                Mi perfil
+              </Link>
+              <Link
+                to="/orders"
+                className={`navbar__drawer-link${isActive("/orders") ? " navbar__drawer-link--active" : ""}`}
+                onClick={closeDrawer}
+              >
+                Órdenes
+              </Link>
+            </>
           )}
         </nav>
         <div className="navbar__drawer-divider" />
