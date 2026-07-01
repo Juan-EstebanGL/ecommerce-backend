@@ -241,9 +241,11 @@ body {
 .quantity-btn:hover:not(:disabled){background:#f3f4f6;border-color:var(--brand)}
 .quantity-btn:disabled{opacity:0.4;cursor:not-allowed}
 .quantity-display{min-width:36px;text-align:center;font-weight:600}
+.quantity-input-wrapper{display:flex;flex-direction:column;align-items:center}
 .quantity-input{width:52px;text-align:center;border:1px solid #e5e7eb;border-radius:6px;padding:7px 4px;font-weight:600;font-size:0.95rem;outline:none;transition:border-color .2s,box-shadow .2s}
 .quantity-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,165,164,0.1)}
 .quantity-input:disabled{opacity:0.4;cursor:not-allowed}
+.quantity-hint{font-size:0.7rem;color:var(--danger);white-space:nowrap;line-height:1.2;margin-top:2px}
 
 /* Product Extra */
 .product-extra{margin-top:60px;padding-top:40px;border-top:1px solid #e5e7eb}

@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCart, updateCartItem, removeCartItem } from "../api/cart";
 import Button from "../components/Button";
 import Loader from "../components/Loader";
+import QuantityInput from "../components/QuantityInput";
 import { showSuccess, showError, showConfirm } from "../utils/alerts";
 
 function Cart() {
@@ -10,31 +11,12 @@ function Cart() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [actionId, setActionId] = useState(null);
-  const [editValues, setEditValues] = useState({});
   const [syncingId, setSyncingId] = useState(null);
   const navigate = useNavigate();
-  const timers = useRef({});
 
   useEffect(() => {
     loadCart();
   }, []);
-
-  useEffect(() => {
-    setEditValues((prev) => {
-      const next = { ...prev };
-      items.forEach((item) => {
-        if (!(item.id in next)) {
-          next[item.id] = String(item.quantity);
-        }
-      });
-      Object.keys(next).forEach((id) => {
-        if (!items.find((i) => i.id === Number(id))) {
-          delete next[id];
-        }
-      });
-      return next;
-    });
-  }, [items]);
 
   async function loadCart() {
     setLoading(true);
@@ -50,23 +32,9 @@ function Cart() {
     }
   }
 
-  async function commitQtyChange(itemId, rawValue) {
+  async function handleQtyChange(itemId, newQty) {
     const item = items.find((i) => i.id === itemId);
-    const parsed = parseInt(rawValue, 10);
-    const stock = item?.product?.stock || Infinity;
-    let newQty;
-
-    if (isNaN(parsed) || parsed < 1) {
-      newQty = 1;
-    } else if (parsed > stock) {
-      newQty = stock;
-    } else {
-      newQty = parsed;
-    }
-
-    setEditValues((prev) => ({ ...prev, [itemId]: String(newQty) }));
-
-    if (newQty === item?.quantity) return;
+    if (!item || newQty === item.quantity) return;
 
     setSyncingId(itemId);
 
@@ -76,59 +44,12 @@ function Cart() {
         current.map((i) => (i.id === itemId ? response.data : i))
       );
     } catch (err) {
-      setError(err?.response?.data?.message || "Error actualizando cantidad");
+      showError(err?.response?.data?.message || "Error actualizando cantidad");
       const cartResponse = await getCart();
       setItems(cartResponse.data?.items || []);
     } finally {
       setSyncingId(null);
     }
-  }
-
-  function handleQtyInput(itemId, value) {
-    setEditValues((prev) => ({ ...prev, [itemId]: value }));
-
-    if (timers.current[itemId]) {
-      clearTimeout(timers.current[itemId]);
-    }
-  }
-
-  function handleQtyBlur(itemId) {
-    if (timers.current[itemId]) {
-      clearTimeout(timers.current[itemId]);
-      delete timers.current[itemId];
-    }
-    commitQtyChange(itemId, editValues[itemId]);
-  }
-
-  function handleQtyKeyDown(itemId, e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (timers.current[itemId]) {
-        clearTimeout(timers.current[itemId]);
-        delete timers.current[itemId];
-      }
-      commitQtyChange(itemId, editValues[itemId]);
-    }
-  }
-
-  function handleIncrement(itemId) {
-    const item = items.find((i) => i.id === itemId);
-    const currentRaw = editValues[itemId];
-    const current = parseInt(currentRaw, 10);
-    const base = isNaN(current) ? (item?.quantity || 1) : current;
-    const newVal = Math.min(base + 1, item?.product?.stock || Infinity);
-    setEditValues((prev) => ({ ...prev, [itemId]: String(newVal) }));
-    commitQtyChange(itemId, String(newVal));
-  }
-
-  function handleDecrement(itemId) {
-    const item = items.find((i) => i.id === itemId);
-    const currentRaw = editValues[itemId];
-    const current = parseInt(currentRaw, 10);
-    const base = isNaN(current) ? (item?.quantity || 1) : current;
-    const newVal = Math.max(base - 1, 1);
-    setEditValues((prev) => ({ ...prev, [itemId]: String(newVal) }));
-    commitQtyChange(itemId, String(newVal));
   }
 
   async function handleRemoveItem(itemId, productName) {
@@ -203,7 +124,6 @@ function Cart() {
           <div className="cart-layout">
             <div className="cart-items">
               {items.map((item) => {
-                const qty = editValues[item.id] ?? String(item.quantity);
                 const isSyncing = syncingId === item.id;
                 const itemSubtotal = (item.product?.price || 0) * item.quantity;
 
@@ -222,35 +142,13 @@ function Cart() {
                       </div>
                     </div>
                     <div className="cart-item__actions">
-                      <div className="quantity-selector">
-                        <button
-                          className="quantity-btn"
-                          onClick={() => handleDecrement(item.id)}
-                          disabled={isSyncing || parseInt(qty, 10) <= 1}
-                          aria-label="Disminuir cantidad"
-                        >
-                          −
-                        </button>
-                        <input
-                          className="quantity-input"
-                          type="text"
-                          inputMode="numeric"
-                          value={qty}
-                          onChange={(e) => handleQtyInput(item.id, e.target.value)}
-                          onBlur={() => handleQtyBlur(item.id)}
-                          onKeyDown={(e) => handleQtyKeyDown(item.id, e)}
-                          disabled={isSyncing}
-                          aria-label="Cantidad"
-                        />
-                        <button
-                          className="quantity-btn"
-                          onClick={() => handleIncrement(item.id)}
-                          disabled={isSyncing || parseInt(qty, 10) >= (item.product?.stock || Infinity)}
-                          aria-label="Aumentar cantidad"
-                        >
-                          +
-                        </button>
-                      </div>
+                      <QuantityInput
+                        value={item.quantity}
+                        min={1}
+                        max={item.product?.stock}
+                        onChange={(v) => handleQtyChange(item.id, v)}
+                        disabled={isSyncing}
+                      />
                       <div className="cart-item__subtotal">
                         ${formatPrice(itemSubtotal)}
                       </div>

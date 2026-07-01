@@ -4,6 +4,7 @@ import { getCart } from "../api/cart";
 import { checkout } from "../api/orders";
 import Loader from "../components/Loader";
 import Button from "../components/Button";
+import { showWarning } from "../utils/alerts";
 
 function Checkout() {
   const [items, setItems] = useState([]);
@@ -39,7 +40,9 @@ function Checkout() {
       await checkout();
       navigate("/orders");
     } catch (err) {
-      setCheckoutError(err?.response?.data?.message || err?.message || "Error al procesar la compra");
+      const msg = err?.response?.data?.message || err?.message || "Error al procesar la compra";
+      setCheckoutError(msg);
+      showWarning("Error en la compra", msg);
     } finally {
       setCheckoutLoading(false);
     }

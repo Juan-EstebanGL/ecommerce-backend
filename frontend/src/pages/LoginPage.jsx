@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import Input from "../components/Input";
 import Button from "../components/Button";
+import { showWarning } from "../utils/alerts";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,10 +18,24 @@ function LoginPage() {
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+
+    if (!email.trim()) {
+      showWarning("Campo requerido", "Por favor ingresa tu correo electrónico.");
+      return;
+    }
+    if (!EMAIL_RE.test(email.trim())) {
+      showWarning("Email inválido", "El formato del correo electrónico no es válido.");
+      return;
+    }
+    if (!password) {
+      showWarning("Campo requerido", "Por favor ingresa tu contraseña.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await login({ email, password });
+      await login({ email: email.trim(), password });
       navigate("/products");
     } catch (err) {
       const message =

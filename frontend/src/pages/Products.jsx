@@ -4,7 +4,7 @@ import { addToCart } from "../api/cart";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 import Input from "../components/Input";
-import { showSuccess, showError } from "../utils/alerts";
+import { showSuccess, showError, showWarning } from "../utils/alerts";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -55,6 +55,12 @@ function Products() {
   }, [searchQuery, showOnlyAvailable, products]);
 
   async function handleAddToCart(productId, quantity = 1) {
+    const product = products.find((p) => p.id === productId);
+    if (product && quantity > product.stock) {
+      showWarning("Stock insuficiente", `Solo hay ${product.stock} unidades disponibles.`);
+      return;
+    }
+
     setAddingId(productId);
 
     try {
