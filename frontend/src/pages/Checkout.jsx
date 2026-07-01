@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCart } from "../api/cart";
 import { checkout } from "../api/orders";
+import Loader from "../components/Loader";
+import Button from "../components/Button";
 
 function Checkout() {
   const [items, setItems] = useState([]);
@@ -47,32 +49,90 @@ function Checkout() {
     (sum, item) => sum + (item.product?.price || 0) * item.quantity,
     0
   );
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const formatPrice = (price) => Number(price).toLocaleString("es-CO", { minimumFractionDigits: 2 });
 
   return (
     <main className="app-container">
-      <h1>Checkout</h1>
-      {loading && <p>Cargando resumen del carrito...</p>}
+      <h1 style={{ marginBottom: 8 }}>Checkout</h1>
+      <p style={{ color: "var(--muted)", margin: "0 0 32px 0" }}>
+        Revisa tu pedido antes de confirmar la compra
+      </p>
+
+      {loading && <Loader />}
       {error && <p className="form-error">{error}</p>}
-      {!loading && !error && items.length === 0 && <p>El carrito está vacío.</p>}
+
+      {!loading && !error && items.length === 0 && (
+        <div className="empty-state">
+          <h2>El carrito está vacío</h2>
+          <p style={{ color: "var(--muted)", marginBottom: 24 }}>Agrega productos al carrito antes de continuar.</p>
+          <Button onClick={() => navigate("/products")}>Ir a productos</Button>
+        </div>
+      )}
+
       {items.length > 0 && (
-        <div style={{display:'grid',gap:12}}>
-          {items.map((item) => (
-            <div key={item.id} className="card">
-              <h2 style={{margin:0}}>{item.product?.name || "Producto"}</h2>
-              <p>Precio: {item.product?.price ?? "-"}</p>
-              <p>Cantidad: {item.quantity}</p>
-              <p>Subtotal: {(item.product?.price || 0) * item.quantity}</p>
-            </div>
-          ))}
-          <div className="card" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            <div style={{fontWeight:'bold'}}>Total: {total.toFixed(2)}</div>
-            <div>
-              {checkoutError && <p className="form-error">{checkoutError}</p>}
-              <button className="btn btn--primary" type="button" onClick={handleCheckout} disabled={checkoutLoading}>
-                {checkoutLoading ? "Procesando..." : "Confirmar compra"}
-              </button>
-            </div>
+        <div className="checkout-layout">
+          <div className="checkout-items">
+            <h2 style={{ marginTop: 0, fontSize: "1.1rem", color: "var(--muted)", fontWeight: 600 }}>
+              Productos ({totalItems})
+            </h2>
+            {items.map((item) => {
+              const itemSubtotal = (item.product?.price || 0) * item.quantity;
+              return (
+                <div key={item.id} className="checkout-item">
+                  <div className="checkout-item__info">
+                    <span className="checkout-item__name">{item.product?.name || "Producto"}</span>
+                    <span className="checkout-item__qty">x{item.quantity}</span>
+                  </div>
+                  <span className="checkout-item__price">${formatPrice(item.product?.price || 0)}</span>
+                  <span className="checkout-item__subtotal">${formatPrice(itemSubtotal)}</span>
+                </div>
+              );
+            })}
           </div>
+
+          <aside className="checkout-summary">
+            <h2 style={{ marginTop: 0, marginBottom: 20, fontSize: "1.15rem" }}>Resumen</h2>
+
+            <div className="checkout-summary__rows">
+              <div className="summary-row">
+                <span>Productos ({totalItems})</span>
+                <span>${formatPrice(total)}</span>
+              </div>
+              <div className="summary-row">
+                <span>Envío</span>
+                <span className="cart-summary__shipping">Gratis</span>
+              </div>
+            </div>
+
+            <div className="checkout-summary__total">
+              <span>Total</span>
+              <span className="checkout-summary__total-value">${formatPrice(total)}</span>
+            </div>
+
+            {checkoutError && (
+              <div className="cart-message cart-message--error" style={{ marginBottom: 16 }}>
+                <span>✕</span> {checkoutError}
+              </div>
+            )}
+
+            <Button
+              onClick={handleCheckout}
+              disabled={checkoutLoading}
+              style={{ width: "100%", padding: "14px 16px", fontSize: "1rem" }}
+            >
+              {checkoutLoading ? "Procesando..." : "Confirmar compra"}
+            </Button>
+
+            <Button
+              onClick={() => navigate("/cart")}
+              variant="ghost"
+              style={{ width: "100%", padding: "12px 16px", marginTop: 8 }}
+            >
+              ← Volver al carrito
+            </Button>
+          </aside>
         </div>
       )}
     </main>

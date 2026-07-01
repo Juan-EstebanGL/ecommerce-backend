@@ -6,6 +6,7 @@ import Loader from "../components/Loader";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import ProductCard from "../components/ProductCard";
+import { showSuccess, showError } from "../utils/alerts";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -15,9 +16,8 @@ function ProductDetail() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [qtyInput, setQtyInput] = useState("1");
   const [cartLoading, setCartLoading] = useState(false);
-  const [cartSuccess, setCartSuccess] = useState("");
-  const [cartError, setCartError] = useState("");
 
   useEffect(() => {
     async function loadProduct() {
@@ -51,11 +51,21 @@ function ProductDetail() {
     }
   }, [id]);
 
-  const handleQuantityChange = (newQuantity) => {
-    const min = 1;
+  const clampQty = (val) => Math.max(1, Math.min(val, product?.stock || 0));
+
+  const commitQty = (raw) => {
+    const parsed = parseInt(raw, 10);
     const max = product?.stock || 0;
-    if (newQuantity >= min && newQuantity <= max) {
+    const clamped = isNaN(parsed) || parsed < 1 ? 1 : Math.min(parsed, max);
+    setQuantity(clamped);
+    setQtyInput(String(clamped));
+  };
+
+  const handleQuantityChange = (newQuantity) => {
+    const max = product?.stock || 0;
+    if (newQuantity >= 1 && newQuantity <= max) {
       setQuantity(newQuantity);
+      setQtyInput(String(newQuantity));
     }
   };
 
@@ -63,17 +73,15 @@ function ProductDetail() {
     if (!product) return;
 
     setCartLoading(true);
-    setCartError("");
-    setCartSuccess("");
 
     try {
       await addToCart(product.id, quantity);
-      setCartSuccess(`${quantity} ${quantity === 1 ? "producto" : "productos"} agregados al carrito`);
+      const msg = `${quantity} ${quantity === 1 ? "producto" : "productos"} agregados al carrito`;
+      showSuccess(msg);
       setQuantity(1);
-      setTimeout(() => setCartSuccess(""), 4000);
+      setQtyInput("1");
     } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || "Error al agregar al carrito";
-      setCartError(msg);
+      showError(err?.response?.data?.message || err?.message || "Error al agregar al carrito");
     } finally {
       setCartLoading(false);
     }
@@ -165,28 +173,34 @@ function ProductDetail() {
             {isAvailable && (
               <div className="product-info__actions">
                 <label className="quantity-label" id="quantity-label">Cantidad</label>
-                <div className="quantity-selector" role="group" aria-labelledby="quantity-label">
-                  <button
-                    className="quantity-btn"
-                    onClick={() => handleQuantityChange(quantity - 1)}
-                    disabled={quantity <= 1}
-                    aria-label="Disminuir cantidad"
-                  >
-                    −
-                  </button>
-                  <div className="quantity-display" aria-live="polite">{quantity}</div>
-                  <button
-                    className="quantity-btn"
-                    onClick={() => handleQuantityChange(quantity + 1)}
-                    disabled={quantity >= product.stock}
-                    aria-label="Aumentar cantidad"
-                  >
-                    +
-                  </button>
-                </div>
-
-                {cartSuccess && <p className="cart-success">✓ {cartSuccess}</p>}
-                {cartError && <p className="form-error">{cartError}</p>}
+                  <div className="quantity-selector" role="group" aria-labelledby="quantity-label">
+                    <button
+                      className="quantity-btn"
+                      onClick={() => handleQuantityChange(quantity - 1)}
+                      disabled={quantity <= 1}
+                      aria-label="Disminuir cantidad"
+                    >
+                      −
+                    </button>
+                    <input
+                      className="quantity-input"
+                      type="text"
+                      inputMode="numeric"
+                      value={qtyInput}
+                      onChange={(e) => setQtyInput(e.target.value)}
+                      onBlur={() => commitQty(qtyInput)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commitQty(qtyInput); } }}
+                      aria-label="Cantidad"
+                    />
+                    <button
+                      className="quantity-btn"
+                      onClick={() => handleQuantityChange(quantity + 1)}
+                      disabled={quantity >= product.stock}
+                      aria-label="Aumentar cantidad"
+                    >
+                      +
+                    </button>
+                  </div>
 
                 <Button
                   onClick={handleAddToCart}

@@ -4,14 +4,13 @@ import { addToCart } from "../api/cart";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 import Input from "../components/Input";
+import { showSuccess, showError } from "../utils/alerts";
 
 function Products() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [cartMessage, setCartMessage] = useState("");
-  const [cartError, setCartError] = useState("");
   const [addingId, setAddingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
@@ -55,16 +54,15 @@ function Products() {
     setFilteredProducts(filtered);
   }, [searchQuery, showOnlyAvailable, products]);
 
-  async function handleAddToCart(productId) {
-    setCartMessage("");
-    setCartError("");
+  async function handleAddToCart(productId, quantity = 1) {
     setAddingId(productId);
 
     try {
-      await addToCart(productId, 1);
-      setCartMessage("Producto agregado al carrito");
+      await addToCart(productId, quantity);
+      const msg = `${quantity} ${quantity === 1 ? "producto" : "productos"} agregado${quantity !== 1 ? "s" : ""} al carrito`;
+      showSuccess(msg);
     } catch (err) {
-      setCartError(err?.response?.data?.message || err?.message || "No se pudo agregar al carrito");
+      showError(err?.response?.data?.message || err?.message || "No se pudo agregar al carrito");
     } finally {
       setAddingId(null);
     }
@@ -83,8 +81,6 @@ function Products() {
 
         {/* Messages */}
         {error && <p className="form-error" style={{ marginBottom: 16 }}>{error}</p>}
-        {cartMessage && <p style={{ color: "#16a34a", marginBottom: 16 }}>✓ {cartMessage}</p>}
-        {cartError && <p className="form-error" style={{ marginBottom: 16 }}>{cartError}</p>}
 
         {/* Toolbar */}
         {!loading && (
