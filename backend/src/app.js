@@ -8,6 +8,7 @@ const testRoutes = require("./routes/test.routes");
 const productRoutes = require("./routes/product.routes");
 const cartRoutes = require("./routes/cart.routes");
 const orderRoutes = require("./routes/order.routes");
+const reviewRoutes = require("./routes/review.routes");
 const errorMiddleware = require("./middleware/error.middleware");
 const swaggerSpec = require("./config/swagger");
 
@@ -57,6 +58,7 @@ if (env.NODE_ENV === "development") {
 app.use("/products", productRoutes);
 app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
+app.use("/", reviewRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/", (req, res) => {
