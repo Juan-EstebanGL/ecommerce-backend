@@ -7,8 +7,11 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import ProductCard from "../components/ProductCard";
 import QuantityInput from "../components/QuantityInput";
-import { showSuccess, showError, showWarning } from "../utils/alerts";
+import { showSuccess, showError } from "../utils/alerts";
 import { useCartContext } from "../context/CartContext";
+import { useAuthContext } from "../context/AuthContext";
+import { getProductReviews, createReview, updateReview } from "../api/reviews";
+import ReviewModal from "../components/ReviewModal";
 
 const benefits = [
   { icon: "🚚", title: "Envío rápido", desc: "Entrega en 2-3 días hábiles" },
@@ -41,11 +44,19 @@ function ProductDetail() {
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [cartLoading, setCartLoading] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [editingReview, setEditingReview] = useState(null);
+  const { user } = useAuthContext();
   const { refreshCartCount } = useCartContext();
 
   useEffect(() => {
     async function loadProduct() {
       setLoading(true);
+      setReviewsLoading(true);
       setError("");
 
       try {
@@ -61,6 +72,15 @@ function ProductDetail() {
           setRelatedProducts(others);
         } catch {
           setRelatedProducts([]);
+        }
+        try {
+          const reviewsRes = await getProductReviews(id);
+          setReviews(reviewsRes.data);
+          setReviewsError("");
+        } catch {
+          setReviewsError("No se pudieron cargar las reseñas.");
+        } finally {
+          setReviewsLoading(false);
         }
       } catch (err) {
         const message = err?.response?.data?.message || err?.message || "Error al cargar el producto";
@@ -95,8 +115,80 @@ function ProductDetail() {
 
   const formatPrice = (price) => Number(price).toLocaleString("es-CO");
 
-  const handleReviewClick = () => {
-    showWarning("Funcionalidad no disponible", "Esta funcionalidad estará disponible próximamente.");
+  const formatDate = (dateStr) => {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Hoy";
+    if (diffDays === 1) return "Ayer";
+    if (diffDays < 30) return `Hace ${diffDays} días`;
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  const renderStars = (rating) => {
+    const full = "★";
+    const empty = "☆";
+    return full.repeat(rating) + empty.repeat(5 - rating);
+  };
+
+  const currentUserEmail = user?.email?.toLowerCase();
+  const userReview = reviews.find((r) => r.user?.email?.toLowerCase() === currentUserEmail) || null;
+
+  const averageRating =
+    reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      : null;
+
+  const refreshReviews = async () => {
+    try {
+      const res = await getProductReviews(id);
+      setReviews(res.data);
+      setReviewsError("");
+    } catch {
+      setReviewsError("No se pudieron cargar las reseñas.");
+    }
+  };
+
+  const handleOpenReviewModal = () => {
+    if (userReview) {
+      setEditingReview(userReview);
+    } else {
+      setEditingReview(null);
+    }
+    setModalOpen(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setModalOpen(false);
+    setEditingReview(null);
+  };
+
+  const handleReviewSubmit = async ({ rating, comment }) => {
+    setModalLoading(true);
+    try {
+      if (editingReview) {
+        await updateReview(editingReview.id, { rating, comment });
+        showSuccess("Reseña actualizada correctamente.");
+      } else {
+        await createReview(id, { rating, comment });
+        showSuccess("Reseña publicada correctamente.");
+      }
+      setModalOpen(false);
+      setEditingReview(null);
+      await refreshReviews();
+    } catch (err) {
+      const msg = err?.response?.data?.message || "Error al guardar la reseña.";
+      showError(msg);
+    } finally {
+      setModalLoading(false);
+    }
   };
 
   if (loading) {
@@ -218,12 +310,85 @@ function ProductDetail() {
 
             <section className="pd-reviews">
               <h2 className="pd-reviews__title">Reseñas</h2>
-              <div className="pd-reviews__empty">
-                <p>No hay reseñas para este producto.</p>
-                <button className="pd-review-btn" onClick={handleReviewClick}>
-                  Escribir una reseña
-                </button>
-              </div>
+
+              {averageRating !== null ? (
+                <div className="pd-reviews__summary">
+                  <div className="pd-reviews__average">
+                    <span className="pd-reviews__stars-display">{renderStars(Math.round(averageRating))}</span>
+                    <span className="pd-reviews__avg-value">{averageRating}</span>
+                  </div>
+                  <span className="pd-reviews__count">{reviews.length} reseña{reviews.length !== 1 ? "s" : ""}</span>
+                </div>
+              ) : null}
+
+              {reviewsLoading && (
+                <div className="pd-reviews__loader">
+                  <Loader />
+                </div>
+              )}
+
+              {reviewsError && !reviewsLoading && (
+                <div className="pd-reviews__error">
+                  <svg className="pd-reviews__error-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <p>{reviewsError}</p>
+                </div>
+              )}
+
+              {!reviewsLoading && !reviewsError && reviews.length === 0 && (
+                <div className="pd-reviews__empty">
+                  <svg className="pd-reviews__empty-icon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  <h3 className="pd-reviews__empty-title">Todavía no existen reseñas para este producto.</h3>
+                  <p className="pd-reviews__empty-desc">Sé el primero en compartir tu opinión.</p>
+                  <button className="pd-review-btn" onClick={handleOpenReviewModal}>Escribir la primera reseña</button>
+                </div>
+              )}
+
+              {!reviewsLoading && reviews.length > 0 && (
+                <div className="pd-reviews__list">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="pd-review">
+                      <div className="pd-review__avatar">
+                        {review.user?.email?.charAt(0)?.toUpperCase() || "?"}
+                      </div>
+                      <div className="pd-review__body">
+                        <div className="pd-review__header">
+                          <span className="pd-review__user">{review.user?.email || "Usuario"}</span>
+                          {review.user?.email?.toLowerCase() === currentUserEmail && (
+                            <span className="pd-review__mine">Tu reseña</span>
+                          )}
+                          <span className="pd-review__date">{formatDate(review.createdAt)}</span>
+                        </div>
+                        <span className="pd-review__stars">{renderStars(review.rating)}</span>
+                        <p className="pd-review__comment">{review.comment}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {user && !reviewsLoading && !reviewsError && (
+                <div className="pd-reviews__action">
+                  <button className="pd-review-btn pd-review-btn--primary" onClick={handleOpenReviewModal}>
+                    {userReview ? "Editar mi reseña" : "Escribir reseña"}
+                  </button>
+                </div>
+              )}
+
+              <ReviewModal
+                isOpen={modalOpen}
+                onClose={handleCloseReviewModal}
+                onSubmit={handleReviewSubmit}
+                initialRating={editingReview?.rating || 0}
+                initialComment={editingReview?.comment || ""}
+                loading={modalLoading}
+                title={editingReview ? "Editar reseña" : "Nueva reseña"}
+              />
             </section>
           </div>
         </div>

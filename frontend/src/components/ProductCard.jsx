@@ -23,10 +23,6 @@ function ProductCard({ product, onAddToCart, addingId }) {
   const [quantity, setQuantity] = useState(1);
   const isAvailable = product.stock > 0;
 
-  const mockRating = ((product.id * 7) % 3) + 3;
-  const mockReviews = ((product.id * 13) % 50) + 10;
-  const mockBadge = product.id % 5 === 0 ? "Nuevo" : product.id % 7 === 0 ? "Más vendido" : null;
-
   const stockStatus = isAvailable
     ? product.stock <= 5
       ? { label: "Poco stock", className: "pc__stock--low", dot: "pc__dot--low" }
@@ -44,11 +40,6 @@ function ProductCard({ product, onAddToCart, addingId }) {
   return (
     <article className="pc">
       <div className="pc__media" onClick={() => navigate(`/products/${product.id}`)}>
-        {mockBadge && (
-          <span className={`pc__badge pc__badge--${mockBadge === "Nuevo" ? "new" : "bestseller"}`}>
-            {mockBadge}
-          </span>
-        )}
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.name} loading="lazy" />
         ) : (
@@ -58,10 +49,6 @@ function ProductCard({ product, onAddToCart, addingId }) {
         )}
       </div>
       <div className="pc__body">
-        <div className="pc__stars">
-          <span className="pc__stars-value">{'★'.repeat(mockRating)}{'☆'.repeat(5 - mockRating)}</span>
-          <span className="pc__reviews">({mockReviews} reseñas)</span>
-        </div>
         <h3 className="pc__name">{product.name}</h3>
         <div className="pc__price">${formattedPrice}</div>
         <div className={`pc__stock ${stockStatus.className}`}>

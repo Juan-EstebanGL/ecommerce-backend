@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { login as loginRequest } from "../api/auth";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("authUser");
     return storedUser ? JSON.parse(storedUser) : null;
@@ -33,6 +35,7 @@ export function AuthProvider({ children }) {
 
   function logout() {
     setUser(null);
+    navigate("/login");
   }
 
   return (
