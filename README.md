@@ -146,7 +146,7 @@ La API cuenta con documentación mediante **Swagger**, facilitando las pruebas y
 ## Clonar el repositorio
 
 ```bash
-git clone https://github.com/TU-USUARIO/Ecommerce-App.git
+git clone https://github.com/Juan-estebanGL/Ecommerce-App.git
 ```
 
 ---
