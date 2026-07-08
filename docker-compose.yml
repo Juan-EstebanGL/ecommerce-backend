@@ -1,8 +1,9 @@
 # docker-compose.yml
-# Levanta únicamente PostgreSQL para desarrollo local.
-# Uso: docker compose up -d          # Inicia PostgreSQL
-#      docker compose down           # Detiene y elimina el contenedor
-#      docker compose down -v        # Detiene, elimina contenedor y volumen
+# Levanta PostgreSQL + Backend para desarrollo local.
+# Uso: docker compose up -d          # Inicia todos los servicios
+#      docker compose up -d --build  # Reconstruye imágenes y levanta
+#      docker compose down           # Detiene y elimina contenedores
+#      docker compose down -v        # Detiene, elimina contenedores y volúmenes
 #      docker compose logs -f        # Ver logs en tiempo real
 
 services:
@@ -39,7 +40,43 @@ services:
     # Política de reinicio automático (útil en desarrollo)
     restart: unless-stopped
 
-# Declaración del volumen nombrado
+  backend:
+    # Construye la imagen usando el Dockerfile en ./backend
+    build:
+      context: ./backend
+
+    # Nombre amigable para el contenedor
+    container_name: ecommerce-backend
+
+    # Carga las variables de entorno desde .env.docker
+    # Incluye DATABASE_URL (con host "postgres"), JWT_SECRET, NODE_ENV, etc.
+    env_file:
+      - .env.docker
+
+    # Puerto: host:contenedor
+    # Expone el puerto 3000 del backend al host
+    ports:
+      - "3000:3000"
+
+    # Volúmenes:
+    #   - Monta el código fuente en caliente (hot reload vía nodemon)
+    #   - Anula node_modules para evitar que el mount del host lo sobrescriba
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+    # Espera a que PostgreSQL esté saludable antes de arrancar
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    # Hot reload con nodemon (sobrescribe el CMD del Dockerfile)
+    command: nodemon src/server.js
+
+    # Política de reinicio automático
+    restart: unless-stopped
+
+# Declaración de volúmenes nombrados
 volumes:
   postgres_data:
     # driver por defecto (local) — almacena en el disco del host

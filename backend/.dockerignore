@@ -1,0 +1,22 @@
+# Dependencias locales (se instalan dentro del contenedor)
+node_modules
+
+# Archivos de entorno (se inyectan via docker-compose)
+.env
+.env.*
+!.env.example
+
+# Control de versiones
+.git
+.gitignore
+
+# Tests (no necesarios en la imagen)
+tests
+scripts
+
+# Documentación
+*.md
+
+# Builds previos
+dist
+build
