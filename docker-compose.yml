@@ -1,5 +1,5 @@
 # docker-compose.yml
-# Levanta PostgreSQL + Backend para desarrollo local.
+# Levanta PostgreSQL + Backend + Frontend para desarrollo local.
 # Uso: docker compose up -d          # Inicia todos los servicios
 #      docker compose up -d --build  # Reconstruye imágenes y levanta
 #      docker compose down           # Detiene y elimina contenedores
@@ -19,13 +19,12 @@ services:
       - .env.docker
 
     # Puerto: host:contenedor
-    # Mapea el puerto 5432 del host al 5432 del contenedor.
-    # Así el backend en localhost:5432 se conecta sin cambios.
+    # Mapea 5432 del host al 5432 del contenedor.
+    # Así herramientas externas (pgAdmin, backend local) se conectan sin cambios.
     ports:
       - "5432:5432"
 
-    # Volumen nombrado para persistencia de datos.
-    # Los datos sobreviven a docker compose down.
+    # Volumen nombrado para persistencia de datos
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -37,47 +36,43 @@ services:
       retries: 10
       start_period: 10s
 
-    # Política de reinicio automático (útil en desarrollo)
     restart: unless-stopped
 
   backend:
-    # Construye la imagen usando el Dockerfile en ./backend
     build:
       context: ./backend
-
-    # Nombre amigable para el contenedor
     container_name: ecommerce-backend
-
-    # Carga las variables de entorno desde .env.docker
-    # Incluye DATABASE_URL (con host "postgres"), JWT_SECRET, NODE_ENV, etc.
     env_file:
       - .env.docker
-
-    # Puerto: host:contenedor
-    # Expone el puerto 3000 del backend al host
     ports:
       - "3000:3000"
-
-    # Volúmenes:
-    #   - Monta el código fuente en caliente (hot reload vía nodemon)
-    #   - Anula node_modules para evitar que el mount del host lo sobrescriba
     volumes:
       - ./backend:/app
       - /app/node_modules
-
-    # Espera a que PostgreSQL esté saludable antes de arrancar
     depends_on:
       postgres:
         condition: service_healthy
-
-    # Hot reload con nodemon (sobrescribe el CMD del Dockerfile)
     command: nodemon src/server.js
-
-    # Política de reinicio automático
     restart: unless-stopped
 
-# Declaración de volúmenes nombrados
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ecommerce-frontend
+    environment:
+      # El browser accede al backend desde el host en localhost:3000
+      VITE_API_URL: http://localhost:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    # --host 0.0.0.0 permite conexiones desde el host hacia el contenedor
+    command: npm run dev -- --host 0.0.0.0
+    restart: unless-stopped
+
 volumes:
   postgres_data:
-    # driver por defecto (local) — almacena en el disco del host
     driver: local
