@@ -1,0 +1,46 @@
+# docker-compose.yml
+# Levanta únicamente PostgreSQL para desarrollo local.
+# Uso: docker compose up -d          # Inicia PostgreSQL
+#      docker compose down           # Detiene y elimina el contenedor
+#      docker compose down -v        # Detiene, elimina contenedor y volumen
+#      docker compose logs -f        # Ver logs en tiempo real
+
+services:
+  postgres:
+    # Imagen oficial de PostgreSQL, versión 16 (estable y ampliamente usada)
+    image: postgres:16
+
+    # Nombre amigable para el contenedor
+    container_name: ecommerce-postgres
+
+    # Carga las variables de entorno desde .env.docker
+    env_file:
+      - .env.docker
+
+    # Puerto: host:contenedor
+    # Mapea el puerto 5432 del host al 5432 del contenedor.
+    # Así el backend en localhost:5432 se conecta sin cambios.
+    ports:
+      - "5432:5432"
+
+    # Volumen nombrado para persistencia de datos.
+    # Los datos sobreviven a docker compose down.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    # Health check para verificar que PostgreSQL está listo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    # Política de reinicio automático (útil en desarrollo)
+    restart: unless-stopped
+
+# Declaración del volumen nombrado
+volumes:
+  postgres_data:
+    # driver por defecto (local) — almacena en el disco del host
+    driver: local
