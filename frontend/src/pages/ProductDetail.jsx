@@ -7,10 +7,10 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import ProductCard from "../components/ProductCard";
 import QuantityInput from "../components/QuantityInput";
-import { showSuccess, showError } from "../utils/alerts";
+import { showSuccess, showError, showConfirm } from "../utils/alerts";
 import { useCartContext } from "../context/CartContext";
 import { useAuthContext } from "../context/AuthContext";
-import { getProductReviews, createReview, updateReview } from "../api/reviews";
+import { getProductReviews, createReview, updateReview, deleteReview } from "../api/reviews";
 import ReviewModal from "../components/ReviewModal";
 
 const benefits = [
@@ -191,6 +191,28 @@ function ProductDetail() {
     }
   };
 
+  const handleDeleteReview = async (reviewId) => {
+    const result = await showConfirm(
+      "¿Eliminar reseña?",
+      "Esta acción eliminará permanentemente tu reseña.",
+      "Eliminar",
+      "Cancelar"
+    );
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await deleteReview(reviewId);
+      showSuccess("Reseña eliminada correctamente.");
+      setModalOpen(false);
+      setEditingReview(null);
+      await refreshReviews();
+    } catch (err) {
+      const msg = err?.response?.data?.message || "Error al eliminar la reseña.";
+      showError(msg);
+    }
+  };
+
   if (loading) {
     return (
       <main className="app-container">
@@ -366,16 +388,36 @@ function ProductDetail() {
                         </div>
                         <span className="pd-review__stars">{renderStars(review.rating)}</span>
                         <p className="pd-review__comment">{review.comment}</p>
+                        {review.user?.email?.toLowerCase() === currentUserEmail && (
+                          <div className="pd-review__actions">
+                            <button className="pd-review__action pd-review__action--edit" onClick={handleOpenReviewModal}>
+                              <svg className="pd-review__action-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                              </svg>
+                              Editar
+                            </button>
+                            <button className="pd-review__action pd-review__action--delete" onClick={() => handleDeleteReview(review.id)}>
+                              <svg className="pd-review__action-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                              </svg>
+                              Eliminar
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {user && !reviewsLoading && !reviewsError && (
+              {user && !reviewsLoading && !reviewsError && !userReview && (
                 <div className="pd-reviews__action">
                   <button className="pd-review-btn pd-review-btn--primary" onClick={handleOpenReviewModal}>
-                    {userReview ? "Editar mi reseña" : "Escribir reseña"}
+                    Escribir reseña
                   </button>
                 </div>
               )}

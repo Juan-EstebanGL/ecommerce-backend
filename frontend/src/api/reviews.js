@@ -11,3 +11,7 @@ export function createReview(productId, data) {
 export function updateReview(reviewId, data) {
   return api.put(`/reviews/${reviewId}`, data);
 }
+
+export function deleteReview(reviewId) {
+  return api.delete(`/reviews/${reviewId}`);
+}
