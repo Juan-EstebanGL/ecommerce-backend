@@ -9,6 +9,7 @@ import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
 import OrderDetail from "../pages/OrderDetail";
 import Profile from "../pages/Profile";
+import Favorites from "../pages/Favorites";
 
 function AppRouter() {
   return (
@@ -23,6 +24,7 @@ function AppRouter() {
       <Route path="/orders" element={<Orders />} />
       <Route path="/orders/:id" element={<OrderDetail />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/favorites" element={<Favorites />} />
     </Routes>
   );
 }

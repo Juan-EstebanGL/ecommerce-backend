@@ -94,6 +94,15 @@ function Navbar() {
                   {isActive("/orders") && <span className="navbar__link-indicator" />}
                 </Link>
               )}
+              {user && (
+                <Link
+                  to="/favorites"
+                  className={`navbar__link${isActive("/favorites") ? " navbar__link--active" : ""}`}
+                >
+                  Favoritos
+                  {isActive("/favorites") && <span className="navbar__link-indicator" />}
+                </Link>
+              )}
             </nav>
           </div>
           <div className="navbar__right">
@@ -123,6 +132,14 @@ function Navbar() {
                       role="menuitem"
                     >
                       Mi perfil
+                    </Link>
+                    <Link
+                      to="/favorites"
+                      className="navbar__dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                      role="menuitem"
+                    >
+                      ❤️ Mis favoritos
                     </Link>
                     <Link
                       to="/orders"
@@ -204,6 +221,13 @@ function Navbar() {
                 onClick={closeDrawer}
               >
                 Mi perfil
+              </Link>
+              <Link
+                to="/favorites"
+                className={`navbar__drawer-link${isActive("/favorites") ? " navbar__drawer-link--active" : ""}`}
+                onClick={closeDrawer}
+              >
+                Mis favoritos
               </Link>
               <Link
                 to="/orders"

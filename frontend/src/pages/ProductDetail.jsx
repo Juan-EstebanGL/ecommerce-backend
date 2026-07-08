@@ -10,6 +10,7 @@ import QuantityInput from "../components/QuantityInput";
 import { showSuccess, showError, showConfirm } from "../utils/alerts";
 import { useCartContext } from "../context/CartContext";
 import { useAuthContext } from "../context/AuthContext";
+import { useFavoriteContext } from "../context/FavoriteContext";
 import { getProductReviews, createReview, updateReview, deleteReview } from "../api/reviews";
 import ReviewModal from "../components/ReviewModal";
 
@@ -52,6 +53,8 @@ function ProductDetail() {
   const [editingReview, setEditingReview] = useState(null);
   const { user } = useAuthContext();
   const { refreshCartCount } = useCartContext();
+  const { isFavorite, toggleFavorite } = useFavoriteContext();
+  const [favAnimating, setFavAnimating] = useState(false);
 
   useEffect(() => {
     async function loadProduct() {
@@ -213,6 +216,19 @@ function ProductDetail() {
     }
   };
 
+  const handleToggleFav = async () => {
+    if (!product) return;
+
+    const wasFavorite = isFavorite(product.id);
+    const success = await toggleFavorite(product.id);
+
+    if (success) {
+      showSuccess(wasFavorite ? "Producto eliminado de favoritos" : "Producto agregado a favoritos");
+      setFavAnimating(true);
+      setTimeout(() => setFavAnimating(false), 350);
+    }
+  };
+
   if (loading) {
     return (
       <main className="app-container">
@@ -286,7 +302,18 @@ function ProductDetail() {
           </div>
 
           <div className="pd-info">
-            <h1 className="pd-name">{product.name}</h1>
+            <div className="pd-name-row">
+              <h1 className="pd-name">{product.name}</h1>
+              <button
+                className={`pd-fav-btn ${isFavorite(product.id) ? "pd-fav-btn--active" : ""} ${favAnimating ? "pd-fav-btn--animate" : ""}`}
+                onClick={handleToggleFav}
+                aria-label={isFavorite(product.id) ? "Eliminar de favoritos" : "Agregar a favoritos"}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill={isFavorite(product.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                </svg>
+              </button>
+            </div>
 
             <div className="pd-price-line">
               <span className="pd-price-value">${formatPrice(product.price)}</span>

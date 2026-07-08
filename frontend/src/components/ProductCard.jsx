@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import QuantityInput from "./QuantityInput";
+import { useFavoriteContext } from "../context/FavoriteContext";
+import { showSuccess } from "../utils/alerts";
 
 const CartIcon = () => (
   <svg className="pc__cart-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -20,8 +22,23 @@ const ImageIcon = () => (
 
 function ProductCard({ product, onAddToCart, addingId }) {
   const navigate = useNavigate();
+  const { isFavorite, toggleFavorite } = useFavoriteContext();
   const [quantity, setQuantity] = useState(1);
+  const [favAnimating, setFavAnimating] = useState(false);
   const isAvailable = product.stock > 0;
+  const isFav = isFavorite(product.id);
+
+  const handleToggleFav = async (e) => {
+    e.stopPropagation();
+    const wasFavorite = isFav;
+    const success = await toggleFavorite(product.id);
+
+    if (success) {
+      showSuccess(wasFavorite ? "Producto eliminado de favoritos" : "Producto agregado a favoritos");
+      setFavAnimating(true);
+      setTimeout(() => setFavAnimating(false), 350);
+    }
+  };
 
   const stockStatus = isAvailable
     ? product.stock <= 5
@@ -47,6 +64,15 @@ function ProductCard({ product, onAddToCart, addingId }) {
             <ImageIcon />
           </div>
         )}
+        <button
+          className={`pc__fav-btn ${isFav ? "pc__fav-btn--active" : ""} ${favAnimating ? "pc__fav-btn--animate" : ""}`}
+          onClick={handleToggleFav}
+          aria-label={isFav ? "Eliminar de favoritos" : "Agregar a favoritos"}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill={isFav ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+          </svg>
+        </button>
       </div>
       <div className="pc__body">
         <h3 className="pc__name">{product.name}</h3>
