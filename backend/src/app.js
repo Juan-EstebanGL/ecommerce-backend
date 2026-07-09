@@ -10,6 +10,7 @@ const cartRoutes = require("./routes/cart.routes");
 const orderRoutes = require("./routes/order.routes");
 const reviewRoutes = require("./routes/review.routes");
 const favoriteRoutes = require("./routes/favorite.routes");
+const uploadRoutes = require("./routes/upload.routes");
 const errorMiddleware = require("./middleware/error.middleware");
 const swaggerSpec = require("./config/swagger");
 
@@ -27,7 +28,7 @@ const allowedOrigins = env.FRONTEND_URL
 
 console.log("[app] Iniciando servidor Express...");
 console.log(
-  "[app] Rutas registradas: /auth, /products, /cart, /orders, /favorites" +
+  "[app] Rutas registradas: /auth, /products, /cart, /orders, /favorites, /upload" +
     (env.NODE_ENV === "development" ? ", /test" : "")
 );
 
@@ -61,6 +62,7 @@ app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
 app.use("/", reviewRoutes);
 app.use("/favorites", favoriteRoutes);
+app.use("/upload", uploadRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/", (req, res) => {

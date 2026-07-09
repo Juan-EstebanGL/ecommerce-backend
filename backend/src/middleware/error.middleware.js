@@ -41,6 +41,14 @@ const errorMiddleware = (error, req, res, next) => {
     });
   }
 
+  if (error.name === "MulterError") {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ message: "El archivo excede el límite de 5 MB" });
+    }
+
+    return res.status(400).json({ message: error.message });
+  }
+
   const prismaError = normalizePrismaError(error);
 
   if (prismaError) {
