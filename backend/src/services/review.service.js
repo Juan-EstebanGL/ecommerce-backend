@@ -100,10 +100,47 @@ const getReviewById = async (reviewId) => {
   return review;
 };
 
-const ensureReviewOwner = (review, userId) => {
-  if (review.userId !== userId) {
+const ensureReviewOwner = (review, userId, userRole) => {
+  if (userRole !== "ADMIN" && review.userId !== userId) {
     throw new AppError("No autorizado", 403);
   }
+};
+
+const getAllReviews = async () => {
+  const reviews = await prisma.review.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      product: {
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return reviews.map((review) => ({
+    id: review.id,
+    rating: review.rating,
+    comment: review.comment,
+    createdAt: review.createdAt,
+    user: {
+      id: review.user.id,
+      email: review.user.email,
+    },
+    product: {
+      id: review.product.id,
+      name: review.product.name,
+      imageUrl: review.product.imageUrl,
+    },
+  }));
 };
 
 const updateReview = async (userId, reviewId, data) => {
@@ -140,10 +177,10 @@ const updateReview = async (userId, reviewId, data) => {
   };
 };
 
-const deleteReview = async (userId, reviewId) => {
+const deleteReview = async (userId, reviewId, userRole) => {
   const review = await getReviewById(reviewId);
 
-  ensureReviewOwner(review, userId);
+  ensureReviewOwner(review, userId, userRole);
 
   try {
     await prisma.review.delete({
@@ -160,6 +197,7 @@ const deleteReview = async (userId, reviewId) => {
 
 module.exports = {
   getProductReviews,
+  getAllReviews,
   createReview,
   updateReview,
   deleteReview,

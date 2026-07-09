@@ -12,6 +12,7 @@ const reviewRoutes = require("./routes/review.routes");
 const favoriteRoutes = require("./routes/favorite.routes");
 const uploadRoutes = require("./routes/upload.routes");
 const userRoutes = require("./routes/user.routes");
+const adminRoutes = require("./routes/admin.routes");
 const errorMiddleware = require("./middleware/error.middleware");
 const swaggerSpec = require("./config/swagger");
 
@@ -65,6 +66,7 @@ app.use("/", reviewRoutes);
 app.use("/favorites", favoriteRoutes);
 app.use("/upload", uploadRoutes);
 app.use("/users", userRoutes);
+app.use("/admin", adminRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/", (req, res) => {

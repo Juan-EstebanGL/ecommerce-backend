@@ -15,3 +15,7 @@ export function updateReview(reviewId, data) {
 export function deleteReview(reviewId) {
   return api.delete(`/reviews/${reviewId}`);
 }
+
+export function getAdminReviews() {
+  return api.get("/reviews/admin");
+}

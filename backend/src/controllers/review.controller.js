@@ -64,6 +64,12 @@ const updateReview = asyncHandler(async (req, res) => {
   return res.json(review);
 }, "Error actualizando reseña");
 
+const getAllReviews = asyncHandler(async (req, res) => {
+  const reviews = await reviewService.getAllReviews();
+
+  return res.json(reviews);
+}, "Error obteniendo reseñas");
+
 const deleteReview = asyncHandler(async (req, res) => {
   const validation = reviewParamsSchema.safeParse({
     params: req.params,
@@ -75,7 +81,8 @@ const deleteReview = asyncHandler(async (req, res) => {
 
   await reviewService.deleteReview(
     req.userId,
-    validation.data.params.id
+    validation.data.params.id,
+    req.userRole
   );
 
   return res.status(204).send();
@@ -83,6 +90,7 @@ const deleteReview = asyncHandler(async (req, res) => {
 
 module.exports = {
   getProductReviews,
+  getAllReviews,
   createReview,
   updateReview,
   deleteReview,

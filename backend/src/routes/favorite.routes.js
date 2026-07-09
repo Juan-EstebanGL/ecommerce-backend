@@ -2,9 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middleware/auth.middleware");
+const adminMiddleware = require("../middleware/admin.middleware");
 
 const {
   getFavorites,
+  getAdminFavorites,
   addFavorite,
   removeFavorite,
 } = require("../controllers/favorite.controller");
@@ -111,5 +113,7 @@ router.post("/:productId", authMiddleware, addFavorite);
  *         description: Favorito no encontrado
  */
 router.delete("/:productId", authMiddleware, removeFavorite);
+
+router.get("/admin", authMiddleware, adminMiddleware, getAdminFavorites);
 
 module.exports = router;

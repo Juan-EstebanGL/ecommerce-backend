@@ -14,20 +14,43 @@ const ORDER_STATUS = {
   CANCELLED: "CANCELLED",
 };
 
-const formatOrder = (order) => {
+const formatOrder = async (order) => {
   if (!order) {
     return order;
+  }
+
+  const items = order.items
+    ? order.items.map((item) => ({
+        ...item,
+        productPrice: Number(item.productPrice),
+      }))
+    : [];
+
+  const missingImageItems = items.filter(
+    (item) => !item.imageUrl && item.productId
+  );
+
+  if (missingImageItems.length > 0) {
+    const products = await prisma.product.findMany({
+      where: { id: { in: missingImageItems.map((i) => i.productId) } },
+      select: { id: true, imageUrl: true },
+    });
+
+    const productMap = new Map(
+      products.map((p) => [p.id, p.imageUrl])
+    );
+
+    for (const item of items) {
+      if (!item.imageUrl && productMap.has(item.productId)) {
+        item.imageUrl = productMap.get(item.productId);
+      }
+    }
   }
 
   return {
     ...order,
     total: Number(order.total),
-    items: order.items
-      ? order.items.map((item) => ({
-          ...item,
-          productPrice: Number(item.productPrice),
-        }))
-      : order.items,
+    items,
   };
 };
 
@@ -145,7 +168,7 @@ const getAllOrders = async () => {
     },
   });
 
-  return orders.map(formatOrder);
+  return Promise.all(orders.map(formatOrder));
 };
 
 const getMyOrders = async (userId) => {
@@ -159,7 +182,7 @@ const getMyOrders = async (userId) => {
     },
   });
 
-  return orders.map(formatOrder);
+  return Promise.all(orders.map(formatOrder));
 };
 
 const getOrderById = async (userId, orderId) => {

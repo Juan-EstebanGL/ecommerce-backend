@@ -196,9 +196,9 @@ function OrderDetail() {
             {items.length > 0 ? (
               <div>
                 {items.map((item, idx) => {
-                  const imgSrc = item.product?.imageUrl || item.imageUrl;
-                  const name = item.productName || item.product?.name || "Producto";
-                  const unitPrice = item.productPrice || item.product?.price || 0;
+                  const imgSrc = item.imageUrl;
+                  const name = item.productName || "Producto";
+                  const unitPrice = item.productPrice || 0;
                   const qty = item.quantity || 0;
 
                   return (

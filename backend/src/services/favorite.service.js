@@ -94,8 +94,68 @@ const removeFavorite = async (userId, productId) => {
   }
 };
 
+const getAdminFavoritesStats = async () => {
+  const favorites = await prisma.favorite.findMany({
+    include: {
+      product: {
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+        },
+      },
+    },
+  });
+
+  if (!favorites.length) {
+    return {
+      products: [],
+      totalFavorites: 0,
+      totalUsersWithFavorites: 0,
+      mostFavoritedProduct: null,
+      averageFavoritesPerProduct: 0,
+    };
+  }
+
+  const productMap = new Map();
+
+  for (const fav of favorites) {
+    const pid = fav.productId;
+    if (!productMap.has(pid)) {
+      productMap.set(pid, {
+        id: fav.product.id,
+        name: fav.product.name,
+        imageUrl: fav.product.imageUrl,
+        totalFavorites: 0,
+      });
+    }
+    productMap.get(pid).totalFavorites++;
+  }
+
+  const products = Array.from(productMap.values()).sort(
+    (a, b) => b.totalFavorites - a.totalFavorites
+  );
+
+  const totalFavorites = favorites.length;
+  const uniqueUsers = new Set(favorites.map((f) => f.userId));
+  const totalUsersWithFavorites = uniqueUsers.size;
+  const mostFavoritedProduct = products[0];
+  const averageFavoritesPerProduct = products.length
+    ? Number((totalFavorites / products.length).toFixed(2))
+    : 0;
+
+  return {
+    products,
+    totalFavorites,
+    totalUsersWithFavorites,
+    mostFavoritedProduct,
+    averageFavoritesPerProduct,
+  };
+};
+
 module.exports = {
   getFavorites,
+  getAdminFavoritesStats,
   addFavorite,
   removeFavorite,
 };

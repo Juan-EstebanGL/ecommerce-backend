@@ -11,3 +11,7 @@ export function addFavorite(productId) {
 export function removeFavorite(productId) {
   return api.delete(`/favorites/${productId}`);
 }
+
+export function getAdminFavorites() {
+  return api.get("/favorites/admin");
+}

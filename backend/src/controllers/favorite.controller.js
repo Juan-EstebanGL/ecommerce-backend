@@ -48,8 +48,15 @@ const removeFavorite = asyncHandler(async (req, res) => {
   return res.status(204).send();
 }, "Error eliminando favorito");
 
+const getAdminFavorites = asyncHandler(async (req, res) => {
+  const stats = await favoriteService.getAdminFavoritesStats();
+
+  return res.json(stats);
+}, "Error obteniendo estadísticas de favoritos");
+
 module.exports = {
   getFavorites,
+  getAdminFavorites,
   addFavorite,
   removeFavorite,
 };
