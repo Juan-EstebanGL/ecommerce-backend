@@ -27,6 +27,7 @@ function Checkout() {
   const [error, setError] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [imgErrors, setImgErrors] = useState(new Set());
   const { refreshCartCount } = useCartContext();
   const navigate = useNavigate();
 
@@ -107,8 +108,8 @@ function Checkout() {
                 return (
                   <div key={item.id} className="co-item">
                     <div className="co-item__media">
-                      {item.product?.imageUrl ? (
-                        <img src={item.product.imageUrl} alt={item.product.name} />
+                      {item.product?.imageUrl && !imgErrors.has(item.id) ? (
+                        <img src={item.product.imageUrl} alt={item.product.name} loading="lazy" onError={() => setImgErrors(prev => new Set(prev).add(item.id))} />
                       ) : (
                         <span className="co-item__placeholder">
                           {item.product?.name?.slice(0, 2).toUpperCase() || "PR"}

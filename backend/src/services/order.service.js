@@ -110,6 +110,7 @@ const createOrder = async (userId) => {
             productId: item.productId,
             productName: item.product.name,
             productPrice: item.product.price,
+            imageUrl: item.product.imageUrl,
             quantity: item.quantity,
           })),
         },

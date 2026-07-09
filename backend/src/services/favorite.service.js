@@ -6,6 +6,7 @@ const productSelect = {
   name: true,
   price: true,
   stock: true,
+  imageUrl: true,
 };
 
 const favoriteInclude = {

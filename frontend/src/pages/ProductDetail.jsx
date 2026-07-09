@@ -55,6 +55,7 @@ function ProductDetail() {
   const { refreshCartCount } = useCartContext();
   const { isFavorite, toggleFavorite } = useFavoriteContext();
   const [favAnimating, setFavAnimating] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     async function loadProduct() {
@@ -283,8 +284,8 @@ function ProductDetail() {
         <div className="pd-layout">
           <div className="pd-gallery">
             <div className="pd-image">
-              {product.imageUrl ? (
-                <img src={product.imageUrl} alt={product.name} />
+              {product.imageUrl && !imgError ? (
+                <img src={product.imageUrl} alt={product.name} loading="lazy" onError={() => setImgError(true)} />
               ) : (
                 <div className="pd-image__placeholder">
                   <div className="pd-placeholder__bg" />

@@ -107,6 +107,7 @@ model OrderItem {
   productId    Int
   productName  String
   productPrice Decimal @db.Decimal(10, 2)
+  imageUrl     String?
 
   quantity Int
 

@@ -25,6 +25,7 @@ function ProductCard({ product, onAddToCart, addingId }) {
   const { isFavorite, toggleFavorite } = useFavoriteContext();
   const [quantity, setQuantity] = useState(1);
   const [favAnimating, setFavAnimating] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const isAvailable = product.stock > 0;
   const isFav = isFavorite(product.id);
 
@@ -57,8 +58,8 @@ function ProductCard({ product, onAddToCart, addingId }) {
   return (
     <article className="pc">
       <div className="pc__media" onClick={() => navigate(`/products/${product.id}`)}>
-        {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} loading="lazy" />
+        {product.imageUrl && !imgError ? (
+          <img src={product.imageUrl} alt={product.name} loading="lazy" onError={() => setImgError(true)} />
         ) : (
           <div className="pc__placeholder">
             <ImageIcon />

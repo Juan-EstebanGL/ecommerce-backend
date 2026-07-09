@@ -75,6 +75,7 @@ function OrderDetail() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imgErrors, setImgErrors] = useState(new Set());
 
   useEffect(() => {
     async function loadOrder() {
@@ -203,8 +204,8 @@ function OrderDetail() {
                   return (
                     <div key={idx} className="od-item">
                       <div className="od-item__media">
-                        {imgSrc ? (
-                          <img src={imgSrc} alt={name} />
+                        {imgSrc && !imgErrors.has(idx) ? (
+                          <img src={imgSrc} alt={name} loading="lazy" onError={() => setImgErrors(prev => new Set(prev).add(idx))} />
                         ) : (
                           <span className="od-item__placeholder">
                             {name.charAt(0)}
