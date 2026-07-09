@@ -4912,13 +4912,19 @@ body {
 
 .ad-sidebar__user {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 12px;
   padding: 16px 20px;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 
-.ad-sidebar__user-avatar {
+.ad-user__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ad-user__avatar {
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -4932,13 +4938,14 @@ body {
   flex-shrink: 0;
 }
 
-.ad-sidebar__user-info {
+.ad-user__details {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1;
 }
 
-.ad-sidebar__user-name {
+.ad-user__name {
   font-size: 0.85rem;
   font-weight: 600;
   color: #e0e2e8;
@@ -4947,12 +4954,97 @@ body {
   text-overflow: ellipsis;
 }
 
-.ad-sidebar__user-email {
+.ad-user__email {
   font-size: 0.75rem;
   color: #6b7185;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.ad-user__badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--brand);
+  background: rgba(14,165,164,0.12);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+/* ── UserMenu ── */
+
+.user-menu {
+  position: relative;
+}
+
+.user-menu__trigger {
+  cursor: pointer;
+}
+
+.user-menu__dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 220px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px -2px rgba(16,24,40,0.04),
+    0 12px 24px -4px rgba(16,24,40,0.12),
+    0 0 0 1px rgba(0,0,0,0.04);
+  z-index: 200;
+  padding: 6px;
+  animation: user-menu-in 0.18s ease-out;
+  transform-origin: top right;
+}
+
+.user-menu__dropdown--up {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform-origin: bottom right;
+  animation-name: user-menu-in-up;
+}
+
+@keyframes user-menu-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96) }
+  to { opacity: 1; transform: translateY(0) scale(1) }
+}
+
+@keyframes user-menu-in-up {
+  from { opacity: 0; transform: translateY(6px) scale(0.96) }
+  to { opacity: 1; transform: translateY(0) scale(1) }
+}
+
+.user-menu__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.user-menu__item:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+.user-menu__item--danger {
+  color: var(--danger);
+}
+
+.user-menu__item--danger:hover {
+  background: #fef2f2;
 }
 
 /* Drawer overlay (mobile) */

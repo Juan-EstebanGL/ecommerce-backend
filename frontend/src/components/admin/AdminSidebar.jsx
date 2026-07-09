@@ -1,5 +1,6 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import UserMenu from "../UserMenu";
 
 const links = [
   {
@@ -81,7 +82,7 @@ const links = [
 ];
 
 export default function AdminSidebar({ open, onClose }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <>
@@ -114,13 +115,46 @@ export default function AdminSidebar({ open, onClose }) {
         </nav>
 
         <div className="ad-sidebar__user">
-          <div className="ad-sidebar__user-avatar">
-            {(user?.name?.[0] || user?.email?.[0] || "A").toUpperCase()}
-          </div>
-          <div className="ad-sidebar__user-info">
-            <span className="ad-sidebar__user-name">{user?.name || "Admin"}</span>
-            <span className="ad-sidebar__user-email">{user?.email || ""}</span>
-          </div>
+          <UserMenu direction="up" trigger={
+            <div className="ad-user__info">
+              <div className="ad-user__avatar">
+                {(user?.name?.[0] || user?.email?.[0] || "A").toUpperCase()}
+              </div>
+              <div className="ad-user__details">
+                <span className="ad-user__name">{user?.name || "Admin"}</span>
+                <span className="ad-user__email">{user?.email || ""}</span>
+              </div>
+              <span className="ad-user__badge">ADMIN</span>
+            </div>
+          }>
+            {({ close }) => (
+              <>
+                <Link
+                  to="/"
+                  className="user-menu__item"
+                  onClick={() => { close(); onClose?.(); }}
+                  role="menuitem"
+                >
+                  🏠 Ver tienda
+                </Link>
+                <Link
+                  to="/profile"
+                  className="user-menu__item"
+                  onClick={() => { close(); onClose?.(); }}
+                  role="menuitem"
+                >
+                  👤 Mi perfil
+                </Link>
+                <button
+                  className="user-menu__item user-menu__item--danger"
+                  onClick={() => { close(); onClose?.(); logout(); }}
+                  role="menuitem"
+                >
+                  🚪 Cerrar sesión
+                </button>
+              </>
+            )}
+          </UserMenu>
         </div>
       </aside>
     </>

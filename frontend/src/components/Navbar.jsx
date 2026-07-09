@@ -1,16 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { useCartContext } from "../context/CartContext";
+import UserMenu from "./UserMenu";
 
 function Navbar() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { cartCount, refreshCartCount } = useCartContext();
-  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -23,22 +22,6 @@ function Navbar() {
       refreshCartCount();
     }
   }, [user]);
-
-  useEffect(() => {
-    if (!dropdownOpen) return;
-    const onKey = (e) => { if (e.key === "Escape") setDropdownOpen(false); };
-    const onClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onClick);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onClick);
-    };
-  }, [dropdownOpen]);
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -107,17 +90,15 @@ function Navbar() {
           </div>
           <div className="navbar__right">
             {user ? (
-              <div className="navbar__user" ref={dropdownRef}>
-                <button
-                  className="navbar__avatar"
-                  onClick={() => setDropdownOpen((prev) => !prev)}
-                  aria-label="Menú de usuario"
-                  aria-expanded={dropdownOpen}
-                >
-                  {avatarLetter}
-                </button>
-                {dropdownOpen && (
-                  <div className="navbar__dropdown" role="menu">
+              <UserMenu
+                trigger={
+                  <button className="navbar__avatar" aria-label="Menú de usuario">
+                    {avatarLetter}
+                  </button>
+                }
+              >
+                {({ close }) => (
+                  <>
                     <div className="navbar__dropdown-header">
                       <span className="navbar__dropdown-name">{user.email}</span>
                       <span className="navbar__dropdown-role">
@@ -128,15 +109,15 @@ function Navbar() {
                     <Link
                       to="/profile"
                       className="navbar__dropdown-item"
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={close}
                       role="menuitem"
                     >
-                      Mi perfil
+                      👤 Mi perfil
                     </Link>
                     <Link
                       to="/favorites"
                       className="navbar__dropdown-item"
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={close}
                       role="menuitem"
                     >
                       ❤️ Mis favoritos
@@ -144,21 +125,31 @@ function Navbar() {
                     <Link
                       to="/orders"
                       className="navbar__dropdown-item"
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={close}
                       role="menuitem"
                     >
-                      Mis pedidos
+                      📦 Mis pedidos
                     </Link>
+                    {user.role === "ADMIN" && (
+                      <Link
+                        to="/admin"
+                        className="navbar__dropdown-item"
+                        onClick={close}
+                        role="menuitem"
+                      >
+                        👑 Panel de administración
+                      </Link>
+                    )}
                     <button
                       className="navbar__dropdown-item navbar__dropdown-item--danger"
-                      onClick={() => { setDropdownOpen(false); logout(); }}
+                      onClick={() => { close(); logout(); }}
                       role="menuitem"
                     >
-                      Cerrar sesión
+                      🚪 Cerrar sesión
                     </button>
-                  </div>
+                  </>
                 )}
-              </div>
+              </UserMenu>
             ) : (
               <div className="navbar__auth">
                 <Link to="/login" className="navbar__auth-link">Iniciar sesión</Link>
@@ -220,22 +211,31 @@ function Navbar() {
                 className={`navbar__drawer-link${isActive("/profile") ? " navbar__drawer-link--active" : ""}`}
                 onClick={closeDrawer}
               >
-                Mi perfil
+                👤 Mi perfil
               </Link>
               <Link
                 to="/favorites"
                 className={`navbar__drawer-link${isActive("/favorites") ? " navbar__drawer-link--active" : ""}`}
                 onClick={closeDrawer}
               >
-                Mis favoritos
+                ❤️ Mis favoritos
               </Link>
               <Link
                 to="/orders"
                 className={`navbar__drawer-link${isActive("/orders") ? " navbar__drawer-link--active" : ""}`}
                 onClick={closeDrawer}
               >
-                Órdenes
+                📦 Mis pedidos
               </Link>
+              {user.role === "ADMIN" && (
+                <Link
+                  to="/admin"
+                  className={`navbar__drawer-link${isActive("/admin") ? " navbar__drawer-link--active" : ""}`}
+                  onClick={closeDrawer}
+                >
+                  👑 Panel de administración
+                </Link>
+              )}
             </>
           )}
         </nav>
@@ -247,7 +247,7 @@ function Navbar() {
               className="navbar__drawer-logout"
               onClick={() => { closeDrawer(); logout(); }}
             >
-              Cerrar sesión
+              🚪 Cerrar sesión
             </button>
           </div>
         ) : (
