@@ -11,3 +11,11 @@ export function getOrders() {
 export function getOrderById(id) {
   return api.get(`/orders/${id}`);
 }
+
+export function getAdminOrders() {
+  return api.get("/orders/admin");
+}
+
+export function updateOrderStatus(id, data) {
+  return api.patch(`/orders/${id}/status`, data);
+}

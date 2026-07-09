@@ -5,6 +5,7 @@ const authMiddleware = require("../middleware/auth.middleware");
 const adminMiddleware = require("../middleware/admin.middleware");
 
 const {
+  getAllOrders,
   createOrder,
   getMyOrders,
   getOrderById,
@@ -56,6 +57,7 @@ const {
  *       404:
  *         description: Producto no encontrado
  */
+router.get("/admin", authMiddleware, adminMiddleware, getAllOrders);
 router.post("/checkout", authMiddleware, createOrder);
 
 /**

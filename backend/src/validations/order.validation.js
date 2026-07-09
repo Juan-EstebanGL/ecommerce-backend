@@ -22,7 +22,7 @@ const orderIdParamsSchema = z.object({
 const updateOrderStatusSchema = orderIdParamsSchema.extend({
   body: z.object({
     status: z.enum(
-      ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED"],
+      ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"],
       {
         error: "status invalido",
       }

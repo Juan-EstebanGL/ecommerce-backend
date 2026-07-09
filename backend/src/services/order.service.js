@@ -32,9 +32,9 @@ const formatOrder = (order) => {
 };
 
 const ORDER_STATUS_TRANSITIONS = {
-  [ORDER_STATUS.PENDING]: [ORDER_STATUS.PAID],
-  [ORDER_STATUS.PAID]: [ORDER_STATUS.PROCESSING],
-  [ORDER_STATUS.PROCESSING]: [ORDER_STATUS.SHIPPED],
+  [ORDER_STATUS.PENDING]: [ORDER_STATUS.PAID, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.PAID]: [ORDER_STATUS.PROCESSING, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.PROCESSING]: [ORDER_STATUS.SHIPPED, ORDER_STATUS.CANCELLED],
   [ORDER_STATUS.SHIPPED]: [ORDER_STATUS.DELIVERED],
 };
 
@@ -128,6 +128,26 @@ const createOrder = async (userId) => {
   });
 };
 
+const getAllOrders = async () => {
+  const orders = await prisma.order.findMany({
+    include: {
+      ...orderInclude,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return orders.map(formatOrder);
+};
+
 const getMyOrders = async (userId) => {
   const orders = await prisma.order.findMany({
     where: {
@@ -181,26 +201,34 @@ const updateOrderStatus = async (userId, userRole, orderId, status) => {
     throw new AppError("No autorizado", 403);
   }
 
-  if (status === ORDER_STATUS.CANCELLED) {
-    throw new AppError(
-      "La cancelacion debe realizarse por PATCH /orders/:id/cancel",
-      400
-    );
-  }
-
   if (!canTransitionOrderStatus(order.status, status)) {
     throw new AppError("Transicion de estado invalida", 400);
   }
 
-  const updatedOrder = await prisma.order.update({
-    where: {
-      id,
-    },
-    data: {
-      status,
-    },
-    include: orderInclude,
-  });
+  const doUpdate = async (tx) => {
+    if (status === ORDER_STATUS.CANCELLED) {
+      for (const item of order.items) {
+        const updatedProduct = await tx.product.updateMany({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        });
+
+        if (updatedProduct.count === 0) {
+          throw new AppError("Producto no encontrado para restaurar stock", 404);
+        }
+      }
+    }
+
+    return tx.order.update({
+      where: { id },
+      data: { status },
+      include: orderInclude,
+    });
+  };
+
+  const updatedOrder = status === ORDER_STATUS.CANCELLED
+    ? await prisma.$transaction(doUpdate)
+    : await doUpdate(prisma);
 
   return formatOrder(updatedOrder);
 };
@@ -259,6 +287,7 @@ const cancelOrder = async (userId, userRole, orderId) => {
 
 module.exports = {
   createOrder,
+  getAllOrders,
   getMyOrders,
   getOrderById,
   updateOrderStatus,

@@ -9,6 +9,14 @@ const {
   getZodErrorMessage,
 } = require("../validations/validation.helper");
 
+const getAllOrders = asyncHandler(async (req, res) => {
+  const orders = await orderService.getAllOrders();
+
+  return res.json({
+    orders,
+  });
+}, "Error obteniendo todas las ordenes");
+
 const createOrder = asyncHandler(async (req, res) => {
   const order = await orderService.createOrder(req.userId);
 
@@ -90,6 +98,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
 }, "Error cancelando orden");
 
 module.exports = {
+  getAllOrders,
   createOrder,
   getMyOrders,
   getOrderById,
