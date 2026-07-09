@@ -33,6 +33,9 @@ const getSystemInfo = async () => {
 };
 
 const getDashboard = async () => {
+  const now = new Date();
+  const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+
   const [
     userCount,
     productCount,
@@ -46,6 +49,8 @@ const getDashboard = async () => {
     favoritedGroup,
     topRatedGroup,
     recentReviews,
+    monthlyRevenueData,
+    monthlyOrdersData,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.product.count(),
@@ -92,6 +97,19 @@ const getDashboard = async () => {
         user: { select: { id: true, email: true } },
         product: { select: { id: true, name: true, imageUrl: true } },
       },
+    }),
+    prisma.order.findMany({
+      where: {
+        status: "DELIVERED",
+        createdAt: { gte: twelveMonthsAgo },
+      },
+      select: { total: true, createdAt: true },
+    }),
+    prisma.order.findMany({
+      where: {
+        createdAt: { gte: twelveMonthsAgo },
+      },
+      select: { createdAt: true },
     }),
   ]);
 
@@ -159,6 +177,49 @@ const getDashboard = async () => {
     createdAt: review.createdAt,
   }));
 
+  const MONTHS_SHORT = [
+    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
+  ];
+
+  const monthlyMap = new Map();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = d.getFullYear() + "-" + String(d.getMonth()).padStart(2, "0");
+    monthlyMap.set(key, { month: MONTHS_SHORT[d.getMonth()], revenue: 0, sortKey: key });
+  }
+
+  for (const order of monthlyRevenueData) {
+    const d = order.createdAt;
+    const key = d.getFullYear() + "-" + String(d.getMonth()).padStart(2, "0");
+    if (monthlyMap.has(key)) {
+      monthlyMap.get(key).revenue += Number(order.total);
+    }
+  }
+
+  const monthlyRevenue = Array.from(monthlyMap.values())
+    .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+    .map(({ month, revenue }) => ({ month, revenue }));
+
+  const monthlyOrdersMap = new Map();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = d.getFullYear() + "-" + String(d.getMonth()).padStart(2, "0");
+    monthlyOrdersMap.set(key, { month: MONTHS_SHORT[d.getMonth()], orders: 0, sortKey: key });
+  }
+
+  for (const order of monthlyOrdersData) {
+    const d = order.createdAt;
+    const key = d.getFullYear() + "-" + String(d.getMonth()).padStart(2, "0");
+    if (monthlyOrdersMap.has(key)) {
+      monthlyOrdersMap.get(key).orders += 1;
+    }
+  }
+
+  const monthlyOrders = Array.from(monthlyOrdersMap.values())
+    .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+    .map(({ month, orders }) => ({ month, orders }));
+
   return {
     stats: {
       users: userCount,
@@ -181,6 +242,8 @@ const getDashboard = async () => {
     mostFavoritedProducts,
     topRatedProducts,
     recentReviews: recentReviewsResult,
+    monthlyRevenue,
+    monthlyOrders,
   };
 };
 
