@@ -39,6 +39,8 @@ model Product {
   name      String
   price     Decimal    @db.Decimal(10, 2)
   stock     Int
+  imageUrl  String?
+  publicId  String?
   user      User       @relation(fields: [userId], references: [id])
   userId    Int
   cartItems CartItem[]

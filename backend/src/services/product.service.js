@@ -1,5 +1,6 @@
 const prisma = require("../lib/prisma");
 const AppError = require("../utils/AppError");
+const cloudinaryService = require("./cloudinary.service");
 
 const ensureProductAccess = (product, userId, userRole, message) => {
   if (userRole !== "ADMIN" && product.userId !== userId) {
@@ -33,14 +34,26 @@ const getProductById = async (id) => {
 };
 
 const createProduct = async (userId, data) => {
-  const product = await prisma.product.create({
-    data: {
-      ...data,
-      userId,
-    },
-  });
+  const { imageUrl, publicId, ...productData } = data;
 
-  return formatProduct(product);
+  try {
+    const product = await prisma.product.create({
+      data: {
+        ...productData,
+        imageUrl: imageUrl || null,
+        publicId: publicId || null,
+        userId,
+      },
+    });
+
+    return formatProduct(product);
+  } catch (error) {
+    if (publicId) {
+      await cloudinaryService.deleteImage(publicId).catch(() => {});
+    }
+
+    throw error;
+  }
 };
 
 const getProducts = async () => {
@@ -61,18 +74,37 @@ const getProducts = async () => {
 const updateProduct = async (userId, userRole, id, data) => {
   const existingProduct = await getProductById(id);
 
-  ensureProductAccess(existingProduct, userId, userRole, "No autorizado");
+  ensureProductAccess(
+    existingProduct,
+    userId,
+    userRole,
+    "No autorizado"
+  );
+
+  const { imageUrl, publicId, ...productData } = data;
 
   try {
+    if (publicId && existingProduct.publicId) {
+      await cloudinaryService.deleteImage(existingProduct.publicId);
+    }
+
     const product = await prisma.product.update({
       where: {
         id,
       },
-      data,
+      data: {
+        ...productData,
+        ...(imageUrl !== undefined ? { imageUrl } : {}),
+        ...(publicId !== undefined ? { publicId } : {}),
+      },
     });
 
     return formatProduct(product);
   } catch (error) {
+    if (publicId) {
+      await cloudinaryService.deleteImage(publicId).catch(() => {});
+    }
+
     if (error.code === "P2025") {
       throw new AppError("Producto no encontrado", 404);
     }
@@ -94,6 +126,10 @@ const deleteProduct = async (userId, userRole, id) => {
     userRole,
     "Usuario no autorizado"
   );
+
+  if (existingProduct.publicId) {
+    await cloudinaryService.deleteImage(existingProduct.publicId);
+  }
 
   try {
     await prisma.product.delete({

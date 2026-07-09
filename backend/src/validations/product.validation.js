@@ -42,6 +42,8 @@ const productPayloadSchema = z.object({
   name: productName,
   price: positiveNumber("price debe ser mayor a 0"),
   stock: nonNegativeInteger("stock debe ser un entero mayor o igual a 0"),
+  imageUrl: z.string().optional(),
+  publicId: z.string().optional(),
 });
 
 const productParamsSchema = z.object({
@@ -65,7 +67,9 @@ const patchProductSchema = productParamsSchema.extend({
       (data) =>
         data.name !== undefined ||
         data.price !== undefined ||
-        data.stock !== undefined,
+        data.stock !== undefined ||
+        data.imageUrl !== undefined ||
+        data.publicId !== undefined,
       {
         message: "Debe enviar al menos un campo para actualizar",
       }
