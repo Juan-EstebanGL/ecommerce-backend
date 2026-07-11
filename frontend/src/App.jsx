@@ -10,12 +10,16 @@ function AppContent() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
 
+  if (isAdmin) {
+    return <AppRouter />;
+  }
+
   return (
-    <>
-      {!isAdmin && <Navbar />}
+    <div className="app-layout">
+      <Navbar />
       <AppRouter />
-      {!isAdmin && <Footer />}
-    </>
+      <Footer />
+    </div>
   );
 }
 

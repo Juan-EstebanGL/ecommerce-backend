@@ -56,8 +56,14 @@ function ProductCard({ product, onAddToCart, addingId }) {
   };
 
   return (
-    <article className="pc">
-      <div className="pc__media" onClick={() => navigate(`/products/${product.id}`)}>
+    <article className={`pc${!onAddToCart ? " pc--browse-only" : ""}`}>
+      <div
+        className="pc__media"
+        onClick={() => navigate(`/products/${product.id}`)}
+        role="link"
+        tabIndex={0}
+        aria-label={`Ver detalle de ${product.name}`}
+      >
         {product.imageUrl && !imgError ? (
           <img src={product.imageUrl} alt={product.name} loading="lazy" onError={() => setImgError(true)} />
         ) : (

@@ -46,13 +46,15 @@ function Timeline({ status }) {
             >
               {isActive ? "✓" : idx + 1}
             </div>
-            <span
-              className={`od-timeline__label ${
-                isActive ? "od-timeline__label--active" : "od-timeline__label--future"
-              }`}
-            >
-              {step.label}
-            </span>
+            <div className="od-timeline__text">
+              <span
+                className={`od-timeline__label ${
+                  isActive ? "od-timeline__label--active" : "od-timeline__label--future"
+                }`}
+              >
+                {step.label}
+              </span>
+            </div>
             {!isLast && (
               <div
                 className={`od-timeline__connector ${
@@ -103,6 +105,7 @@ function OrderDetail() {
         <div className="app-container">
           <div className="od-loading">
             <Loader />
+            <p className="od-loading__text">Cargando detalle del pedido...</p>
           </div>
         </div>
       </main>
@@ -114,6 +117,13 @@ function OrderDetail() {
       <main className="od-page">
         <div className="app-container">
           <div className="od-error">
+            <div className="od-error__icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
             <p className="od-error__text">{error}</p>
             <Button onClick={() => navigate("/orders")} variant="ghost">
               ← Volver a mis pedidos
@@ -129,7 +139,17 @@ function OrderDetail() {
       <main className="od-page">
         <div className="app-container">
           <div className="od-not-found">
-            <p className="od-not-found__text">Orden no encontrada.</p>
+            <div className="od-not-found__icon">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                <line x1="8" y1="11" x2="14" y2="11" />
+              </svg>
+            </div>
+            <h2 className="od-not-found__title">Orden no encontrada</h2>
+            <p className="od-not-found__desc">
+              No pudimos encontrar la orden que buscas. Puede que haya sido eliminada o que el identificador sea incorrecto.
+            </p>
             <Button onClick={() => navigate("/orders")} variant="ghost">
               ← Volver a mis pedidos
             </Button>
@@ -148,18 +168,24 @@ function OrderDetail() {
   return (
     <main className="od-page">
       <div className="app-container">
-        <nav className="breadcrumb">
+        <nav className="breadcrumb" aria-label="Navegación">
           <Link to="/">Inicio</Link>
-          <span className="breadcrumb__sep">›</span>
+          <span className="breadcrumb__sep">/</span>
           <Link to="/orders">Órdenes</Link>
-          <span className="breadcrumb__sep">›</span>
+          <span className="breadcrumb__sep">/</span>
           <span className="breadcrumb__current">Pedido #{order.id}</span>
         </nav>
 
         <header className="od-header">
-          <div>
+          <div className="od-header__text">
             <h1 className="od-header__title">Pedido #{order.id}</h1>
             <p className="od-header__date">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "-2px", marginRight: "4px" }}>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
               {new Date(order.createdAt).toLocaleDateString("es-ES", {
                 year: "numeric",
                 month: "long",
@@ -188,13 +214,13 @@ function OrderDetail() {
         )}
 
         <div className="od-layout">
-          <div>
+          <div className="od-items">
             <h2 className="od-items__title">
               Productos ({items.length})
             </h2>
 
             {items.length > 0 ? (
-              <div>
+              <div className="od-items__list">
                 {items.map((item, idx) => {
                   const imgSrc = item.imageUrl;
                   const name = item.productName || "Producto";
@@ -202,7 +228,11 @@ function OrderDetail() {
                   const qty = item.quantity || 0;
 
                   return (
-                    <div key={idx} className="od-item">
+                    <div
+                      key={idx}
+                      className="od-item"
+                      style={{ animationDelay: `${idx * 0.06}s` }}
+                    >
                       <div className="od-item__media">
                         {imgSrc && !imgErrors.has(idx) ? (
                           <img src={imgSrc} alt={name} loading="lazy" onError={() => setImgErrors(prev => new Set(prev).add(idx))} />
@@ -219,6 +249,7 @@ function OrderDetail() {
                           <span className="od-item__meta-field">
                             Cantidad: <strong>{qty}</strong>
                           </span>
+                          <span className="od-item__meta-dot">·</span>
                           <span className="od-item__meta-field">
                             Precio: <strong>${unitPrice.toFixed(2)}</strong>
                           </span>
@@ -233,7 +264,9 @@ function OrderDetail() {
                 })}
               </div>
             ) : (
-              <p style={{ color: "var(--muted)" }}>No hay productos en esta orden.</p>
+              <div className="od-items__empty">
+                <p>No hay productos en esta orden.</p>
+              </div>
             )}
           </div>
 

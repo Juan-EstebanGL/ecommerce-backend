@@ -1,9 +1,42 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProducts } from "../api/products";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 import { showWarning } from "../utils/alerts";
+
+function useScrollReveal() {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("hm-revealed");
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return ref;
+}
+
+function RevealSection({ children, className = "", ...props }) {
+  const ref = useScrollReveal();
+  return (
+    <div ref={ref} className={`hm-reveal ${className}`} {...props}>
+      {children}
+    </div>
+  );
+}
 
 function HomePage() {
   const [products, setProducts] = useState([]);
@@ -104,12 +137,13 @@ function HomePage() {
       </section>
 
       {/* ── Categories ── */}
-      <section className="hm-section">
-        <div className="app-container">
-          <div className="hm-section__header">
-            <h2 className="hm-section__title">Explora categorías</h2>
-            <p className="hm-section__sub">Encuentra lo que buscas en nuestras categorías principales.</p>
-          </div>
+      <RevealSection>
+        <section className="hm-section">
+          <div className="app-container">
+            <div className="hm-section__header">
+              <h2 className="hm-section__title">Explora categorías</h2>
+              <p className="hm-section__sub">Encuentra lo que buscas en nuestras categorías principales.</p>
+            </div>
           <div className="hm-cats">
             {[
               {
@@ -171,8 +205,10 @@ function HomePage() {
           </div>
         </div>
       </section>
+      </RevealSection>
 
       {/* ── Featured Products ── */}
+      <RevealSection>
       <section className="hm-section hm-section--alt">
         <div className="app-container">
           <div className="hm-section__header">
@@ -219,8 +255,10 @@ function HomePage() {
           )}
         </div>
       </section>
+      </RevealSection>
 
       {/* ── Benefits ── */}
+      <RevealSection>
       <section className="hm-section">
         <div className="app-container">
           <div className="hm-section__header">
@@ -268,8 +306,10 @@ function HomePage() {
           </div>
         </div>
       </section>
+      </RevealSection>
 
       {/* ── Banner ── */}
+      <RevealSection>
       <section className="hm-banner">
         <div className="hm-banner__bg" />
         <div className="app-container hm-banner__inner">
@@ -280,21 +320,36 @@ function HomePage() {
               Calidad, innovación y diseño se unen en cada uno de nuestros artículos.
             </p>
             <button
-              className="hm-hero__btn hm-hero__btn--primary"
+              className="hm-banner__btn"
               onClick={() => navigate("/products")}
             >
               Explorar colección
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
             </button>
           </div>
-          <div className="hm-banner__visual">
-            <div className="hm-banner__circle hm-banner__circle--1" />
-            <div className="hm-banner__circle hm-banner__circle--2" />
-            <div className="hm-banner__circle hm-banner__circle--3" />
+          <div className="hm-banner__stats">
+            <div className="hm-banner__stat">
+              <span className="hm-banner__stat-value">10K+</span>
+              <span className="hm-banner__stat-label">Clientes satisfechos</span>
+            </div>
+            <div className="hm-banner__stat">
+              <span className="hm-banner__stat-value">500+</span>
+              <span className="hm-banner__stat-label">Productos disponibles</span>
+            </div>
+            <div className="hm-banner__stat">
+              <span className="hm-banner__stat-value">24h</span>
+              <span className="hm-banner__stat-label">Envío express</span>
+            </div>
           </div>
         </div>
       </section>
+      </RevealSection>
 
       {/* ── Newsletter ── */}
+      <RevealSection>
       <section className="hm-section hm-section--alt">
         <div className="app-container">
           <div className="hm-newsletter">
@@ -324,8 +379,10 @@ function HomePage() {
           </div>
         </div>
       </section>
+      </RevealSection>
 
       {/* ── Final CTA ── */}
+      <RevealSection>
       <section className="hm-cta">
         <div className="hm-cta__bg" />
         <div className="app-container hm-cta__inner">
@@ -334,7 +391,7 @@ function HomePage() {
             Explora nuestro catálogo completo y encuentra exactamente lo que buscas.
           </p>
           <button
-            className="hm-hero__btn hm-hero__btn--primary"
+            className="hm-cta__btn"
             onClick={() => navigate("/products")}
           >
             Explorar productos
@@ -345,6 +402,7 @@ function HomePage() {
           </button>
         </div>
       </section>
+      </RevealSection>
     </main>
   );
 }

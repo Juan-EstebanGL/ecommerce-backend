@@ -78,64 +78,76 @@ function Products() {
   }
 
   return (
-    <main>
+    <main className="pr-page">
       <div className="app-container">
-        {/* Header Section */}
-        <section style={{ marginBottom: 40 }}>
-          <h1 style={{ marginBottom: 8 }}>Catálogo de Productos</h1>
-          <p style={{ color: "var(--muted)", margin: 0 }}>
+        <header className="pr-header">
+          <h1 className="pr-header__title">Catálogo de Productos</h1>
+          <p className="pr-header__sub">
             Explora nuestro amplio catálogo de productos de alta calidad.
           </p>
-        </section>
+        </header>
 
-        {/* Messages */}
-        {error && <p className="form-error" style={{ marginBottom: 16 }}>{error}</p>}
+        {error && <p className="form-error pr-error">{error}</p>}
 
-        {/* Toolbar */}
         {!loading && (
           <div className="products-toolbar">
-            <div style={{ display: "flex", gap: 12, flex: 1, alignItems: "center" }}>
-              <div style={{ flex: 1, minWidth: 200 }}>
+            <div className="pr-toolbar__controls">
+              <div className="pr-toolbar__search">
                 <Input
                   type="text"
                   placeholder="Buscar productos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Buscar productos"
                 />
               </div>
-              <label style={{ display: "flex", gap: 6, alignItems: "center", whiteSpace: "nowrap", color: "var(--muted)" }}>
+              <label className="pr-filter-label">
                 <input
                   type="checkbox"
                   checked={showOnlyAvailable}
                   onChange={(e) => setShowOnlyAvailable(e.target.checked)}
-                  style={{ cursor: "pointer" }}
                 />
-                <span style={{ fontSize: "0.95rem" }}>Solo disponibles</span>
+                <span>Solo disponibles</span>
               </label>
             </div>
-            <div style={{ color: "var(--muted)", fontSize: "0.95rem", whiteSpace: "nowrap" }}>
+            <span className="pr-toolbar-count">
               {filteredProducts.length} {filteredProducts.length === 1 ? "producto" : "productos"}
-            </div>
+            </span>
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && <Loader />}
+        {loading && (
+          <div className="pr-loading">
+            <Loader />
+          </div>
+        )}
 
-        {/* Products Grid or Empty State */}
         {!loading && !error && filteredProducts.length === 0 && (
-          <div className="card" style={{ textAlign: "center", padding: 40 }}>
-            <p style={{ color: "var(--muted)", margin: 0 }}>
+          <div className="pr-empty">
+            <div className="pr-empty__icon">
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            </div>
+            <h2 className="pr-empty__title">
               {products.length === 0
-                ? "No hay productos disponibles en este momento."
+                ? "No hay productos disponibles"
                 : searchQuery
-                ? `No hay productos que coincidan con "${searchQuery}".`
-                : "No hay productos disponibles con esa disponibilidad."}
+                ? "Sin resultados"
+                : "Ningún producto coincide"}
+            </h2>
+            <p className="pr-empty__desc">
+              {products.length === 0
+                ? "Vuelve más tarde para descubrir nuevas incorporaciones al catálogo."
+                : searchQuery
+                ? `No encontramos productos que coincidan con "${searchQuery}".`
+                : "No hay productos disponibles con el filtro seleccionado."}
             </p>
           </div>
         )}
 
-        {/* Products Grid */}
         {!loading && filteredProducts.length > 0 && (
           <div className="product-grid">
             {filteredProducts.map((product) => (

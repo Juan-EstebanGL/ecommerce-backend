@@ -91,6 +91,8 @@ const login = asyncHandler(async (req, res) => {
       id: user.id,
       email: user.email,
       role: user.role,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
     },
   });
 }, "Error interno del servidor");

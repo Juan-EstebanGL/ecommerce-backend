@@ -1,7 +1,7 @@
 import api from "./axios";
 
-export function checkout() {
-  return api.post("/orders/checkout");
+export function checkout(data) {
+  return api.post("/orders/checkout", data || {});
 }
 
 export function getOrders() {

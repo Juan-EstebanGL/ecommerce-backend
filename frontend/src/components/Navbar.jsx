@@ -93,7 +93,11 @@ function Navbar() {
               <UserMenu
                 trigger={
                   <button className="navbar__avatar" aria-label="Menú de usuario">
-                    {avatarLetter}
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="" className="navbar__avatar-img" />
+                    ) : (
+                      avatarLetter
+                    )}
                   </button>
                 }
               >

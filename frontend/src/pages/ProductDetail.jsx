@@ -232,30 +232,38 @@ function ProductDetail() {
 
   if (loading) {
     return (
-      <main className="app-container">
-        <Loader />
+      <main className="pd-page">
+        <div className="app-container">
+          <div className="pd-loading">
+            <Loader />
+          </div>
+        </div>
       </main>
     );
   }
 
   if (error) {
     return (
-      <main className="app-container">
-        <Card className="error-state">
-          <p className="form-error">{error}</p>
-        </Card>
+      <main className="pd-page">
+        <div className="app-container">
+          <Card className="error-state">
+            <p className="form-error">{error}</p>
+          </Card>
+        </div>
       </main>
     );
   }
 
   if (!product) {
     return (
-      <main className="app-container">
-        <Card className="error-state">
-          <h2>Producto no encontrado</h2>
-          <p>El producto que buscas no existe o ha sido eliminado.</p>
-          <Button onClick={() => navigate("/products")}>Volver a productos</Button>
-        </Card>
+      <main className="pd-page">
+        <div className="app-container">
+          <Card className="error-state">
+            <h2>Producto no encontrado</h2>
+            <p>El producto que buscas no existe o ha sido eliminado.</p>
+            <Button onClick={() => navigate("/products")}>Volver a productos</Button>
+          </Card>
+        </div>
       </main>
     );
   }
@@ -330,7 +338,7 @@ function ProductDetail() {
               {product.description || "Producto sin descripción."}
             </p>
 
-            {isAvailable && (
+            {isAvailable ? (
               <div className="pd-actions">
                 <div className="pd-qty-row">
                   <QuantityInput value={quantity} min={1} max={product.stock} onChange={setQuantity} />
@@ -356,112 +364,119 @@ function ProductDetail() {
                   ← Seguir comprando
                 </button>
               </div>
+            ) : (
+              <div className="pd-unavailable">
+                <p className="pd-unavailable__text">Este producto no está disponible en este momento.</p>
+                <button className="pd-back-btn" onClick={() => navigate("/products")}>
+                  ← Volver al catálogo
+                </button>
+              </div>
             )}
-
-            <section className="pd-reviews">
-              <h2 className="pd-reviews__title">Reseñas</h2>
-
-              {averageRating !== null ? (
-                <div className="pd-reviews__summary">
-                  <div className="pd-reviews__average">
-                    <span className="pd-reviews__stars-display">{renderStars(Math.round(averageRating))}</span>
-                    <span className="pd-reviews__avg-value">{averageRating}</span>
-                  </div>
-                  <span className="pd-reviews__count">{reviews.length} reseña{reviews.length !== 1 ? "s" : ""}</span>
-                </div>
-              ) : null}
-
-              {reviewsLoading && (
-                <div className="pd-reviews__loader">
-                  <Loader />
-                </div>
-              )}
-
-              {reviewsError && !reviewsLoading && (
-                <div className="pd-reviews__error">
-                  <svg className="pd-reviews__error-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <p>{reviewsError}</p>
-                </div>
-              )}
-
-              {!reviewsLoading && !reviewsError && reviews.length === 0 && (
-                <div className="pd-reviews__empty">
-                  <svg className="pd-reviews__empty-icon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  <h3 className="pd-reviews__empty-title">Todavía no existen reseñas para este producto.</h3>
-                  <p className="pd-reviews__empty-desc">Sé el primero en compartir tu opinión.</p>
-                  <button className="pd-review-btn" onClick={handleOpenReviewModal}>Escribir la primera reseña</button>
-                </div>
-              )}
-
-              {!reviewsLoading && reviews.length > 0 && (
-                <div className="pd-reviews__list">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="pd-review">
-                      <div className="pd-review__avatar">
-                        {review.user?.email?.charAt(0)?.toUpperCase() || "?"}
-                      </div>
-                      <div className="pd-review__body">
-                        <div className="pd-review__header">
-                          <span className="pd-review__user">{review.user?.email || "Usuario"}</span>
-                          {review.user?.email?.toLowerCase() === currentUserEmail && (
-                            <span className="pd-review__mine">Tu reseña</span>
-                          )}
-                          <span className="pd-review__date">{formatDate(review.createdAt)}</span>
-                        </div>
-                        <span className="pd-review__stars">{renderStars(review.rating)}</span>
-                        <p className="pd-review__comment">{review.comment}</p>
-                        {review.user?.email?.toLowerCase() === currentUserEmail && (
-                          <div className="pd-review__actions">
-                            <button className="pd-review__action pd-review__action--edit" onClick={handleOpenReviewModal}>
-                              <svg className="pd-review__action-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                              </svg>
-                              Editar
-                            </button>
-                            <button className="pd-review__action pd-review__action--delete" onClick={() => handleDeleteReview(review.id)}>
-                              <svg className="pd-review__action-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 6h18" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                <line x1="10" y1="11" x2="10" y2="17" />
-                                <line x1="14" y1="11" x2="14" y2="17" />
-                              </svg>
-                              Eliminar
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {user && !reviewsLoading && !reviewsError && !userReview && (
-                <div className="pd-reviews__action">
-                  <button className="pd-review-btn pd-review-btn--primary" onClick={handleOpenReviewModal}>
-                    Escribir reseña
-                  </button>
-                </div>
-              )}
-
-              <ReviewModal
-                isOpen={modalOpen}
-                onClose={handleCloseReviewModal}
-                onSubmit={handleReviewSubmit}
-                initialRating={editingReview?.rating || 0}
-                initialComment={editingReview?.comment || ""}
-                loading={modalLoading}
-                title={editingReview ? "Editar reseña" : "Nueva reseña"}
-              />
-            </section>
           </div>
         </div>
+
+        <section className="pd-reviews pd-section">
+          <h2 className="pd-reviews__title">Reseñas</h2>
+
+          {averageRating !== null ? (
+            <div className="pd-reviews__summary">
+              <div className="pd-reviews__average">
+                <span className="pd-reviews__stars-display">{renderStars(Math.round(averageRating))}</span>
+                <span className="pd-reviews__avg-value">{averageRating}</span>
+              </div>
+              <span className="pd-reviews__count">{reviews.length} reseña{reviews.length !== 1 ? "s" : ""}</span>
+            </div>
+          ) : null}
+
+          {reviewsLoading && (
+            <div className="pd-reviews__loader">
+              <Loader />
+            </div>
+          )}
+
+          {reviewsError && !reviewsLoading && (
+            <div className="pd-reviews__error">
+              <svg className="pd-reviews__error-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <p>{reviewsError}</p>
+            </div>
+          )}
+
+          {!reviewsLoading && !reviewsError && reviews.length === 0 && (
+            <div className="pd-reviews__empty">
+              <svg className="pd-reviews__empty-icon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              <h3 className="pd-reviews__empty-title">Todavía no existen reseñas para este producto.</h3>
+              <p className="pd-reviews__empty-desc">Sé el primero en compartir tu opinión.</p>
+              <button className="pd-review-btn" onClick={handleOpenReviewModal}>Escribir la primera reseña</button>
+            </div>
+          )}
+
+          {!reviewsLoading && reviews.length > 0 && (
+            <div className="pd-reviews__list">
+              {reviews.map((review) => (
+                <div key={review.id} className="pd-review">
+                  <div className="pd-review__avatar">
+                    {review.user?.email?.charAt(0)?.toUpperCase() || "?"}
+                  </div>
+                  <div className="pd-review__body">
+                    <div className="pd-review__header">
+                      <span className="pd-review__user">{review.user?.email || "Usuario"}</span>
+                      {review.user?.email?.toLowerCase() === currentUserEmail && (
+                        <span className="pd-review__mine">Tu reseña</span>
+                      )}
+                      <span className="pd-review__date">{formatDate(review.createdAt)}</span>
+                    </div>
+                    <span className="pd-review__stars">{renderStars(review.rating)}</span>
+                    <p className="pd-review__comment">{review.comment}</p>
+                    {review.user?.email?.toLowerCase() === currentUserEmail && (
+                      <div className="pd-review__actions">
+                        <button className="pd-review__action pd-review__action--edit" onClick={handleOpenReviewModal}>
+                          <svg className="pd-review__action-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                          </svg>
+                          Editar
+                        </button>
+                        <button className="pd-review__action pd-review__action--delete" onClick={() => handleDeleteReview(review.id)}>
+                          <svg className="pd-review__action-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            <line x1="10" y1="11" x2="10" y2="17" />
+                            <line x1="14" y1="11" x2="14" y2="17" />
+                          </svg>
+                          Eliminar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {user && !reviewsLoading && !reviewsError && !userReview && (
+            <div className="pd-reviews__action">
+              <button className="pd-review-btn pd-review-btn--primary" onClick={handleOpenReviewModal}>
+                Escribir reseña
+              </button>
+            </div>
+          )}
+
+          <ReviewModal
+            isOpen={modalOpen}
+            onClose={handleCloseReviewModal}
+            onSubmit={handleReviewSubmit}
+            initialRating={editingReview?.rating || 0}
+            initialComment={editingReview?.comment || ""}
+            loading={modalLoading}
+            title={editingReview ? "Editar reseña" : "Nueva reseña"}
+          />
+        </section>
 
         <section className="pd-section">
           <div className="pd-benefits">

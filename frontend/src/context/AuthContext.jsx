@@ -38,8 +38,12 @@ export function AuthProvider({ children }) {
     navigate("/login");
   }
 
+  function updateUser(newData) {
+    setUser((prev) => (prev ? { ...prev, ...newData } : prev));
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

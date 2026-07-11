@@ -36,8 +36,21 @@ export default function UserTable({ users, onView, onRoleToggle, onDelete, delet
             return (
               <tr key={user.id} className={isDeleting ? "ad-delete--fade-out" : ""}>
                 <td>
-                  <div className="ad-users-avatar">
-                    <span>{(user.email?.charAt(0) || "?").toUpperCase()}</span>
+                  <div className="ad-user-avatar">
+                    {user.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt=""
+                        className="ad-user-avatar__img"
+                        onError={(e) => { e.target.style.display = "none"; e.target.nextElementSibling.style.display = "flex"; }}
+                      />
+                    ) : null}
+                    <span
+                      className="ad-user-avatar__fallback"
+                      style={user.avatarUrl ? { display: "none" } : undefined}
+                    >
+                      {(user.email?.charAt(0) || "?").toUpperCase()}
+                    </span>
                   </div>
                 </td>
                 <td className="ad-users-cell-name">{user.name || user.email.split("@")[0]}</td>

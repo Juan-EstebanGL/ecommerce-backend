@@ -18,7 +18,11 @@ const getAllOrders = asyncHandler(async (req, res) => {
 }, "Error obteniendo todas las ordenes");
 
 const createOrder = asyncHandler(async (req, res) => {
-  const order = await orderService.createOrder(req.userId);
+  const { addressId } = req.body || {};
+
+  const order = await orderService.createOrder(req.userId, {
+    addressId: addressId || null,
+  });
 
   return res.status(201).json({
     message: "Orden creada correctamente",

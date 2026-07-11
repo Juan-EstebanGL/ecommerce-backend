@@ -118,7 +118,11 @@ export default function AdminSidebar({ open, onClose }) {
           <UserMenu direction="up" trigger={
             <div className="ad-user__info">
               <div className="ad-user__avatar">
-                {(user?.name?.[0] || user?.email?.[0] || "A").toUpperCase()}
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" className="ad-user__avatar-img" />
+                ) : (
+                  (user?.email?.[0] || "A").toUpperCase()
+                )}
               </div>
               <div className="ad-user__details">
                 <span className="ad-user__name">{user?.name || "Admin"}</span>

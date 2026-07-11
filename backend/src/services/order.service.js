@@ -65,8 +65,19 @@ const canTransitionOrderStatus = (currentStatus, nextStatus) => {
   return (ORDER_STATUS_TRANSITIONS[currentStatus] || []).includes(nextStatus);
 };
 
-const createOrder = async (userId) => {
+const createOrder = async (userId, { addressId } = {}) => {
   return prisma.$transaction(async (tx) => {
+    if (addressId) {
+      const address = await tx.address.findUnique({
+        where: { id: addressId },
+        select: { userId: true },
+      });
+
+      if (!address || address.userId !== userId) {
+        throw new AppError("Dirección no válida", 400);
+      }
+    }
+
     const cartItems = await tx.cartItem.findMany({
       where: {
         userId,
@@ -128,6 +139,7 @@ const createOrder = async (userId) => {
         total,
         status: ORDER_STATUS.PENDING,
         userId,
+        addressId: addressId || null,
         items: {
           create: cartItems.map((item) => ({
             productId: item.productId,
