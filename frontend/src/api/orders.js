@@ -12,8 +12,11 @@ export function getOrderById(id) {
   return api.get(`/orders/${id}`);
 }
 
-export function getAdminOrders() {
-  return api.get("/orders/admin");
+export function getAdminOrders({ page, limit } = {}) {
+  const params = {};
+  if (page) params.page = page;
+  if (limit) params.limit = limit;
+  return api.get("/orders/admin", { params });
 }
 
 export function updateOrderStatus(id, data) {

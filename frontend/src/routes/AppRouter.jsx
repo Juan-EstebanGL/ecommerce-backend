@@ -19,6 +19,7 @@ import AdminUsers from "../pages/admin/AdminUsers";
 import AdminReviews from "../pages/admin/AdminReviews";
 import AdminFavorites from "../pages/admin/AdminFavorites";
 import AdminSettings from "../pages/admin/AdminSettings";
+import AdminCategories from "../pages/admin/AdminCategories";
 
 function AdminGuard({ children }) {
   const { user } = useAuthContext();
@@ -74,6 +75,7 @@ function AppRouter() {
       <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
+        <Route path="categories" element={<AdminCategories />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="reviews" element={<AdminReviews />} />

@@ -1,9 +1,47 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProducts } from "../api/products";
+import { getCategories } from "../api/categories";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 import { showWarning } from "../utils/alerts";
+
+const categoryStyles = [
+  { gradient: "linear-gradient(135deg, #0ea5a4, #3b82f6)", icon: (
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </svg>
+  )},
+  { gradient: "linear-gradient(135deg, #7c3aed, #a855f7)", icon: (
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="6" y1="11" x2="10" y2="11" />
+      <line x1="8" y1="9" x2="8" y2="13" />
+      <line x1="15" y1="12" x2="15.01" y2="12" />
+      <line x1="18" y1="10" x2="18.01" y2="10" />
+      <path d="M17.32 5H6.68a4 4 0 00-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 003 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 019.828 16h4.344a2 2 0 011.414.586L17 18c.5.5 1 1 2 1a3 3 0 003-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0017.32 5z" />
+    </svg>
+  )},
+  { gradient: "linear-gradient(135deg, #f59e0b, #f97316)", icon: (
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  )},
+  { gradient: "linear-gradient(135deg, #ef4444, #ec4899)", icon: (
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18V5l12-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+    </svg>
+  )},
+  { gradient: "linear-gradient(135deg, #10b981, #06b6d4)", icon: (
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  )},
+];
 
 function useScrollReveal() {
   const ref = useRef(null);
@@ -40,6 +78,7 @@ function RevealSection({ children, className = "", ...props }) {
 
 function HomePage() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
@@ -51,9 +90,13 @@ function HomePage() {
       setError("");
 
       try {
-        const response = await getProducts();
-        const allProducts = response.data || [];
+        const [prodRes, catRes] = await Promise.all([
+          getProducts(),
+          getCategories().catch(() => ({ data: [] })),
+        ]);
+        const allProducts = prodRes.data?.data || prodRes.data || [];
         setProducts(allProducts.slice(0, 4));
+        setCategories(Array.isArray(catRes.data) ? catRes.data : []);
       } catch (err) {
         setError(err?.response?.data?.message || err?.message || "Error cargando productos destacados");
       } finally {
@@ -145,63 +188,62 @@ function HomePage() {
               <p className="hm-section__sub">Encuentra lo que buscas en nuestras categorías principales.</p>
             </div>
           <div className="hm-cats">
-            {[
-              {
-                name: "Tecnología",
-                desc: "Laptops, tablets y más",
-                gradient: "linear-gradient(135deg, #0ea5a4, #3b82f6)",
-                icon: (
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                    <line x1="8" y1="21" x2="16" y2="21" />
-                    <line x1="12" y1="17" x2="12" y2="21" />
-                  </svg>
-                ),
-              },
-              {
-                name: "Gaming",
-                desc: "Consolas y periféricos",
-                gradient: "linear-gradient(135deg, #7c3aed, #a855f7)",
-                icon: (
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="6" y1="11" x2="10" y2="11" />
-                    <line x1="8" y1="9" x2="8" y2="13" />
-                    <line x1="15" y1="12" x2="15.01" y2="12" />
-                    <line x1="18" y1="10" x2="18.01" y2="10" />
-                    <path d="M17.32 5H6.68a4 4 0 00-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 003 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 019.828 16h4.344a2 2 0 011.414.586L17 18c.5.5 1 1 2 1a3 3 0 003-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0017.32 5z" />
-                  </svg>
-                ),
-              },
-              {
-                name: "Hogar",
-                desc: "Electrodomésticos inteligentes",
-                gradient: "linear-gradient(135deg, #f59e0b, #f97316)",
-                icon: (
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                  </svg>
-                ),
-              },
-              {
-                name: "Accesorios",
-                desc: "Audífonos, relojes y más",
-                gradient: "linear-gradient(135deg, #ef4444, #ec4899)",
-                icon: (
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 18V5l12-2v13" />
-                    <circle cx="6" cy="18" r="3" />
-                    <circle cx="18" cy="16" r="3" />
-                  </svg>
-                ),
-              },
-            ].map((cat, idx) => (
-              <div key={idx} className="hm-cat" style={{ "--cat-gradient": cat.gradient }}>
-                <div className="hm-cat__icon">{cat.icon}</div>
-                <h3 className="hm-cat__name">{cat.name}</h3>
-                <p className="hm-cat__desc">{cat.desc}</p>
-              </div>
-            ))}
+            {categories.length > 0
+              ? categories.slice(0, 5).map((cat, idx) => {
+                  const style = categoryStyles[idx % categoryStyles.length];
+                  return (
+                    <div
+                      key={cat.id}
+                      className="hm-cat"
+                      style={{ "--cat-gradient": style.gradient }}
+                      onClick={() => navigate(`/products?category=${cat.id}`)}
+                      role="link"
+                      tabIndex={0}
+                    >
+                      <div className="hm-cat__icon">{style.icon}</div>
+                      <h3 className="hm-cat__name">{cat.name}</h3>
+                      <p className="hm-cat__desc">{cat.productCount} {cat.productCount === 1 ? "producto" : "productos"}</p>
+                    </div>
+                  );
+                })
+              : [
+                  { name: "Tecnología", desc: "Laptops, tablets y más", gradient: "linear-gradient(135deg, #0ea5a4, #3b82f6)", icon: (
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                      <line x1="8" y1="21" x2="16" y2="21" />
+                      <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                  )},
+                  { name: "Gaming", desc: "Consolas y periféricos", gradient: "linear-gradient(135deg, #7c3aed, #a855f7)", icon: (
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="6" y1="11" x2="10" y2="11" />
+                      <line x1="8" y1="9" x2="8" y2="13" />
+                      <line x1="15" y1="12" x2="15.01" y2="12" />
+                      <line x1="18" y1="10" x2="18.01" y2="10" />
+                      <path d="M17.32 5H6.68a4 4 0 00-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 003 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 019.828 16h4.344a2 2 0 011.414.586L17 18c.5.5 1 1 2 1a3 3 0 003-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0017.32 5z" />
+                    </svg>
+                  )},
+                  { name: "Hogar", desc: "Electrodomésticos inteligentes", gradient: "linear-gradient(135deg, #f59e0b, #f97316)", icon: (
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                  )},
+                  { name: "Accesorios", desc: "Audífonos, relojes y más", gradient: "linear-gradient(135deg, #ef4444, #ec4899)", icon: (
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18V5l12-2v13" />
+                      <circle cx="6" cy="18" r="3" />
+                      <circle cx="18" cy="16" r="3" />
+                    </svg>
+                  )},
+                ].map((cat, idx) => (
+                  <div key={idx} className="hm-cat" style={{ "--cat-gradient": cat.gradient }} onClick={() => navigate("/products")}>
+                    <div className="hm-cat__icon">{cat.icon}</div>
+                    <h3 className="hm-cat__name">{cat.name}</h3>
+                    <p className="hm-cat__desc">{cat.desc}</p>
+                  </div>
+                ))
+            }
           </div>
         </div>
       </section>

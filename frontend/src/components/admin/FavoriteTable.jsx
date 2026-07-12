@@ -46,10 +46,22 @@ export default function FavoriteTable({ products, onView }) {
               <td>
                 <div className="ad-favorites-thumb">
                   {product.imageUrl ? (
-                    <img src={product.imageUrl} alt={product.name} />
-                  ) : (
-                    <span className="ad-favorites-thumb__placeholder">{placeholderImg}</span>
-                  )}
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        e.currentTarget.nextSibling.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
+                  <span
+                    className="ad-favorites-thumb__placeholder"
+                    style={{ display: product.imageUrl ? "none" : "flex" }}
+                  >
+                    {placeholderImg}
+                  </span>
                 </div>
               </td>
               <td className="ad-favorites-cell-name">{product.name}</td>

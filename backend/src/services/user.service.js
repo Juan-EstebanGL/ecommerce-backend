@@ -31,13 +31,27 @@ const ADDRESS_SELECT = {
   updatedAt: true,
 };
 
-const getUsers = async () => {
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    select: USER_SELECT,
-  });
+const getUsers = async ({ page = 1, limit = 8 } = {}) => {
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 8));
+  const skip = (pageNum - 1) * limitNum;
 
-  return users;
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      select: USER_SELECT,
+      skip,
+      take: limitNum,
+    }),
+    prisma.user.count(),
+  ]);
+
+  return {
+    data: users,
+    total,
+    page: pageNum,
+    totalPages: Math.ceil(total / limitNum),
+  };
 };
 
 const getById = async (id) => {

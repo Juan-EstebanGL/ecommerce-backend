@@ -29,9 +29,9 @@ const createProduct = asyncHandler(async (req, res) => {
 }, "Error creando producto");
 
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await productService.getProducts();
-
-  return res.json(products);
+  const { page, limit } = req.query;
+  const result = await productService.getProducts({ page, limit });
+  return res.json(result);
 }, "Error obteniendo productos");
 
 const getProductById = asyncHandler(async (req, res) => {

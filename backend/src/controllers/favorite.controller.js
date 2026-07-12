@@ -9,9 +9,9 @@ const {
 } = require("../validations/validation.helper");
 
 const getFavorites = asyncHandler(async (req, res) => {
-  const favorites = await favoriteService.getFavorites(req.userId);
-
-  return res.json(favorites);
+  const { page, limit } = req.query;
+  const result = await favoriteService.getFavorites(req.userId, { page, limit });
+  return res.json(result);
 }, "Error obteniendo favoritos");
 
 const addFavorite = asyncHandler(async (req, res) => {
@@ -49,8 +49,8 @@ const removeFavorite = asyncHandler(async (req, res) => {
 }, "Error eliminando favorito");
 
 const getAdminFavorites = asyncHandler(async (req, res) => {
-  const stats = await favoriteService.getAdminFavoritesStats();
-
+  const { page, limit } = req.query;
+  const stats = await favoriteService.getAdminFavoritesStats({ page, limit });
   return res.json(stats);
 }, "Error obteniendo estadísticas de favoritos");
 

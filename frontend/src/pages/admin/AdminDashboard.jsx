@@ -348,14 +348,26 @@ export default function AdminDashboard() {
                   <div key={p.id} className="ad-dashboard-product-row">
                     <div className="ad-dashboard-product-row__thumb">
                       {p.imageUrl ? (
-                        <img src={p.imageUrl} alt={p.name} />
-                      ) : (
+                        <img
+                          src={p.imageUrl}
+                          alt={p.name}
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextSibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <span
+                        className="ad-dashboard-product-row__placeholder"
+                        style={{ display: p.imageUrl ? "none" : "flex" }}
+                      >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                           <circle cx="8.5" cy="8.5" r="1.5" />
                           <polyline points="21 15 16 10 5 21" />
                         </svg>
-                      )}
+                      </span>
                     </div>
                     <span className="ad-dashboard-product-row__name">{p.name}</span>
                     <span className={`ad-dashboard-badge ad-dashboard-badge--${p.stock <= 5 ? "danger" : p.stock <= 10 ? "warning" : "success"}`}>
@@ -380,14 +392,26 @@ export default function AdminDashboard() {
                     <div key={p.id} className="ad-dashboard-product-row">
                       <div className="ad-dashboard-product-row__thumb">
                         {p.imageUrl ? (
-                          <img src={p.imageUrl} alt={p.name} />
-                        ) : (
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              e.currentTarget.nextSibling.style.display = "flex";
+                            }}
+                          />
+                        ) : null}
+                        <span
+                          className="ad-dashboard-product-row__placeholder"
+                          style={{ display: p.imageUrl ? "none" : "flex" }}
+                        >
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                             <circle cx="8.5" cy="8.5" r="1.5" />
                             <polyline points="21 15 16 10 5 21" />
                           </svg>
-                        )}
+                        </span>
                       </div>
                       <span className="ad-dashboard-product-row__name">{p.name}</span>
                       <span className="ad-dashboard-product-row__count" title="Favoritos">
@@ -412,14 +436,26 @@ export default function AdminDashboard() {
                     <div key={p.id} className="ad-dashboard-product-row">
                       <div className="ad-dashboard-product-row__thumb">
                         {p.imageUrl ? (
-                          <img src={p.imageUrl} alt={p.name} />
-                        ) : (
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              e.currentTarget.nextSibling.style.display = "flex";
+                            }}
+                          />
+                        ) : null}
+                        <span
+                          className="ad-dashboard-product-row__placeholder"
+                          style={{ display: p.imageUrl ? "none" : "flex" }}
+                        >
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                             <circle cx="8.5" cy="8.5" r="1.5" />
                             <polyline points="21 15 16 10 5 21" />
                           </svg>
-                        )}
+                        </span>
                       </div>
                       <span className="ad-dashboard-product-row__name">{p.name}</span>
                       <div className="ad-dashboard-product-row__rating">

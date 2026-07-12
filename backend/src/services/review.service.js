@@ -106,41 +106,55 @@ const ensureReviewOwner = (review, userId, userRole) => {
   }
 };
 
-const getAllReviews = async () => {
-  const reviews = await prisma.review.findMany({
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
+const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 8));
+  const skip = (pageNum - 1) * limitNum;
+
+  const [reviews, total] = await Promise.all([
+    prisma.review.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+          },
         },
+        product: {
+          select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limitNum,
+    }),
+    prisma.review.count(),
+  ]);
+
+  return {
+    data: reviews.map((review) => ({
+      id: review.id,
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.createdAt,
+      user: {
+        id: review.user.id,
+        email: review.user.email,
       },
       product: {
-        select: {
-          id: true,
-          name: true,
-          imageUrl: true,
-        },
+        id: review.product.id,
+        name: review.product.name,
+        imageUrl: review.product.imageUrl,
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  return reviews.map((review) => ({
-    id: review.id,
-    rating: review.rating,
-    comment: review.comment,
-    createdAt: review.createdAt,
-    user: {
-      id: review.user.id,
-      email: review.user.email,
-    },
-    product: {
-      id: review.product.id,
-      name: review.product.name,
-      imageUrl: review.product.imageUrl,
-    },
-  }));
+    })),
+    total,
+    page: pageNum,
+    totalPages: Math.ceil(total / limitNum),
+  };
 };
 
 const updateReview = async (userId, reviewId, data) => {

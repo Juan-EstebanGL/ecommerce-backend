@@ -21,8 +21,8 @@ export function FavoriteProvider({ children }) {
     setLoading(true);
 
     try {
-      const response = await getFavorites();
-      const data = response.data || [];
+      const response = await getFavorites({ limit: 9999 });
+      const data = response.data?.data || [];
       setFavorites(data);
       setFavoriteIds(new Set(data.map((f) => f.productId)));
     } catch {

@@ -1,20 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getProducts } from "../api/products";
+import { getCategories } from "../api/categories";
 import { addToCart } from "../api/cart";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
+import Pagination from "../components/Pagination";
 import { useCartContext } from "../context/CartContext";
 import Input from "../components/Input";
 import { showSuccess, showError, showWarning } from "../utils/alerts";
 
+const PAGE_SIZE = 20;
+
 function Products() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [addingId, setAddingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
+  const [page, setPage] = useState(1);
+  const gridRef = useRef(null);
   const { refreshCartCount } = useCartContext();
 
   useEffect(() => {
@@ -23,10 +33,14 @@ function Products() {
       setError("");
 
       try {
-        const response = await getProducts();
-        const data = response.data || [];
+        const [prodRes, catRes] = await Promise.all([
+          getProducts(),
+          getCategories().catch(() => ({ data: [] })),
+        ]);
+        const data = prodRes.data?.data || prodRes.data || [];
         setProducts(data);
         setFilteredProducts(data);
+        setCategories(catRes.data || []);
       } catch (err) {
         setError(err?.response?.data?.message || err?.message || "Error al cargar productos");
       } finally {
@@ -37,24 +51,48 @@ function Products() {
     loadProducts();
   }, []);
 
-  // Filter products based on search query and availability
   useEffect(() => {
     let filtered = products;
 
-    // Filter by search query
     if (searchQuery.trim()) {
       filtered = filtered.filter((product) =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // Filter by availability
     if (showOnlyAvailable) {
       filtered = filtered.filter((product) => product.stock > 0);
     }
 
+    if (selectedCategory) {
+      filtered = filtered.filter(
+        (product) => String(product.categoryId) === String(selectedCategory)
+      );
+    }
+
     setFilteredProducts(filtered);
-  }, [searchQuery, showOnlyAvailable, products]);
+    setPage(1);
+  }, [searchQuery, showOnlyAvailable, selectedCategory, products]);
+
+  function handleCategoryChange(catId) {
+    setSelectedCategory(catId);
+    if (catId) {
+      setSearchParams({ category: catId });
+    } else {
+      setSearchParams({});
+    }
+  }
+
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
+  const pageStart = (page - 1) * PAGE_SIZE;
+  const currentPageProducts = filteredProducts.slice(pageStart, pageStart + PAGE_SIZE);
+
+  function handlePageChange(newPage) {
+    setPage(newPage);
+    if (gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   async function handleAddToCart(productId, quantity = 1) {
     const product = products.find((p) => p.id === productId);
@@ -110,6 +148,25 @@ function Products() {
                 <span>Solo disponibles</span>
               </label>
             </div>
+            {categories.length > 0 && (
+              <div className="pr-toolbar__categories">
+                <button
+                  className={`pr-category-chip${!selectedCategory ? " pr-category-chip--active" : ""}`}
+                  onClick={() => handleCategoryChange("")}
+                >
+                  Todos
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    className={`pr-category-chip${String(selectedCategory) === String(cat.id) ? " pr-category-chip--active" : ""}`}
+                    onClick={() => handleCategoryChange(cat.id)}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
             <span className="pr-toolbar-count">
               {filteredProducts.length} {filteredProducts.length === 1 ? "producto" : "productos"}
             </span>
@@ -149,16 +206,25 @@ function Products() {
         )}
 
         {!loading && filteredProducts.length > 0 && (
-          <div className="product-grid">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={handleAddToCart}
-                addingId={addingId}
-              />
-            ))}
-          </div>
+          <>
+            <div className="product-grid" ref={gridRef}>
+              {currentPageProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                  addingId={addingId}
+                />
+              ))}
+            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              total={filteredProducts.length}
+              itemsPerPage={PAGE_SIZE}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
     </main>

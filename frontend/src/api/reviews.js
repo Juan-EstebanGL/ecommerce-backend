@@ -16,6 +16,9 @@ export function deleteReview(reviewId) {
   return api.delete(`/reviews/${reviewId}`);
 }
 
-export function getAdminReviews() {
-  return api.get("/reviews/admin");
+export function getAdminReviews({ page, limit } = {}) {
+  const params = {};
+  if (page) params.page = page;
+  if (limit) params.limit = limit;
+  return api.get("/reviews/admin", { params });
 }

@@ -29,6 +29,7 @@ function Cart() {
   const [error, setError] = useState("");
   const [actionId, setActionId] = useState(null);
   const [syncingId, setSyncingId] = useState(null);
+  const [clearing, setClearing] = useState(false);
   const [imgErrors, setImgErrors] = useState(new Set());
   const { refreshCartCount } = useCartContext();
   const navigate = useNavigate();
@@ -95,6 +96,33 @@ function Cart() {
     }
   }
 
+  async function handleClearCart() {
+    const result = await showConfirm(
+      "Vaciar carrito",
+      `¿Deseas eliminar los ${items.length} productos de tu carrito?`,
+      "Vaciar",
+      "Cancelar"
+    );
+
+    if (!result.isConfirmed) return;
+
+    setClearing(true);
+    setError("");
+
+    try {
+      await Promise.all(items.map((item) => removeCartItem(item.id)));
+      setItems([]);
+      refreshCartCount();
+      showSuccess("Carrito vaciado");
+    } catch (err) {
+      showError("No fue posible vaciar el carrito. Intenta de nuevo.");
+      const cartResponse = await getCart();
+      setItems(cartResponse.data?.items || []);
+    } finally {
+      setClearing(false);
+    }
+  }
+
   const subtotal = items.reduce(
     (sum, item) => sum + (item.product?.price || 0) * item.quantity,
     0
@@ -109,11 +137,26 @@ function Cart() {
     <main>
       <div className="app-container">
         <div className="ct-header">
-          <h1 className="ct-header__title">Mi carrito</h1>
+          <div className="ct-header__left">
+            <h1 className="ct-header__title">Mi carrito</h1>
+            {!isEmpty && (
+              <p className="ct-header__sub">
+                Tienes {totalItems} {totalItems === 1 ? "producto" : "productos"} listos para comprar.
+              </p>
+            )}
+          </div>
           {!isEmpty && (
-            <p className="ct-header__sub">
-              Tienes {totalItems} {totalItems === 1 ? "producto" : "productos"} listos para comprar.
-            </p>
+            <button
+              className="ct-clear-btn"
+              disabled={clearing}
+              onClick={handleClearCart}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              {clearing ? "Vaciando..." : "Vaciar carrito"}
+            </button>
           )}
         </div>
 
@@ -224,6 +267,7 @@ function Cart() {
 
               <button
                 className="ct-checkout-btn"
+                disabled={clearing}
                 onClick={() => navigate("/checkout")}
               >
                 Continuar compra

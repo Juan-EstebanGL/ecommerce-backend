@@ -39,18 +39,31 @@ model User {
   addresses       Address[]
 }
 
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  imageUrl    String?
+  publicId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
 model Product {
-  id        Int        @id @default(autoincrement())
-  name      String
-  price     Decimal    @db.Decimal(10, 2)
-  stock     Int
-  imageUrl  String?
-  publicId  String?
-  user      User       @relation(fields: [userId], references: [id])
-  userId    Int
-  cartItems CartItem[]
-  reviews   Review[]
-  favorites Favorite[]
+  id         Int        @id @default(autoincrement())
+  name       String
+  price      Decimal    @db.Decimal(10, 2)
+  stock      Int
+  imageUrl   String?
+  publicId   String?
+  user       User       @relation(fields: [userId], references: [id])
+  userId     Int
+  category   Category?  @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+  cartItems  CartItem[]
+  reviews    Review[]
+  favorites  Favorite[]
 }
 
 model CartItem {

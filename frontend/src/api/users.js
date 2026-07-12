@@ -1,7 +1,10 @@
 import api from "./axios";
 
-export function getUsers() {
-  return api.get("/users");
+export function getUsers({ page, limit } = {}) {
+  const params = {};
+  if (page) params.page = page;
+  if (limit) params.limit = limit;
+  return api.get("/users", { params });
 }
 
 export function updateUserRole(id, data) {

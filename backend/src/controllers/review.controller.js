@@ -65,9 +65,9 @@ const updateReview = asyncHandler(async (req, res) => {
 }, "Error actualizando reseña");
 
 const getAllReviews = asyncHandler(async (req, res) => {
-  const reviews = await reviewService.getAllReviews();
-
-  return res.json(reviews);
+  const { page, limit } = req.query;
+  const result = await reviewService.getAllReviews({ page, limit });
+  return res.json(result);
 }, "Error obteniendo reseñas");
 
 const deleteReview = asyncHandler(async (req, res) => {

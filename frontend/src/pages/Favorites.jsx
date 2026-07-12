@@ -1,20 +1,87 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
-import { useFavoriteContext } from "../context/FavoriteContext";
+import { getFavorites } from "../api/favorites";
+import { addToCart } from "../api/cart";
+import { useCartContext } from "../context/CartContext";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
+import Pagination from "../components/Pagination";
+import { showSuccess, showError, showWarning } from "../utils/alerts";
+
+const PAGE_SIZE = 20;
 
 function Favorites() {
   const navigate = useNavigate();
   const { user } = useAuthContext();
-  const { favorites, loading } = useFavoriteContext();
+  const { refreshCartCount } = useCartContext();
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [addingId, setAddingId] = useState(null);
+  const gridRef = useRef(null);
 
   useEffect(() => {
     if (!user) {
       navigate("/login", { replace: true });
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await getFavorites({ page, limit: PAGE_SIZE });
+        if (!cancelled) {
+          setFavorites(res.data?.data || []);
+          setTotal(res.data?.total || 0);
+          setTotalPages(res.data?.totalPages || 0);
+        }
+      } catch {
+        if (!cancelled) {
+          setFavorites([]);
+          setTotal(0);
+          setTotalPages(0);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user, page]);
+
+  function handlePageChange(newPage) {
+    setPage(newPage);
+    if (gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  async function handleAddToCart(productId, quantity = 1) {
+    const product = favorites.find((f) => f.product?.id === productId)?.product;
+    if (product && quantity > product.stock) {
+      showWarning("Stock insuficiente", `Solo hay ${product.stock} unidades disponibles.`);
+      return;
+    }
+
+    setAddingId(productId);
+
+    try {
+      await addToCart(productId, quantity);
+      refreshCartCount();
+      const msg = `${quantity} ${quantity === 1 ? "producto" : "productos"} agregado${quantity !== 1 ? "s" : ""} al carrito`;
+      showSuccess(msg);
+    } catch (err) {
+      showError(err?.response?.data?.message || err?.message || "No se pudo agregar al carrito");
+    } finally {
+      setAddingId(null);
+    }
+  }
 
   if (!user) return null;
 
@@ -36,12 +103,12 @@ function Favorites() {
               Guarda los productos que más te interesan para comprarlos después.
             </p>
           </div>
-          {!loading && favorites.length > 0 && (
+          {!loading && total > 0 && (
             <span className="fv-header__count">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none">
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
               </svg>
-              {favorites.length} {favorites.length === 1 ? "producto guardado" : "productos guardados"}
+              {total} {total === 1 ? "producto guardado" : "productos guardados"}
             </span>
           )}
         </header>
@@ -74,17 +141,26 @@ function Favorites() {
         )}
 
         {!loading && favorites.length > 0 && (
-          <div className="product-grid fv-grid">
-            {favorites.map((fav, idx) => (
-              <div key={fav.id} className="fv-grid__item" style={{ animationDelay: `${idx * 0.06}s` }}>
-                <ProductCard
-                  product={fav.product}
-                  onAddToCart={null}
-                  addingId={null}
-                />
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="product-grid fv-grid" ref={gridRef}>
+              {favorites.map((fav, idx) => (
+                <div key={fav.id} className="fv-grid__item" style={{ animationDelay: `${idx * 0.06}s` }}>
+                  <ProductCard
+                    product={fav.product}
+                    onAddToCart={handleAddToCart}
+                    addingId={addingId}
+                  />
+                </div>
+              ))}
+            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              itemsPerPage={PAGE_SIZE}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
     </main>

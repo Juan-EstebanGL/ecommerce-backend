@@ -3,8 +3,9 @@ const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 
 const getUsers = asyncHandler(async (req, res) => {
-  const users = await userService.getUsers();
-  return res.json(users);
+  const { page, limit } = req.query;
+  const result = await userService.getUsers({ page, limit });
+  return res.json(result);
 }, "Error obteniendo usuarios");
 
 const updateUserRole = asyncHandler(async (req, res) => {

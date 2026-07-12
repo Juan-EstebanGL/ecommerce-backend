@@ -10,10 +10,13 @@ const {
 } = require("../validations/validation.helper");
 
 const getAllOrders = asyncHandler(async (req, res) => {
-  const orders = await orderService.getAllOrders();
-
+  const { page, limit } = req.query;
+  const result = await orderService.getAllOrders({ page, limit });
   return res.json({
-    orders,
+    orders: result.data,
+    total: result.total,
+    page: result.page,
+    totalPages: result.totalPages,
   });
 }, "Error obteniendo todas las ordenes");
 

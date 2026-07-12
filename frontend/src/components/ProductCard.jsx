@@ -83,6 +83,9 @@ function ProductCard({ product, onAddToCart, addingId }) {
       </div>
       <div className="pc__body">
         <h3 className="pc__name">{product.name}</h3>
+        {product.category && (
+          <span className="pc__category">{product.category.name}</span>
+        )}
         <div className="pc__price">${formattedPrice}</div>
         <div className={`pc__stock ${stockStatus.className}`}>
           <span className={`pc__dot ${stockStatus.dot}`} />

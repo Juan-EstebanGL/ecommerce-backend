@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getUsers, updateUserRole, deleteUser } from "../../api/users";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import UserTable from "../../components/admin/UserTable";
 import UserViewModal from "../../components/admin/UserViewModal";
+import Pagination from "../../components/Pagination";
+
+const PAGE_SIZE = 8;
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -11,13 +14,38 @@ export default function AdminUsers() {
   const [viewingUser, setViewingUser] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [roleLoadingId, setRoleLoadingId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const tableRef = useRef(null);
+
+  async function loadUsers(currentPage) {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await getUsers({ page: currentPage, limit: PAGE_SIZE });
+      setUsers(res.data?.data || []);
+      setTotal(res.data?.total || 0);
+      setTotalPages(res.data?.totalPages || 0);
+    } catch (err) {
+      setError(err.response?.data?.message || "Error al cargar usuarios");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      setLoading(true);
+      setError("");
       try {
-        const res = await getUsers();
-        if (!cancelled) setUsers(res.data || []);
+        const res = await getUsers({ page, limit: PAGE_SIZE });
+        if (!cancelled) {
+          setUsers(res.data?.data || []);
+          setTotal(res.data?.total || 0);
+          setTotalPages(res.data?.totalPages || 0);
+        }
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Error al cargar usuarios");
       } finally {
@@ -25,7 +53,14 @@ export default function AdminUsers() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [page]);
+
+  function handlePageChange(newPage) {
+    setPage(newPage);
+    if (tableRef.current) {
+      tableRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   function handleView(user) {
     setViewingUser(user);
@@ -73,9 +108,9 @@ export default function AdminUsers() {
     try {
       await deleteUser(userId);
       setTimeout(() => {
-        setUsers((prev) => prev.filter((u) => u.id !== userId));
         setDeletingId(null);
         showSuccess("Usuario eliminado correctamente");
+        loadUsers(page);
       }, 350);
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Error al eliminar usuario";
@@ -90,7 +125,7 @@ export default function AdminUsers() {
   const stats = [
     {
       label: "Total usuarios",
-      value: users.length,
+      value: total,
       color: "teal",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -168,7 +203,7 @@ export default function AdminUsers() {
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           <p>{error}</p>
-          <button className="btn btn--primary" onClick={() => window.location.reload()}>
+          <button className="btn btn--primary" onClick={() => loadUsers(page)}>
             Reintentar
           </button>
         </div>
@@ -185,7 +220,7 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <div className="ad-stats ad-users-stats">
+      <div className="ad-stats ad-users-stats" ref={tableRef}>
         {stats.map((s) => (
           <div key={s.label} className={`ad-card ad-card--${s.color}`}>
             <div className="ad-card__top">
@@ -204,6 +239,14 @@ export default function AdminUsers() {
         onDelete={handleDelete}
         deletingId={deletingId}
         roleLoadingId={roleLoadingId}
+      />
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        itemsPerPage={PAGE_SIZE}
+        onPageChange={handlePageChange}
       />
 
       <UserViewModal user={viewingUser} onClose={() => setViewingUser(null)} />

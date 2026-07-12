@@ -1,21 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getAdminOrders, updateOrderStatus } from "../../api/orders";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import OrderTable from "../../components/admin/OrderTable";
 import OrderStatusBadge from "../../components/admin/OrderStatusBadge";
+import Pagination from "../../components/Pagination";
+
+const PAGE_SIZE = 8;
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [viewingOrder, setViewingOrder] = useState(null);
   const [loadingId, setLoadingId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const tableRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await getAdminOrders();
-        if (!cancelled) setOrders(res.data.orders || []);
+        const res = await getAdminOrders({ page, limit: PAGE_SIZE });
+        if (!cancelled) {
+          setOrders(res.data?.orders || []);
+          setTotal(res.data?.total || 0);
+          setTotalPages(res.data?.totalPages || 0);
+        }
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Error al cargar órdenes");
       } finally {
@@ -23,7 +35,14 @@ export default function AdminOrders() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [page]);
+
+  function handlePageChange(newPage) {
+    setPage(newPage);
+    if (tableRef.current) {
+      tableRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   function handleView(order) {
     setViewingOrder(order);
@@ -68,7 +87,7 @@ export default function AdminOrders() {
   const stats = [
     {
       label: "Total órdenes",
-      value: orders.length,
+      value: total,
       color: "teal",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -164,7 +183,7 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      <div className="ad-stats ad-orders-stats">
+      <div className="ad-stats ad-orders-stats" ref={tableRef}>
         {stats.map((s) => (
           <div key={s.label} className={`ad-card ad-card--${s.color}`}>
             <div className="ad-card__top">
@@ -181,6 +200,14 @@ export default function AdminOrders() {
         onView={handleView}
         onStatusChange={handleStatusChange}
         loadingId={loadingId}
+      />
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        itemsPerPage={PAGE_SIZE}
+        onPageChange={handlePageChange}
       />
 
       <OrderViewModal order={viewingOrder} onClose={() => setViewingOrder(null)} />
@@ -242,6 +269,7 @@ function OrderViewModal({ order, onClose }) {
                       <img
                         src={item.imageUrl}
                         alt={item.productName}
+                        loading="lazy"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                           e.currentTarget.nextSibling.style.display = "flex";

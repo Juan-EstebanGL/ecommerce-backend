@@ -1,40 +1,25 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { uploadImage } from "../../api/upload";
-import { createProduct, updateProduct } from "../../api/products";
-import { getCategories } from "../../api/categories";
+import { createCategory, updateCategory } from "../../api/categories";
 import { showError, showSuccess } from "../../utils/alerts";
 
 const ACCEPTED = "image/jpeg,image/jpg,image/png,image/webp";
 const MAX_SIZE = 5 * 1024 * 1024;
 
-const initialForm = { name: "", price: "", stock: "", categoryId: "" };
+const initialForm = { name: "", description: "" };
 
-export default function ProductFormModal({ mode = "create", product = null, isOpen, onClose, onSuccess }) {
+export default function CategoryFormModal({ mode = "create", category = null, isOpen, onClose, onSuccess }) {
   const [form, setForm] = useState(
-    mode === "edit" && product
-      ? { name: product.name, price: String(product.price), stock: String(product.stock), categoryId: product.categoryId ? String(product.categoryId) : "" }
+    mode === "edit" && category
+      ? { name: category.name, description: category.description || "" }
       : { ...initialForm }
   );
-  const [categories, setCategories] = useState([]);
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(mode === "edit" && product?.imageUrl ? product.imageUrl : null);
+  const [preview, setPreview] = useState(mode === "edit" && category?.imageUrl ? category.imageUrl : null);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [phase, setPhase] = useState("");
   const inputRef = useRef(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await getCategories();
-        if (!cancelled) setCategories(res.data || []);
-      } catch {
-        // categories optional, silent fail
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -64,14 +49,16 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
     reader.readAsDataURL(f);
   }
 
+  function handleRemoveImage() {
+    setFile(null);
+    setPreview(null);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
   function validate() {
     const errs = {};
     if (!form.name.trim()) errs.name = "El nombre es obligatorio";
-    const priceNum = parseFloat(form.price);
-    if (!form.price || isNaN(priceNum) || priceNum <= 0) errs.price = "Debe ser mayor a 0";
-    const stockNum = parseInt(form.stock, 10);
-    if (form.stock === "" || isNaN(stockNum) || stockNum < 0) errs.stock = "Debe ser 0 o mayor";
-    if (mode === "create" && !file) errs.image = "Selecciona una imagen";
+    if (form.description && form.description.length > 500) errs.description = "Máximo 500 caracteres";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -82,34 +69,35 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
 
     setSubmitting(true);
 
-    const payload = {
-      name: form.name.trim(),
-      price: parseFloat(form.price),
-      stock: parseInt(form.stock, 10),
-      categoryId: form.categoryId ? parseInt(form.categoryId, 10) : null,
-    };
-
     try {
       if (mode === "edit" && !file) {
-        payload.imageUrl = product.imageUrl || null;
-        payload.publicId = product.publicId || null;
-        setPhase("Actualizando producto...");
-        await updateProduct(product.id, payload);
+        const payload = {
+          name: form.name.trim(),
+          description: form.description.trim() || null,
+          imageUrl: category.imageUrl || null,
+          publicId: category.publicId || null,
+        };
+        setPhase("Actualizando categoría...");
+        await updateCategory(category.id, payload);
       } else {
         setPhase("Subiendo imagen...");
         const uploadRes = await uploadImage(file);
-        payload.imageUrl = uploadRes.data.imageUrl;
-        payload.publicId = uploadRes.data.publicId;
+        const payload = {
+          name: form.name.trim(),
+          description: form.description.trim() || null,
+          imageUrl: uploadRes.data.imageUrl,
+          publicId: uploadRes.data.publicId,
+        };
 
-        setPhase(mode === "edit" ? "Actualizando producto..." : "Creando producto...");
+        setPhase(mode === "edit" ? "Actualizando categoría..." : "Creando categoría...");
         if (mode === "edit") {
-          await updateProduct(product.id, payload);
+          await updateCategory(category.id, payload);
         } else {
-          await createProduct(payload);
+          await createCategory(payload);
         }
       }
 
-      showSuccess(mode === "edit" ? "Producto actualizado correctamente" : "Producto creado correctamente");
+      showSuccess(mode === "edit" ? "Categoría actualizada correctamente" : "Categoría creada correctamente");
       onSuccess();
       onClose();
     } catch (err) {
@@ -129,7 +117,7 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
     <div className="ad-form-overlay" onClick={onClose}>
       <div className="ad-form-modal" onClick={(e) => e.stopPropagation()}>
         <div className="ad-form-modal__header">
-          <h2>{isEdit ? "Editar producto" : "Nuevo producto"}</h2>
+          <h2>{isEdit ? "Editar categoría" : "Nueva categoría"}</h2>
           <button className="ad-form-modal__close" onClick={onClose} aria-label="Cerrar">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -148,75 +136,55 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  placeholder="Ej: Mouse gamer"
+                  placeholder="Electrónica"
                   disabled={submitting}
+                  autoFocus
                 />
                 {errors.name && <span className="ad-form__error">{errors.name}</span>}
               </div>
 
               <div className="ad-form__group">
-                <label className="ad-form__label">Precio</label>
-                <input
-                  className={`ad-form__input${errors.price ? " ad-form__input--error" : ""}`}
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={form.price}
+                <label className="ad-form__label">Descripción</label>
+                <textarea
+                  className={`ad-form__input ad-form__textarea${errors.description ? " ad-form__input--error" : ""}`}
+                  name="description"
+                  value={form.description}
                   onChange={handleChange}
-                  placeholder="Ej: 49.99"
+                  placeholder="Descripción opcional de la categoría"
+                  rows={4}
                   disabled={submitting}
                 />
-                {errors.price && <span className="ad-form__error">{errors.price}</span>}
-              </div>
-
-              <div className="ad-form__group">
-                <label className="ad-form__label">Stock</label>
-                <input
-                  className={`ad-form__input${errors.stock ? " ad-form__input--error" : ""}`}
-                  name="stock"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={form.stock}
-                  onChange={handleChange}
-                  placeholder="Ej: 10"
-                  disabled={submitting}
-                />
-                {errors.stock && <span className="ad-form__error">{errors.stock}</span>}
-              </div>
-
-              <div className="ad-form__group">
-                <label className="ad-form__label">Categoría</label>
-                <select
-                  className="ad-form__input"
-                  name="categoryId"
-                  value={form.categoryId}
-                  onChange={handleChange}
-                  disabled={submitting}
-                >
-                  <option value="">Sin categoría</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                <span className="ad-form__hint">{form.description.length}/500</span>
+                {errors.description && <span className="ad-form__error">{errors.description}</span>}
               </div>
             </div>
 
             <div className="ad-form__right">
               <label className="ad-form__label">Imagen</label>
               <div
-                className={`ad-form-upload${errors.image ? " ad-form-upload--error" : ""}`}
+                className="ad-form-upload"
                 onClick={() => !submitting && inputRef.current?.click()}
               >
                 {preview ? (
-                  <img src={preview} alt="Preview" className="ad-form-upload__preview" />
+                  <>
+                    <img src={preview} alt="Preview" className="ad-form-upload__preview" />
+                    {!submitting && (
+                      <button
+                        type="button"
+                        className="ad-form-upload__remove"
+                        onClick={(e) => { e.stopPropagation(); handleRemoveImage(); }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <div className="ad-form-upload__placeholder">
                     <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                      <circle cx="8.5" cy="8.5" r="1.5" />
-                      <polyline points="21 15 16 10 5 21" />
+                      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
                     </svg>
                     <span>Haz clic para seleccionar</span>
                     <span className="ad-form-upload__hint">JPG, JPEG, PNG o WebP • Máx 5 MB</span>
@@ -231,7 +199,6 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
                 style={{ display: "none" }}
                 disabled={submitting}
               />
-              {errors.image && <span className="ad-form__error">{errors.image}</span>}
             </div>
           </div>
 
@@ -246,7 +213,7 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
                   {phase}
                 </>
               ) : (
-                isEdit ? "Guardar cambios" : "Crear producto"
+                isEdit ? "Guardar cambios" : "Crear categoría"
               )}
             </button>
           </div>

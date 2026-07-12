@@ -24,6 +24,9 @@ const getProductById = async (id) => {
     where: {
       id,
     },
+    include: {
+      category: true,
+    },
   });
 
   if (!product) {
@@ -34,7 +37,7 @@ const getProductById = async (id) => {
 };
 
 const createProduct = async (userId, data) => {
-  const { imageUrl, publicId, ...productData } = data;
+  const { imageUrl, publicId, categoryId, ...productData } = data;
 
   try {
     const product = await prisma.product.create({
@@ -43,7 +46,9 @@ const createProduct = async (userId, data) => {
         imageUrl: imageUrl || null,
         publicId: publicId || null,
         userId,
+        ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
       },
+      include: { category: true },
     });
 
     return formatProduct(product);
@@ -56,19 +61,38 @@ const createProduct = async (userId, data) => {
   }
 };
 
-const getProducts = async () => {
-  const products = await prisma.product.findMany({
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-        },
-      },
-    },
-  });
+const getProducts = async ({ page = 1, limit = 20, categoryId } = {}) => {
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+  const skip = (pageNum - 1) * limitNum;
 
-  return products.map(formatProduct);
+  const where = categoryId ? { categoryId: parseInt(categoryId, 10) } : {};
+
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+        category: true,
+      },
+      where,
+      skip,
+      take: limitNum,
+      orderBy: { id: "desc" },
+    }),
+    prisma.product.count({ where }),
+  ]);
+
+  return {
+    data: products.map(formatProduct),
+    total,
+    page: pageNum,
+    totalPages: Math.ceil(total / limitNum),
+  };
 };
 
 const updateProduct = async (userId, userRole, id, data) => {
@@ -81,12 +105,19 @@ const updateProduct = async (userId, userRole, id, data) => {
     "No autorizado"
   );
 
-  const { imageUrl, publicId, ...productData } = data;
+  const { imageUrl, publicId, categoryId, ...productData } = data;
 
   try {
     if (publicId && existingProduct.publicId) {
       await cloudinaryService.deleteImage(existingProduct.publicId);
     }
+
+    const categoryUpdate =
+      categoryId !== undefined
+        ? categoryId
+          ? { category: { connect: { id: categoryId } } }
+          : { category: { disconnect: true } }
+        : {};
 
     const product = await prisma.product.update({
       where: {
@@ -96,7 +127,9 @@ const updateProduct = async (userId, userRole, id, data) => {
         ...productData,
         ...(imageUrl !== undefined ? { imageUrl } : {}),
         ...(publicId !== undefined ? { publicId } : {}),
+        ...categoryUpdate,
       },
+      include: { category: true },
     });
 
     return formatProduct(product);

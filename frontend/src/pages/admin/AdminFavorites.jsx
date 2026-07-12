@@ -1,19 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getAdminFavorites } from "../../api/favorites";
 import FavoriteTable from "../../components/admin/FavoriteTable";
+import Pagination from "../../components/Pagination";
+
+const PAGE_SIZE = 8;
 
 export default function AdminFavorites() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [viewingProduct, setViewingProduct] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const tableRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await getAdminFavorites();
-        if (!cancelled) setData(res.data);
+        const res = await getAdminFavorites({ page, limit: PAGE_SIZE });
+        if (!cancelled) {
+          setData(res.data);
+          setTotalPages(res.data?.totalPages || 0);
+        }
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Error al cargar favoritos");
       } finally {
@@ -21,7 +30,14 @@ export default function AdminFavorites() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [page]);
+
+  function handlePageChange(newPage) {
+    setPage(newPage);
+    if (tableRef.current) {
+      tableRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   const stats = data
     ? [
@@ -125,7 +141,7 @@ export default function AdminFavorites() {
         </div>
       </div>
 
-      <div className="ad-stats ad-favorites-stats">
+      <div className="ad-stats ad-favorites-stats" ref={tableRef}>
         {stats.map((s) => (
           <div key={s.label} className={`ad-card ad-card--${s.color}`}>
             <div className="ad-card__top">
@@ -138,6 +154,14 @@ export default function AdminFavorites() {
       </div>
 
       <FavoriteTable products={data?.products || []} onView={setViewingProduct} />
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={data?.total || 0}
+        itemsPerPage={PAGE_SIZE}
+        onPageChange={handlePageChange}
+      />
 
       <FavoriteViewModal
         product={viewingProduct}
@@ -171,14 +195,26 @@ function FavoriteViewModal({ product, totalFavorites, onClose }) {
           <div className="ad-favorites-modal__product">
             <div className="ad-favorites-modal__product-thumb">
               {product.imageUrl ? (
-                <img src={product.imageUrl} alt={product.name} />
-              ) : (
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextSibling.style.display = "flex";
+                  }}
+                />
+              ) : null}
+              <span
+                className="ad-favorites-modal__product-placeholder"
+                style={{ display: product.imageUrl ? "none" : "flex" }}
+              >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c0c4cc" strokeWidth="1.5">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
                 </svg>
-              )}
+              </span>
             </div>
             <div className="ad-favorites-modal__product-info">
               <span className="ad-favorites-modal__product-label">Producto</span>

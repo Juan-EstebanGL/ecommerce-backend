@@ -1,7 +1,11 @@
 import api from "./axios";
 
-export function getProducts() {
-  return api.get("/products");
+export function getProducts({ page, limit, categoryId } = {}) {
+  const params = {};
+  if (page) params.page = page;
+  if (limit) params.limit = limit;
+  if (categoryId) params.categoryId = categoryId;
+  return api.get("/products", { params });
 }
 
 export function getProductById(id) {

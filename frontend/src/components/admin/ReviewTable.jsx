@@ -44,10 +44,22 @@ export default function ReviewTable({ reviews, onView, onDelete, deletingId }) {
                   <div className="ad-reviews-cell-product">
                     <div className="ad-reviews-product-thumb">
                       {review.product?.imageUrl ? (
-                        <img src={review.product.imageUrl} alt={review.product.name} />
-                      ) : (
-                        <span className="ad-reviews-product-thumb__placeholder">{placeholderImg}</span>
-                      )}
+                        <img
+                          src={review.product.imageUrl}
+                          alt={review.product.name}
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextSibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <span
+                        className="ad-reviews-product-thumb__placeholder"
+                        style={{ display: review.product?.imageUrl ? "none" : "flex" }}
+                      >
+                        {placeholderImg}
+                      </span>
                     </div>
                     <span className="ad-reviews-product-name">{review.product?.name || "—"}</span>
                   </div>
