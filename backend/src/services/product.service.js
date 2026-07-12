@@ -46,7 +46,7 @@ const createProduct = async (userId, data) => {
         imageUrl: imageUrl || null,
         publicId: publicId || null,
         userId,
-        ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
+        categoryId: categoryId ? Number(categoryId) : null,
       },
       include: { category: true },
     });
@@ -68,7 +68,7 @@ const getProducts = async ({ page = 1, limit = 20, categoryId } = {}) => {
 
   const where = categoryId ? { categoryId: parseInt(categoryId, 10) } : {};
 
-  const [products, total] = await Promise.all([
+  const [products, total, totalAvailable, totalLowStock, totalOutOfStock] = await Promise.all([
     prisma.product.findMany({
       include: {
         user: {
@@ -85,6 +85,9 @@ const getProducts = async ({ page = 1, limit = 20, categoryId } = {}) => {
       orderBy: { id: "desc" },
     }),
     prisma.product.count({ where }),
+    prisma.product.count({ where: { ...where, stock: { gt: 5 } } }),
+    prisma.product.count({ where: { ...where, stock: { gt: 0, lte: 5 } } }),
+    prisma.product.count({ where: { ...where, stock: 0 } }),
   ]);
 
   return {
@@ -92,6 +95,11 @@ const getProducts = async ({ page = 1, limit = 20, categoryId } = {}) => {
     total,
     page: pageNum,
     totalPages: Math.ceil(total / limitNum),
+    stats: {
+      totalAvailable,
+      totalLowStock,
+      totalOutOfStock,
+    },
   };
 };
 
@@ -114,9 +122,7 @@ const updateProduct = async (userId, userRole, id, data) => {
 
     const categoryUpdate =
       categoryId !== undefined
-        ? categoryId
-          ? { category: { connect: { id: categoryId } } }
-          : { category: { disconnect: true } }
+        ? { categoryId: categoryId ? Number(categoryId) : null }
         : {};
 
     const product = await prisma.product.update({

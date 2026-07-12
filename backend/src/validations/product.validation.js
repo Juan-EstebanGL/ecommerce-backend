@@ -1,12 +1,12 @@
 const { z } = require("zod");
 
 const numberFromInput = (value) => {
-  if (value === null) {
-    return NaN;
+  if (value === null || value === undefined) {
+    return null;
   }
 
   if (typeof value === "string" && value.trim() === "") {
-    return NaN;
+    return null;
   }
 
   return Number(value);
@@ -34,14 +34,14 @@ const nonNegativeInteger = (message) => {
 };
 
 const productName = z
-  .string({ error: "name no puede estar vacio" })
+  .string({ error: "El nombre es obligatorio" })
   .trim()
-  .min(1, "name no puede estar vacio");
+  .min(1, "El nombre es obligatorio");
 
 const productPayloadSchema = z.object({
   name: productName,
-  price: positiveNumber("price debe ser mayor a 0"),
-  stock: nonNegativeInteger("stock debe ser un entero mayor o igual a 0"),
+  price: positiveNumber("El precio debe ser un número mayor a 0"),
+  stock: nonNegativeInteger("El stock debe ser un número entero igual o mayor a 0"),
   imageUrl: z.string().optional(),
   publicId: z.string().optional(),
   categoryId: z.preprocess(
@@ -52,7 +52,7 @@ const productPayloadSchema = z.object({
 
 const productParamsSchema = z.object({
   params: z.object({
-    id: positiveInteger("id debe ser un entero positivo"),
+    id: positiveInteger("El ID del producto no es válido"),
   }),
 });
 

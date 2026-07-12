@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { getProducts, deleteProduct } from "../../api/products";
 import ProductTable from "../../components/admin/ProductTable";
 import ProductFormModal from "../../components/admin/ProductFormModal";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import Pagination from "../../components/Pagination";
+import useDebounce from "../../hooks/useDebounce";
 
 const PAGE_SIZE = 8;
 
@@ -14,20 +15,20 @@ export default function AdminProducts() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [statsData, setStatsData] = useState({ totalAvailable: 0, totalLowStock: 0, totalOutOfStock: 0 });
   const tableRef = useRef(null);
+  const debouncedSearch = useDebounce(search);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await getProducts({ page, limit: PAGE_SIZE });
+        const res = await getProducts({ limit: 100 });
         if (!cancelled) {
           setProducts(res.data?.data || []);
-          setTotal(res.data?.total || 0);
-          setTotalPages(res.data?.totalPages || 0);
+          setStatsData(res.data?.stats || { totalAvailable: 0, totalLowStock: 0, totalOutOfStock: 0 });
         }
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Error al cargar productos");
@@ -36,7 +37,25 @@ export default function AdminProducts() {
       }
     })();
     return () => { cancelled = true; };
-  }, [page]);
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!debouncedSearch.trim()) return products;
+    const q = debouncedSearch.toLowerCase().trim();
+    return products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        (p.category?.name && p.category.name.toLowerCase().includes(q))
+    );
+  }, [products, debouncedSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [totalPages, page]);
 
   function handlePageChange(newPage) {
     setPage(newPage);
@@ -49,10 +68,9 @@ export default function AdminProducts() {
     setLoading(true);
     setError("");
     try {
-      const res = await getProducts({ page, limit: PAGE_SIZE });
+      const res = await getProducts({ limit: 100 });
       setProducts(res.data?.data || []);
-      setTotal(res.data?.total || 0);
-      setTotalPages(res.data?.totalPages || 0);
+      setStatsData(res.data?.stats || { totalAvailable: 0, totalLowStock: 0, totalOutOfStock: 0 });
     } catch (err) {
       setError(err.response?.data?.message || "Error al cargar productos");
     } finally {
@@ -100,7 +118,7 @@ export default function AdminProducts() {
   const stats = [
     {
       label: "Total productos",
-      value: total,
+      value: products.length,
       color: "teal",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -112,7 +130,7 @@ export default function AdminProducts() {
     },
     {
       label: "Disponibles",
-      value: products.filter((p) => p.stock > 5).length,
+      value: statsData.totalAvailable,
       color: "success",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -123,7 +141,7 @@ export default function AdminProducts() {
     },
     {
       label: "Poco stock",
-      value: products.filter((p) => p.stock > 0 && p.stock <= 5).length,
+      value: statsData.totalLowStock,
       color: "warning",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -135,7 +153,7 @@ export default function AdminProducts() {
     },
     {
       label: "Agotados",
-      value: products.filter((p) => p.stock === 0).length,
+      value: statsData.totalOutOfStock,
       color: "danger",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -228,17 +246,18 @@ export default function AdminProducts() {
             type="text"
             placeholder="Buscar productos..."
             className="ad-products-search__input"
-            disabled
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
         </div>
       </div>
 
-      <ProductTable products={products} onEdit={openEditModal} onDelete={handleDelete} deletingId={deletingId} />
+      <ProductTable products={paged} onEdit={openEditModal} onDelete={handleDelete} deletingId={deletingId} />
 
       <Pagination
-        page={page}
+        page={safePage}
         totalPages={totalPages}
-        total={total}
+        total={filtered.length}
         itemsPerPage={PAGE_SIZE}
         onPageChange={handlePageChange}
       />

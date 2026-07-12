@@ -17,6 +17,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
     total: result.total,
     page: result.page,
     totalPages: result.totalPages,
+    stats: result.stats,
   });
 }, "Error obteniendo todas las ordenes");
 

@@ -2,7 +2,7 @@ const { z } = require("zod");
 
 const categoryParamsSchema = z.object({
   params: z.object({
-    id: z.coerce.number().int().positive("id debe ser un entero positivo"),
+    id: z.coerce.number().int().positive("El ID de la categoría no es válido"),
   }),
 });
 
@@ -10,12 +10,12 @@ const categoryName = z
   .string({ error: "El nombre es obligatorio" })
   .trim()
   .min(1, "El nombre es obligatorio")
-  .max(100, "El nombre no puede superar 100 caracteres");
+  .max(100, "El nombre no puede superar los 100 caracteres");
 
 const categoryDescription = z
   .string()
   .trim()
-  .max(500, "La descripción no puede superar 500 caracteres")
+  .max(500, "La descripción no puede superar los 500 caracteres")
   .optional()
   .nullable();
 

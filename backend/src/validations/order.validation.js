@@ -15,7 +15,7 @@ const positiveInteger = (message) => {
 
 const orderIdParamsSchema = z.object({
   params: z.object({
-    id: positiveInteger("id debe ser un entero positivo"),
+    id: positiveInteger("El ID de la orden no es válido"),
   }),
 });
 
@@ -24,7 +24,7 @@ const updateOrderStatusSchema = orderIdParamsSchema.extend({
     status: z.enum(
       ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"],
       {
-        error: "status invalido",
+        error: "El estado seleccionado no es válido",
       }
     ),
   }),

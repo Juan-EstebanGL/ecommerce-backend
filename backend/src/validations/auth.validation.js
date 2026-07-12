@@ -2,12 +2,12 @@ const { z } = require("zod");
 
 const authSchema = z.object({
   email: z
-    .string({ error: "Email y password son requeridos" })
+    .string({ error: "El correo electrónico es obligatorio" })
     .trim()
-    .email("Email invalido"),
+    .email("Ingrese un correo electrónico válido"),
   password: z
-    .string({ error: "Email y password son requeridos" })
-    .min(6, "password debe tener minimo 6 caracteres"),
+    .string({ error: "La contraseña es obligatoria" })
+    .min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
 const registerSchema = authSchema;

@@ -111,7 +111,7 @@ const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
   const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 8));
   const skip = (pageNum - 1) * limitNum;
 
-  const [reviews, total] = await Promise.all([
+  const [reviews, total, avgResult, totalFiveStar, totalOneStar] = await Promise.all([
     prisma.review.findMany({
       include: {
         user: {
@@ -133,6 +133,9 @@ const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
       take: limitNum,
     }),
     prisma.review.count(),
+    prisma.review.aggregate({ _avg: { rating: true } }),
+    prisma.review.count({ where: { rating: 5 } }),
+    prisma.review.count({ where: { rating: 1 } }),
   ]);
 
   return {
@@ -154,6 +157,13 @@ const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
     total,
     page: pageNum,
     totalPages: Math.ceil(total / limitNum),
+    stats: {
+      averageRating: avgResult._avg.rating
+        ? Number(avgResult._avg.rating.toFixed(1))
+        : null,
+      totalFiveStar,
+      totalOneStar,
+    },
   };
 };
 

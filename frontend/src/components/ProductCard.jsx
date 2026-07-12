@@ -20,7 +20,7 @@ const ImageIcon = () => (
   </svg>
 );
 
-function ProductCard({ product, onAddToCart, addingId }) {
+function ProductCard({ product, onAddToCart, addingId, onFavoriteToggle }) {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavoriteContext();
   const [quantity, setQuantity] = useState(1);
@@ -38,6 +38,7 @@ function ProductCard({ product, onAddToCart, addingId }) {
       showSuccess(wasFavorite ? "Producto eliminado de favoritos" : "Producto agregado a favoritos");
       setFavAnimating(true);
       setTimeout(() => setFavAnimating(false), 350);
+      if (onFavoriteToggle) onFavoriteToggle(product.id, !wasFavorite);
     }
   };
 

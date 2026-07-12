@@ -16,16 +16,16 @@ const positiveInteger = (message) => {
 const reviewRating = z.preprocess(
   numberFromInput,
   z
-    .number({ error: "rating debe ser un numero entero entre 1 y 5" })
-    .int("rating debe ser un numero entero entre 1 y 5")
-    .min(1, "rating debe ser un numero entero entre 1 y 5")
-    .max(5, "rating debe ser un numero entero entre 1 y 5")
+    .number({ error: "La calificación debe ser un número del 1 al 5" })
+    .int("La calificación debe ser un número entero del 1 al 5")
+    .min(1, "La calificación debe ser un número del 1 al 5")
+    .max(5, "La calificación debe ser un número del 1 al 5")
 );
 
 const reviewComment = z
-  .string({ error: "comment es obligatorio" })
+  .string({ error: "El comentario es obligatorio" })
   .trim()
-  .min(1, "comment es obligatorio");
+  .min(1, "El comentario es obligatorio");
 
 const reviewPayloadSchema = z.object({
   rating: reviewRating,
@@ -34,20 +34,20 @@ const reviewPayloadSchema = z.object({
 
 const reviewParamsSchema = z.object({
   params: z.object({
-    id: positiveInteger("id debe ser un entero positivo"),
+    id: positiveInteger("El ID de la reseña no es válido"),
   }),
 });
 
 const createReviewSchema = z.object({
   params: z.object({
-    id: positiveInteger("id debe ser un entero positivo"),
+    id: positiveInteger("El ID del producto no es válido"),
   }),
   body: reviewPayloadSchema,
 });
 
 const updateReviewSchema = z.object({
   params: z.object({
-    id: positiveInteger("id debe ser un entero positivo"),
+    id: positiveInteger("El ID de la reseña no es válido"),
   }),
   body: reviewPayloadSchema,
 });

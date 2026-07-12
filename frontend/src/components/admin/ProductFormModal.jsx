@@ -72,6 +72,7 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
     const stockNum = parseInt(form.stock, 10);
     if (form.stock === "" || isNaN(stockNum) || stockNum < 0) errs.stock = "Debe ser 0 o mayor";
     if (mode === "create" && !file) errs.image = "Selecciona una imagen";
+    if (!form.categoryId) errs.categoryId = "Debes seleccionar una categoría";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -200,6 +201,7 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
+                {errors.categoryId && <span className="ad-form__error">{errors.categoryId}</span>}
               </div>
             </div>
 

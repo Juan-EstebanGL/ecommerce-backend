@@ -15,7 +15,7 @@ const positiveInteger = (message) => {
 
 const favoriteParamsSchema = z.object({
   params: z.object({
-    productId: positiveInteger("productId debe ser un entero positivo"),
+    productId: positiveInteger("El ID del producto no es válido"),
   }),
 });
 

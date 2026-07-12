@@ -15,20 +15,20 @@ const positiveInteger = (message) => {
 
 const cartItemParamsSchema = z.object({
   params: z.object({
-    id: positiveInteger("id debe ser un entero positivo"),
+    id: positiveInteger("El ID del producto no es válido"),
   }),
 });
 
 const addToCartSchema = z.object({
   body: z.object({
-    productId: positiveInteger("productId debe ser un entero positivo"),
-    quantity: positiveInteger("quantity debe ser un entero mayor a 0"),
+    productId: positiveInteger("El ID del producto no es válido"),
+    quantity: positiveInteger("La cantidad debe ser un número entero mayor a 0"),
   }),
 });
 
 const updateCartItemSchema = cartItemParamsSchema.extend({
   body: z.object({
-    quantity: positiveInteger("quantity debe ser un entero mayor a 0"),
+    quantity: positiveInteger("La cantidad debe ser un número entero mayor a 0"),
   }),
 });
 

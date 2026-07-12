@@ -34,7 +34,7 @@ function Products() {
 
       try {
         const [prodRes, catRes] = await Promise.all([
-          getProducts(),
+          getProducts({ limit: 100 }),
           getCategories().catch(() => ({ data: [] })),
         ]);
         const data = prodRes.data?.data || prodRes.data || [];

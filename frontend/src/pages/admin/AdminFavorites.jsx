@@ -1,7 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { getAdminFavorites } from "../../api/favorites";
 import FavoriteTable from "../../components/admin/FavoriteTable";
 import Pagination from "../../components/Pagination";
+import useDebounce from "../../hooks/useDebounce";
 
 const PAGE_SIZE = 8;
 
@@ -10,19 +11,17 @@ export default function AdminFavorites() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [viewingProduct, setViewingProduct] = useState(null);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
   const tableRef = useRef(null);
+  const debouncedSearch = useDebounce(search);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await getAdminFavorites({ page, limit: PAGE_SIZE });
-        if (!cancelled) {
-          setData(res.data);
-          setTotalPages(res.data?.totalPages || 0);
-        }
+        const res = await getAdminFavorites({ limit: 100 });
+        if (!cancelled) setData(res.data);
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Error al cargar favoritos");
       } finally {
@@ -30,7 +29,25 @@ export default function AdminFavorites() {
       }
     })();
     return () => { cancelled = true; };
-  }, [page]);
+  }, []);
+
+  const allProducts = data?.products || [];
+
+  const filtered = useMemo(() => {
+    if (!debouncedSearch.trim()) return allProducts;
+    const q = debouncedSearch.toLowerCase().trim();
+    return allProducts.filter(
+      (p) => p.name.toLowerCase().includes(q)
+    );
+  }, [allProducts, debouncedSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [totalPages, page]);
 
   function handlePageChange(newPage) {
     setPage(newPage);
@@ -153,12 +170,28 @@ export default function AdminFavorites() {
         ))}
       </div>
 
-      <FavoriteTable products={data?.products || []} onView={setViewingProduct} />
+      <div className="ad-products-toolbar">
+        <div className="ad-products-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar productos..."
+            className="ad-products-search__input"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+      </div>
+
+      <FavoriteTable products={paged} onView={setViewingProduct} />
 
       <Pagination
-        page={page}
+        page={safePage}
         totalPages={totalPages}
-        total={data?.total || 0}
+        total={filtered.length}
         itemsPerPage={PAGE_SIZE}
         onPageChange={handlePageChange}
       />

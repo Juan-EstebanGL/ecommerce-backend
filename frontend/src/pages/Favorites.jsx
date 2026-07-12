@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { getFavorites } from "../api/favorites";
@@ -21,6 +21,8 @@ function Favorites() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [addingId, setAddingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const gridRef = useRef(null);
 
   useEffect(() => {
@@ -55,10 +57,45 @@ function Favorites() {
     return () => { cancelled = true; };
   }, [user, page]);
 
+  const filtered = useMemo(() => {
+    let result = favorites;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (f) =>
+          f.product?.name?.toLowerCase().includes(q) ||
+          (f.product?.description && f.product.description.toLowerCase().includes(q))
+      );
+    }
+
+    if (showOnlyAvailable) {
+      result = result.filter((f) => f.product?.stock > 0);
+    }
+
+    return result;
+  }, [favorites, searchQuery, showOnlyAvailable]);
+
+  const hasActiveFilters = searchQuery.trim() !== "" || showOnlyAvailable;
+
   function handlePageChange(newPage) {
     setPage(newPage);
     if (gridRef.current) {
       gridRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function handleFavoriteToggle(productId, isNowFavorite) {
+    if (!isNowFavorite) {
+      setFavorites((prev) => {
+        const next = prev.filter((f) => f.productId !== productId);
+        const newTotal = total - 1;
+        setTotal(newTotal);
+        const newTotalPages = Math.max(1, Math.ceil(newTotal / PAGE_SIZE));
+        setTotalPages(newTotalPages);
+        if (page > newTotalPages) setPage(newTotalPages);
+        return next;
+      });
     }
   }
 
@@ -85,7 +122,8 @@ function Favorites() {
 
   if (!user) return null;
 
-  const isEmpty = !loading && favorites.length === 0;
+  const isEmpty = !loading && total === 0;
+  const noResults = !loading && total > 0 && filtered.length === 0;
 
   return (
     <main className="fv-page">
@@ -140,15 +178,63 @@ function Favorites() {
           </div>
         )}
 
-        {!loading && favorites.length > 0 && (
+        {!loading && total > 0 && (
+          <div className="products-toolbar">
+            <div className="pr-toolbar__controls">
+              <div className="pr-toolbar__search">
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Buscar productos"
+                />
+              </div>
+              <label className="pr-filter-label">
+                <input
+                  type="checkbox"
+                  checked={showOnlyAvailable}
+                  onChange={(e) => setShowOnlyAvailable(e.target.checked)}
+                />
+                <span>Solo disponibles</span>
+              </label>
+            </div>
+            <span className="pr-toolbar-count">
+              {hasActiveFilters
+                ? `${filtered.length} ${filtered.length === 1 ? "producto encontrado" : "productos encontrados"}`
+                : `${total} ${total === 1 ? "producto guardado" : "productos guardados"}`
+              }
+            </span>
+          </div>
+        )}
+
+        {noResults && (
+          <div className="pr-empty">
+            <div className="pr-empty__icon">
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </div>
+            <h2 className="pr-empty__title">No se encontraron productos</h2>
+            <p className="pr-empty__desc">
+              {searchQuery
+                ? `No encontramos favoritos que coincidan con "${searchQuery}".`
+                : "No hay productos disponibles con el filtro seleccionado."}
+            </p>
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
           <>
             <div className="product-grid fv-grid" ref={gridRef}>
-              {favorites.map((fav, idx) => (
+              {filtered.map((fav, idx) => (
                 <div key={fav.id} className="fv-grid__item" style={{ animationDelay: `${idx * 0.06}s` }}>
                   <ProductCard
                     product={fav.product}
                     onAddToCart={handleAddToCart}
                     addingId={addingId}
+                    onFavoriteToggle={handleFavoriteToggle}
                   />
                 </div>
               ))}

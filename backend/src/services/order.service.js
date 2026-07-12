@@ -168,7 +168,7 @@ const getAllOrders = async ({ page = 1, limit = 8 } = {}) => {
   const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 8));
   const skip = (pageNum - 1) * limitNum;
 
-  const [orders, total] = await Promise.all([
+  const [orders, total, totalPending, totalDelivered, totalCancelled] = await Promise.all([
     prisma.order.findMany({
       include: {
         ...orderInclude,
@@ -187,6 +187,9 @@ const getAllOrders = async ({ page = 1, limit = 8 } = {}) => {
       take: limitNum,
     }),
     prisma.order.count(),
+    prisma.order.count({ where: { status: "PENDING" } }),
+    prisma.order.count({ where: { status: "DELIVERED" } }),
+    prisma.order.count({ where: { status: "CANCELLED" } }),
   ]);
 
   return {
@@ -194,6 +197,11 @@ const getAllOrders = async ({ page = 1, limit = 8 } = {}) => {
     total,
     page: pageNum,
     totalPages: Math.ceil(total / limitNum),
+    stats: {
+      totalPending,
+      totalDelivered,
+      totalCancelled,
+    },
   };
 };
 

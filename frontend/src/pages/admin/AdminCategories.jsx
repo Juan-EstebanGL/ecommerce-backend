@@ -5,6 +5,7 @@ import CategoryFormModal from "../../components/admin/CategoryFormModal";
 import CategoryDetailModal from "../../components/admin/CategoryDetailModal";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import Pagination from "../../components/Pagination";
+import useDebounce from "../../hooks/useDebounce";
 
 const PAGE_SIZE = 8;
 
@@ -19,6 +20,7 @@ export default function AdminCategories() {
   const [search, setSearch] = useState("");
   const [detailCategory, setDetailCategory] = useState(null);
   const tableRef = useRef(null);
+  const debouncedSearch = useDebounce(search);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,14 +38,14 @@ export default function AdminCategories() {
   }, []);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return categories;
-    const q = search.toLowerCase().trim();
+    if (!debouncedSearch.trim()) return categories;
+    const q = debouncedSearch.toLowerCase().trim();
     return categories.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.description && c.description.toLowerCase().includes(q))
     );
-  }, [categories, search]);
+  }, [categories, debouncedSearch]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -144,7 +146,7 @@ export default function AdminCategories() {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
+          <line x1="12" y1="16" x2="12.01" y2="17" />
         </svg>
       ),
     },

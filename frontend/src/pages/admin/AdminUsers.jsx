@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { getUsers, updateUserRole, deleteUser } from "../../api/users";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import UserTable from "../../components/admin/UserTable";
 import UserViewModal from "../../components/admin/UserViewModal";
 import Pagination from "../../components/Pagination";
+import useDebounce from "../../hooks/useDebounce";
 
 const PAGE_SIZE = 8;
 
@@ -14,37 +15,20 @@ export default function AdminUsers() {
   const [viewingUser, setViewingUser] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [roleLoadingId, setRoleLoadingId] = useState(null);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [statsData, setStatsData] = useState({ totalAdmins: 0, totalClients: 0, totalNewThisMonth: 0 });
   const tableRef = useRef(null);
-
-  async function loadUsers(currentPage) {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await getUsers({ page: currentPage, limit: PAGE_SIZE });
-      setUsers(res.data?.data || []);
-      setTotal(res.data?.total || 0);
-      setTotalPages(res.data?.totalPages || 0);
-    } catch (err) {
-      setError(err.response?.data?.message || "Error al cargar usuarios");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const debouncedSearch = useDebounce(search);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setLoading(true);
-      setError("");
       try {
-        const res = await getUsers({ page, limit: PAGE_SIZE });
+        const res = await getUsers({ limit: 100 });
         if (!cancelled) {
           setUsers(res.data?.data || []);
-          setTotal(res.data?.total || 0);
-          setTotalPages(res.data?.totalPages || 0);
+          setStatsData(res.data?.stats || { totalAdmins: 0, totalClients: 0, totalNewThisMonth: 0 });
         }
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Error al cargar usuarios");
@@ -53,7 +37,40 @@ export default function AdminUsers() {
       }
     })();
     return () => { cancelled = true; };
-  }, [page]);
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!debouncedSearch.trim()) return users;
+    const q = debouncedSearch.toLowerCase().trim();
+    return users.filter(
+      (u) =>
+        (u.firstName && u.firstName.toLowerCase().includes(q)) ||
+        (u.lastName && u.lastName.toLowerCase().includes(q)) ||
+        u.email.toLowerCase().includes(q)
+    );
+  }, [users, debouncedSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [totalPages, page]);
+
+  async function refreshUsers() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await getUsers({ limit: 100 });
+      setUsers(res.data?.data || []);
+      setStatsData(res.data?.stats || { totalAdmins: 0, totalClients: 0, totalNewThisMonth: 0 });
+    } catch (err) {
+      setError(err.response?.data?.message || "Error al cargar usuarios");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handlePageChange(newPage) {
     setPage(newPage);
@@ -110,7 +127,7 @@ export default function AdminUsers() {
       setTimeout(() => {
         setDeletingId(null);
         showSuccess("Usuario eliminado correctamente");
-        loadUsers(page);
+        refreshUsers();
       }, 350);
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Error al eliminar usuario";
@@ -119,13 +136,10 @@ export default function AdminUsers() {
     }
   }
 
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
   const stats = [
     {
       label: "Total usuarios",
-      value: total,
+      value: users.length,
       color: "teal",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -138,7 +152,7 @@ export default function AdminUsers() {
     },
     {
       label: "Administradores",
-      value: users.filter((u) => u.role === "ADMIN").length,
+      value: statsData.totalAdmins,
       color: "purple",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -148,7 +162,7 @@ export default function AdminUsers() {
     },
     {
       label: "Clientes",
-      value: users.filter((u) => u.role === "USER").length,
+      value: statsData.totalClients,
       color: "blue",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -159,7 +173,7 @@ export default function AdminUsers() {
     },
     {
       label: "Nuevos este mes",
-      value: users.filter((u) => new Date(u.createdAt) >= startOfMonth).length,
+      value: statsData.totalNewThisMonth,
       color: "success",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -203,7 +217,7 @@ export default function AdminUsers() {
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           <p>{error}</p>
-          <button className="btn btn--primary" onClick={() => loadUsers(page)}>
+          <button className="btn btn--primary" onClick={() => refreshUsers()}>
             Reintentar
           </button>
         </div>
@@ -232,8 +246,24 @@ export default function AdminUsers() {
         ))}
       </div>
 
+      <div className="ad-products-toolbar">
+        <div className="ad-products-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar usuarios..."
+            className="ad-products-search__input"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+      </div>
+
       <UserTable
-        users={users}
+        users={paged}
         onView={handleView}
         onRoleToggle={handleRoleToggle}
         onDelete={handleDelete}
@@ -242,9 +272,9 @@ export default function AdminUsers() {
       />
 
       <Pagination
-        page={page}
+        page={safePage}
         totalPages={totalPages}
-        total={total}
+        total={filtered.length}
         itemsPerPage={PAGE_SIZE}
         onPageChange={handlePageChange}
       />

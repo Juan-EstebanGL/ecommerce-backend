@@ -90,8 +90,12 @@ const login = asyncHandler(async (req, res) => {
     user: {
       id: user.id,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
       role: user.role,
       avatarUrl: user.avatarUrl,
+      avatarPublicId: user.avatarPublicId,
       createdAt: user.createdAt,
     },
   });

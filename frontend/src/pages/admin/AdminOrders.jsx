@@ -1,11 +1,21 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { getAdminOrders, updateOrderStatus } from "../../api/orders";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import OrderTable from "../../components/admin/OrderTable";
 import OrderStatusBadge from "../../components/admin/OrderStatusBadge";
 import Pagination from "../../components/Pagination";
+import useDebounce from "../../hooks/useDebounce";
 
 const PAGE_SIZE = 8;
+
+const STATUS_LABELS = {
+  PENDING: "Pendiente",
+  PAID: "Pagado",
+  PROCESSING: "Procesando",
+  SHIPPED: "Enviado",
+  DELIVERED: "Entregado",
+  CANCELLED: "Cancelado",
+};
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -13,20 +23,20 @@ export default function AdminOrders() {
   const [error, setError] = useState("");
   const [viewingOrder, setViewingOrder] = useState(null);
   const [loadingId, setLoadingId] = useState(null);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [statsData, setStatsData] = useState({ totalPending: 0, totalDelivered: 0, totalCancelled: 0 });
   const tableRef = useRef(null);
+  const debouncedSearch = useDebounce(search);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await getAdminOrders({ page, limit: PAGE_SIZE });
+        const res = await getAdminOrders({ limit: 100 });
         if (!cancelled) {
           setOrders(res.data?.orders || []);
-          setTotal(res.data?.total || 0);
-          setTotalPages(res.data?.totalPages || 0);
+          setStatsData(res.data?.stats || { totalPending: 0, totalDelivered: 0, totalCancelled: 0 });
         }
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Error al cargar órdenes");
@@ -35,7 +45,41 @@ export default function AdminOrders() {
       }
     })();
     return () => { cancelled = true; };
-  }, [page]);
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!debouncedSearch.trim()) return orders;
+    const q = debouncedSearch.toLowerCase().trim();
+    return orders.filter(
+      (o) =>
+        String(o.id).includes(q) ||
+        (o.user?.email && o.user.email.toLowerCase().includes(q)) ||
+        (STATUS_LABELS[o.status] && STATUS_LABELS[o.status].toLowerCase().includes(q)) ||
+        o.status.toLowerCase().includes(q)
+    );
+  }, [orders, debouncedSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [totalPages, page]);
+
+  async function refreshOrders() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await getAdminOrders({ limit: 100 });
+      setOrders(res.data?.orders || []);
+      setStatsData(res.data?.stats || { totalPending: 0, totalDelivered: 0, totalCancelled: 0 });
+    } catch (err) {
+      setError(err.response?.data?.message || "Error al cargar órdenes");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handlePageChange(newPage) {
     setPage(newPage);
@@ -49,21 +93,13 @@ export default function AdminOrders() {
   }
 
   async function handleStatusChange(orderId, newStatus) {
-    const statusLabels = {
-      PAID: "Pagado",
-      PROCESSING: "Procesando",
-      SHIPPED: "Enviado",
-      DELIVERED: "Entregado",
-      CANCELLED: "Cancelado",
-    };
-
     const isCancel = newStatus === "CANCELLED";
 
     const result = await showConfirm(
       isCancel ? "Cancelar orden" : "Cambiar estado",
       isCancel
         ? "Esta acción cancelará la orden y no podrá continuar su flujo normal."
-        : `¿Estás seguro de marcar esta orden como "${statusLabels[newStatus]}"?`,
+        : `¿Estás seguro de marcar esta orden como "${STATUS_LABELS[newStatus]}"?`,
       isCancel ? "Sí, cancelar" : "Cambiar",
       "Cancelar"
     );
@@ -75,7 +111,7 @@ export default function AdminOrders() {
     try {
       const res = await updateOrderStatus(orderId, { status: newStatus });
       setOrders((prev) => prev.map((o) => (o.id === orderId ? res.data.order : o)));
-      showSuccess(`Estado actualizado a "${statusLabels[newStatus]}"`);
+      showSuccess(`Estado actualizado a "${STATUS_LABELS[newStatus]}"`);
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Error al actualizar estado";
       showError(msg);
@@ -87,7 +123,7 @@ export default function AdminOrders() {
   const stats = [
     {
       label: "Total órdenes",
-      value: total,
+      value: orders.length,
       color: "teal",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -99,7 +135,7 @@ export default function AdminOrders() {
     },
     {
       label: "Pendientes",
-      value: orders.filter((o) => o.status === "PENDING").length,
+      value: statsData.totalPending,
       color: "warning",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -110,7 +146,7 @@ export default function AdminOrders() {
     },
     {
       label: "Completadas",
-      value: orders.filter((o) => o.status === "DELIVERED").length,
+      value: statsData.totalDelivered,
       color: "success",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -121,7 +157,7 @@ export default function AdminOrders() {
     },
     {
       label: "Canceladas",
-      value: orders.filter((o) => o.status === "CANCELLED").length,
+      value: statsData.totalCancelled,
       color: "danger",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -166,7 +202,7 @@ export default function AdminOrders() {
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           <p>{error}</p>
-          <button className="btn btn--primary" onClick={() => window.location.reload()}>
+          <button className="btn btn--primary" onClick={() => refreshOrders()}>
             Reintentar
           </button>
         </div>
@@ -195,17 +231,33 @@ export default function AdminOrders() {
         ))}
       </div>
 
+      <div className="ad-products-toolbar">
+        <div className="ad-products-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar órdenes..."
+            className="ad-products-search__input"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+      </div>
+
       <OrderTable
-        orders={orders}
+        orders={paged}
         onView={handleView}
         onStatusChange={handleStatusChange}
         loadingId={loadingId}
       />
 
       <Pagination
-        page={page}
+        page={safePage}
         totalPages={totalPages}
-        total={total}
+        total={filtered.length}
         itemsPerPage={PAGE_SIZE}
         onPageChange={handlePageChange}
       />

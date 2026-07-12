@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { getAdminReviews, deleteReview } from "../../api/reviews";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import ReviewTable from "../../components/admin/ReviewTable";
 import ReviewRating from "../../components/admin/ReviewRating";
 import Pagination from "../../components/Pagination";
+import useDebounce from "../../hooks/useDebounce";
 
 const PAGE_SIZE = 8;
 
@@ -13,20 +14,20 @@ export default function AdminReviews() {
   const [error, setError] = useState("");
   const [viewingReview, setViewingReview] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [statsData, setStatsData] = useState({ averageRating: null, totalFiveStar: 0, totalOneStar: 0 });
   const tableRef = useRef(null);
+  const debouncedSearch = useDebounce(search);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await getAdminReviews({ page, limit: PAGE_SIZE });
+        const res = await getAdminReviews({ limit: 100 });
         if (!cancelled) {
           setReviews(res.data?.data || []);
-          setTotal(res.data?.total || 0);
-          setTotalPages(res.data?.totalPages || 0);
+          setStatsData(res.data?.stats || { averageRating: null, totalFiveStar: 0, totalOneStar: 0 });
         }
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Error al cargar reseñas");
@@ -35,7 +36,40 @@ export default function AdminReviews() {
       }
     })();
     return () => { cancelled = true; };
-  }, [page]);
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!debouncedSearch.trim()) return reviews;
+    const q = debouncedSearch.toLowerCase().trim();
+    return reviews.filter(
+      (r) =>
+        (r.product?.name && r.product.name.toLowerCase().includes(q)) ||
+        (r.user?.email && r.user.email.toLowerCase().includes(q)) ||
+        (r.comment && r.comment.toLowerCase().includes(q))
+    );
+  }, [reviews, debouncedSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [totalPages, page]);
+
+  async function refreshReviews() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await getAdminReviews({ limit: 100 });
+      setReviews(res.data?.data || []);
+      setStatsData(res.data?.stats || { averageRating: null, totalFiveStar: 0, totalOneStar: 0 });
+    } catch (err) {
+      setError(err.response?.data?.message || "Error al cargar reseñas");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handlePageChange(newPage) {
     setPage(newPage);
@@ -61,10 +95,7 @@ export default function AdminReviews() {
     try {
       await deleteReview(reviewId);
       showSuccess("Reseña eliminada correctamente");
-      const res = await getAdminReviews({ page, limit: PAGE_SIZE });
-      setReviews(res.data?.data || []);
-      setTotal(res.data?.total || 0);
-      setTotalPages(res.data?.totalPages || 0);
+      refreshReviews();
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Error al eliminar reseña";
       showError(msg);
@@ -73,17 +104,12 @@ export default function AdminReviews() {
     }
   }
 
-  const avgRating = reviews.length
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-    : "—";
-
-  const fiveStars = reviews.filter((r) => r.rating === 5).length;
-  const oneStar = reviews.filter((r) => r.rating === 1).length;
+  const avgRating = statsData.averageRating !== null ? statsData.averageRating : "—";
 
   const stats = [
     {
       label: "Total reseñas",
-      value: total,
+      value: reviews.length,
       color: "teal",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -103,7 +129,7 @@ export default function AdminReviews() {
     },
     {
       label: "5 estrellas",
-      value: fiveStars,
+      value: statsData.totalFiveStar,
       color: "success",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -113,7 +139,7 @@ export default function AdminReviews() {
     },
     {
       label: "1 estrella",
-      value: oneStar,
+      value: statsData.totalOneStar,
       color: "danger",
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -156,7 +182,7 @@ export default function AdminReviews() {
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           <p>{error}</p>
-          <button className="btn btn--primary" onClick={() => window.location.reload()}>
+          <button className="btn btn--primary" onClick={() => refreshReviews()}>
             Reintentar
           </button>
         </div>
@@ -185,17 +211,33 @@ export default function AdminReviews() {
         ))}
       </div>
 
+      <div className="ad-products-toolbar">
+        <div className="ad-products-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar reseñas..."
+            className="ad-products-search__input"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+      </div>
+
       <ReviewTable
-        reviews={reviews}
+        reviews={paged}
         onView={handleView}
         onDelete={handleDelete}
         deletingId={deletingId}
       />
 
       <Pagination
-        page={page}
+        page={safePage}
         totalPages={totalPages}
-        total={total}
+        total={filtered.length}
         itemsPerPage={PAGE_SIZE}
         onPageChange={handlePageChange}
       />

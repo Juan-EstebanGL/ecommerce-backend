@@ -36,7 +36,10 @@ const getUsers = async ({ page = 1, limit = 8 } = {}) => {
   const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 8));
   const skip = (pageNum - 1) * limitNum;
 
-  const [users, total] = await Promise.all([
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [users, total, totalAdmins, totalClients, totalNewThisMonth] = await Promise.all([
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       select: USER_SELECT,
@@ -44,6 +47,9 @@ const getUsers = async ({ page = 1, limit = 8 } = {}) => {
       take: limitNum,
     }),
     prisma.user.count(),
+    prisma.user.count({ where: { role: "ADMIN" } }),
+    prisma.user.count({ where: { role: "USER" } }),
+    prisma.user.count({ where: { createdAt: { gte: startOfMonth } } }),
   ]);
 
   return {
@@ -51,6 +57,11 @@ const getUsers = async ({ page = 1, limit = 8 } = {}) => {
     total,
     page: pageNum,
     totalPages: Math.ceil(total / limitNum),
+    stats: {
+      totalAdmins,
+      totalClients,
+      totalNewThisMonth,
+    },
   };
 };
 

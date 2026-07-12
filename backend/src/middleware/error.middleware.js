@@ -3,20 +3,27 @@ const AppError = require("../utils/AppError");
 const getZodMessage = (error) => {
   const firstIssue = error.issues && error.issues[0];
 
-  return firstIssue ? firstIssue.message : "Datos invalidos";
+  return firstIssue ? firstIssue.message : "Los datos enviados no son válidos";
 };
 
 const normalizePrismaError = (error) => {
   if (error.code === "P2025") {
-    return new AppError("Recurso no encontrado", 404);
+    return new AppError("El recurso solicitado no fue encontrado", 404);
   }
 
   if (error.code === "P2002") {
-    return new AppError("El recurso ya existe", 400);
+    const target = error.meta?.target;
+    if (target && target.includes("email")) {
+      return new AppError("El correo electrónico ya está en uso", 409);
+    }
+    if (target && target.includes("name")) {
+      return new AppError("Ya existe un registro con ese nombre", 409);
+    }
+    return new AppError("Esta información ya existe", 409);
   }
 
   if (error.code === "P2003") {
-    return new AppError("Operacion invalida por relacion existente", 400);
+    return new AppError("No se puede realizar esta operación porque existen registros relacionados", 409);
   }
 
   return null;
@@ -43,10 +50,10 @@ const errorMiddleware = (error, req, res, next) => {
 
   if (error.name === "MulterError") {
     if (error.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({ message: "El archivo excede el límite de 5 MB" });
+      return res.status(400).json({ message: "La imagen no debe superar los 5 MB" });
     }
 
-    return res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: "Error al procesar el archivo" });
   }
 
   const prismaError = normalizePrismaError(error);
@@ -58,7 +65,7 @@ const errorMiddleware = (error, req, res, next) => {
   }
 
   return res.status(500).json({
-    message: error.fallbackMessage || "Error interno del servidor",
+    message: error.fallbackMessage || "Ocurrió un error inesperado. Intente nuevamente.",
   });
 };
 
