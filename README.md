@@ -1,18 +1,25 @@
 # 🛒 Ecommerce Full Stack
 
-Aplicación de comercio electrónico desarrollada siguiendo una arquitectura cliente-servidor. El proyecto implementa autenticación con JWT, gestión de productos, carrito de compras, proceso de checkout, administración de órdenes y sistema de reseñas para productos, utilizando tecnologías modernas tanto en el frontend como en el backend. La aplicación cuenta con una interfaz moderna, completamente responsive y una arquitectura organizada para facilitar su escalabilidad y mantenimiento.
+Aplicación de comercio electrónico Full Stack desarrollada con una arquitectura cliente-servidor moderna utilizando React, Node.js, Express, Prisma y PostgreSQL.
+
+El proyecto implementa autenticación con JWT, panel de administración, catálogo de productos, carrito de compras, checkout, gestión de pedidos, sistema de reseñas, perfil de usuario con avatar, favoritos y una interfaz completamente responsive enfocada en una experiencia de usuario moderna.
 
 ---
 
-## 🚀 Highlights
+# 🚀 Highlights
 
-- 🔐 Autenticación completa mediante JWT.
-- 🛒 Ecommerce Full Stack desarrollado con React, Node.js, Express y PostgreSQL.
-- ⭐ Sistema de reseñas para productos con promedio y actualización en tiempo real.
-- 📦 Gestión completa de productos, carrito, checkout y órdenes.
-- 👤 Perfil de usuario.
-- ⚡ Actualización reactiva del carrito mediante Context API.
-- 🎨 Interfaz moderna, responsive y con microinteracciones.
+- 🔐 Autenticación segura mediante JWT.
+- 👤 Perfil de usuario completo con avatar y direcciones.
+- 🛍️ Catálogo de productos con búsqueda y filtros.
+- ❤️ Sistema de favoritos.
+- 🛒 Carrito sincronizado mediante Context API.
+- 📦 Checkout completo.
+- 📄 Historial y detalle de pedidos.
+- ⭐ Sistema de reseñas con calificación promedio.
+- 🛠️ Panel administrativo completo.
+- 📊 Dashboard administrativo con estadísticas y gráficos.
+- ☁️ Gestión de imágenes mediante Cloudinary.
+- 🎨 Interfaz moderna, responsive y optimizada para UX/UI.
 - 📖 API documentada con Swagger.
 - 🧪 Testing de integración con Jest.
 
@@ -28,6 +35,8 @@ Aplicación de comercio electrónico desarrollada siguiendo una arquitectura cli
 - Axios
 - Context API
 - SweetAlert2
+- Recharts
+- React CountUp
 - CSS3
 
 ## Backend
@@ -35,44 +44,83 @@ Aplicación de comercio electrónico desarrollada siguiendo una arquitectura cli
 - Node.js
 - Express.js
 - Prisma ORM
-- JWT (JSON Web Token)
+- PostgreSQL
+- JWT
+- bcrypt
+- Multer
+- Cloudinary
 - Zod
 - Swagger
 - Jest
 
-## Base de datos
+---
 
-- PostgreSQL
+# ✨ Funcionalidades
 
-## Herramientas
+## Usuarios
 
-- Git
-- GitHub
+- Registro.
+- Inicio de sesión.
+- Autenticación JWT.
+- Protección de rutas privadas.
+- Perfil de usuario.
+- Cambio de contraseña.
+- Cambio de avatar.
+- Gestión de direcciones.
+- Roles (USER / ADMIN).
 
 ---
 
-# ✨ Características
+## Productos
 
-- Registro e inicio de sesión de usuarios.
-- Autenticación segura mediante JWT.
-- Protección de rutas privadas.
-- Gestión de productos.
-- Catálogo con búsqueda y filtros.
-- Carrito de compras en tiempo real.
-- Checkout con validaciones.
-- Gestión completa de órdenes.
-- Perfil de usuario.
-- Sistema de reseñas para productos.
-- Creación y edición de reseñas propias.
-- Promedio y cantidad de reseñas calculados automáticamente.
-- Actualización reactiva del carrito mediante Context API.
-- Componentes reutilizables.
-- Interfaz moderna y completamente responsive.
-- Alertas y confirmaciones mediante SweetAlert2.
-- Validaciones tanto en frontend como en backend.
-- Arquitectura organizada por capas.
+- Catálogo.
+- Búsqueda.
+- Filtros.
+- Productos destacados.
+- Detalle del producto.
+- Productos relacionados.
+- Control de stock.
 
-## Estados de las órdenes
+---
+
+## Favoritos
+
+- Agregar productos a favoritos.
+- Eliminar favoritos.
+- Sincronización en tiempo real.
+- Página dedicada de favoritos.
+
+---
+
+## Carrito
+
+- Agregar productos.
+- Actualizar cantidades.
+- Eliminar productos.
+- Validación de stock.
+- Sincronización mediante Context API.
+- Contador dinámico.
+
+---
+
+## Checkout
+
+- Resumen del pedido.
+- Selección de dirección.
+- Gestión de direcciones durante el checkout.
+- Confirmación de compra.
+- Creación de órdenes.
+
+---
+
+## Órdenes
+
+- Historial de pedidos.
+- Detalle del pedido.
+- Estados de la orden.
+- Resumen de compra.
+
+Estados soportados:
 
 - Pending
 - Paid
@@ -80,6 +128,58 @@ Aplicación de comercio electrónico desarrollada siguiendo una arquitectura cli
 - Shipped
 - Delivered
 - Cancelled
+
+---
+
+## Reseñas
+
+- Crear reseñas.
+- Editar reseñas propias.
+- Una reseña por usuario y producto.
+- Promedio automático.
+- Cantidad de reseñas.
+- Actualización dinámica.
+
+---
+
+## Panel Administrativo
+
+### Dashboard
+
+- Estadísticas generales.
+- Estado de órdenes.
+- Ingresos.
+- Evolución mensual de ventas.
+- Productos con poco stock.
+- Productos más guardados.
+- Productos mejor calificados.
+- Últimas órdenes.
+- Últimas reseñas.
+
+### Gestión de usuarios
+
+- Listado de usuarios.
+- Avatar de usuario.
+- Roles.
+- Estados.
+
+### Gestión de productos
+
+- CRUD completo.
+- Subida de imágenes.
+- Gestión de stock.
+- Categorías.
+
+### Gestión de órdenes
+
+- Listado.
+- Actualización de estados.
+- Consulta de detalles.
+
+### Gestión de reseñas
+
+- Visualización.
+- Administración.
 
 ---
 
@@ -106,7 +206,7 @@ Frontend (React)
 
 ---
 
-# 📁 Estructura del proyecto
+# 📁 Estructura
 
 ```
 Ecommerce-App
@@ -140,75 +240,52 @@ Ecommerce-App
 
 ---
 
-# 🔐 Autenticación
+# 🔐 Seguridad
 
-La autenticación se implementó utilizando JWT (JSON Web Tokens).
-
-El flujo consiste en:
-
-- Registro de usuarios.
-- Inicio de sesión.
-- Generación del token.
-- Almacenamiento del token en el cliente.
-- Validación mediante middleware.
-- Protección de rutas privadas.
-- Cierre de sesión.
-- Redirección automática al login cuando la sesión finaliza.
+- JWT Authentication.
+- Hash de contraseñas con bcrypt.
+- Middleware de autorización.
+- Validación de datos con Zod.
+- Protección de rutas administrativas.
+- Validación de propiedad de recursos (productos, reseñas, direcciones).
 
 ---
 
-# 🛒 Carrito de compras
+# ☁️ Gestión de imágenes
 
-El carrito utiliza Context API para mantener el estado sincronizado en toda la aplicación.
+Las imágenes se almacenan utilizando Cloudinary.
 
-Características:
+Incluye:
 
-- Actualización en tiempo real del contador del carrito.
-- Agregar productos.
-- Modificar cantidades.
-- Validaciones de stock.
-- Eliminación de productos.
-- Checkout integrado.
-- Sincronización automática entre todas las vistas.
+- Imágenes de productos.
+- Avatar de usuario.
+- Eliminación automática de imágenes antiguas al reemplazarlas.
 
 ---
 
-# ⭐ Sistema de reseñas
+# 🎨 Experiencia de Usuario
 
-Los usuarios autenticados pueden valorar los productos.
-
-Características:
-
-- Crear una reseña.
-- Editar la propia reseña.
-- Una única reseña por usuario y producto.
-- Promedio de calificaciones calculado automáticamente.
-- Cantidad total de reseñas.
-- Actualización dinámica sin recargar la página.
-
----
-
-# 🎨 Experiencia de usuario
-
-La interfaz fue desarrollada priorizando una experiencia moderna y responsive.
+La aplicación fue optimizada siguiendo principios modernos de UX/UI.
 
 Incluye:
 
 - Diseño completamente responsive.
-- Navbar profesional con menú adaptativo.
-- Footer moderno.
+- Dashboard administrativo moderno.
+- Animaciones suaves.
+- Empty states personalizados.
+- Skeleton loaders.
+- Estados de carga.
+- Estados de error.
+- Confirmaciones mediante SweetAlert2.
 - Componentes reutilizables.
-- Loader y estados de carga.
-- Confirmaciones y notificaciones con SweetAlert2.
-- Microanimaciones y transiciones.
-- Validaciones visuales en formularios.
-- Diseño consistente en todas las páginas.
+- Navegación consistente.
+- Diseño uniforme en todos los módulos.
 
 ---
 
 # 🧪 Testing
 
-El backend incluye pruebas de integración desarrolladas con Jest, cubriendo funcionalidades como:
+El backend incluye pruebas de integración desarrolladas con Jest para funcionalidades como:
 
 - Autenticación.
 - Productos.
@@ -217,18 +294,18 @@ El backend incluye pruebas de integración desarrolladas con Jest, cubriendo fun
 
 ---
 
-# 📖 Documentación de la API
+# 📖 Documentación
 
-La API cuenta con documentación mediante Swagger, facilitando las pruebas y consulta de los diferentes endpoints.
+La API cuenta con documentación mediante Swagger para facilitar las pruebas de todos los endpoints.
 
 ---
 
 # ⚙️ Instalación
 
-## Clonar el repositorio
+## Clonar repositorio
 
 ```bash
-git clone https://github.com/Juan-estebanGL/Ecommerce-App.git
+git clone https://github.com/Juan-EstebanGL/Ecommerce-App.git
 ```
 
 ## Backend
@@ -240,13 +317,19 @@ npm install
 
 Crear el archivo `.env` tomando como referencia `.env.example`.
 
-Ejecutar las migraciones:
+Ejecutar migraciones:
 
 ```bash
 npx prisma migrate dev
 ```
 
-Iniciar el servidor:
+Generar cliente Prisma:
+
+```bash
+npx prisma generate
+```
+
+Iniciar servidor:
 
 ```bash
 npm run dev
@@ -271,40 +354,27 @@ npm run dev
 | Node.js | Backend |
 | Express | API REST |
 | PostgreSQL | Base de datos |
-| Prisma ORM | Acceso a datos |
+| Prisma ORM | ORM |
 | JWT | Autenticación |
+| Cloudinary | Gestión de imágenes |
+| Recharts | Dashboard |
+| React CountUp | KPIs |
+| SweetAlert2 | Alertas |
+| Context API | Estado global |
 | Zod | Validación |
 | Swagger | Documentación |
 | Jest | Testing |
-| SweetAlert2 | Alertas y confirmaciones |
-| Context API | Estado global |
-
----
-
-# 🚀 Próximas mejoras
-
-- Recuperación de contraseña.
-- Eliminación de reseñas.
-- Integración de pasarela de pagos.
-- Panel administrativo.
-- Gestión de imágenes para productos.
-- Wishlist (Favoritos).
-- Paginación de productos.
-- Filtros y búsqueda avanzada.
-- Docker.
-- CI/CD.
-- Despliegue en la nube.
 
 ---
 
 # 👨‍💻 Autor
 
-Juan Esteban Gómez Londoño
+**Juan Esteban Gómez Londoño**
 
-Tecnólogo en Análisis y Desarrollo de Software (ADSO) apasionado por el desarrollo Full Stack, enfocado en construir aplicaciones escalables utilizando React, Node.js y PostgreSQL.
+Tecnólogo en Análisis y Desarrollo de Software
 
-📧 Correo: juangomezlon@gmail.com
+📧 **Correo:** juangomezlon@gmail.com
 
-💼 LinkedIn: https://www.linkedin.com/in/juan-esteban-g%C3%B3mez-londo%C3%B1o-a0315b3ab/
+💼 **LinkedIn:** https://www.linkedin.com/in/juan-esteban-g%C3%B3mez-londo%C3%B1o-a0315b3ab/
 
-🐙 GitHub: https://github.com/Juan-EstebanGL
+🐙 **GitHub:** https://github.com/Juan-EstebanGL
