@@ -21,22 +21,25 @@ enum Role {
 }
 
 model User {
-  id              Int        @id @default(autoincrement())
-  email           String     @unique
-  password        String
-  firstName       String?
-  lastName        String?
-  phone           String?
-  role            Role       @default(USER)
-  avatarUrl       String?
-  avatarPublicId  String?
-  createdAt       DateTime   @default(now())
-  products        Product[]
-  cartItems       CartItem[]
-  reviews         Review[]
-  favorites       Favorite[]
-  orders          Order[]
-  addresses       Address[]
+  id                        Int        @id @default(autoincrement())
+  email                     String     @unique
+  password                  String
+  firstName                 String?
+  lastName                  String?
+  phone                     String?
+  role                      Role       @default(USER)
+  avatarUrl                 String?
+  avatarPublicId            String?
+  emailVerified             Boolean    @default(false)
+  emailVerificationToken    String?
+  emailVerificationExpires  DateTime?
+  createdAt                 DateTime   @default(now())
+  products                  Product[]
+  cartItems                 CartItem[]
+  reviews                   Review[]
+  favorites                 Favorite[]
+  orders                    Order[]
+  addresses                 Address[]
 }
 
 model Category {

@@ -48,7 +48,7 @@ function RegisterPage() {
       const response = await register({ email: email.trim(), password });
       setSuccessMessage(response.data?.message || "Registro exitoso");
       setTimeout(() => {
-        navigate("/login");
+        navigate("/check-email", { state: { email: email.trim() } });
       }, 800);
     } catch (err) {
       const message =

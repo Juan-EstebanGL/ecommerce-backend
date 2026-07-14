@@ -6,10 +6,19 @@ const asyncHandler = require("../utils/asyncHandler");
 const {
   registerSchema,
   loginSchema,
+  resendVerificationSchema,
+  verifyEmailSchema,
 } = require("../validations/auth.validation");
 const {
   getZodErrorMessage,
 } = require("../validations/validation.helper");
+const {
+  generateToken,
+  hashToken,
+  getExpiryDate,
+  isTokenExpired,
+} = require("../services/token.service");
+const { sendVerificationEmail } = require("../services/email.service");
 
 const register = asyncHandler(async (req, res) => {
   const validation = registerSchema.safeParse(req.body || {});
@@ -32,13 +41,27 @@ const register = asyncHandler(async (req, res) => {
   // hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // generar token de verificación
+  const rawToken = generateToken();
+  const hashedToken = hashToken(rawToken);
+  const tokenExpires = getExpiryDate();
+
   // crear usuario
   await prisma.user.create({
     data: {
       email,
       password: hashedPassword,
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: tokenExpires,
     },
   });
+
+  // enviar correo de verificación (no bloquear respuesta si falla)
+  try {
+    await sendVerificationEmail(email, rawToken);
+  } catch (emailError) {
+    console.error("[auth] No se pudo enviar el correo de verificación:", emailError.message);
+  }
 
   return res.status(201).json({
     message: "Usuario creado correctamente",
@@ -73,6 +96,13 @@ const login = asyncHandler(async (req, res) => {
     throw new AppError("Credenciales invalidas", 400);
   }
 
+  // verificar correo
+  if (!user.emailVerified) {
+    return res.status(403).json({
+      message: "Debes verificar tu correo electrónico antes de iniciar sesión",
+    });
+  }
+
   // generar token
   const token = jwt.sign(
     {
@@ -101,7 +131,106 @@ const login = asyncHandler(async (req, res) => {
   });
 }, "Error interno del servidor");
 
+const resendVerification = asyncHandler(async (req, res) => {
+  const validation = resendVerificationSchema.safeParse(req.body || {});
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
+  }
+
+  const { email } = validation.data;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, emailVerified: true },
+  });
+
+  if (!user) {
+    return res.json({
+      message: "Si el correo está registrado, recibirás un enlace de verificación",
+    });
+  }
+
+  if (user.emailVerified) {
+    return res.json({
+      message: "El correo ya está verificado",
+    });
+  }
+
+  // generar nuevo token e invalidar el anterior
+  const rawToken = generateToken();
+  const hashedToken = hashToken(rawToken);
+  const tokenExpires = getExpiryDate();
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: tokenExpires,
+    },
+  });
+
+  // enviar correo de verificación (no bloquear respuesta si falla)
+  try {
+    await sendVerificationEmail(email, rawToken);
+  } catch (emailError) {
+    console.error("[auth] No se pudo enviar el correo de verificación:", emailError.message);
+  }
+
+  return res.json({
+    message: "Si el correo está registrado, recibirás un enlace de verificación",
+  });
+}, "Error interno del servidor");
+
+const verifyEmail = asyncHandler(async (req, res) => {
+  const validation = verifyEmailSchema.safeParse(req.query || {});
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
+  }
+
+  const { token } = validation.data;
+  const hashedToken = hashToken(token);
+
+  const user = await prisma.user.findFirst({
+    where: {
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: { not: null },
+    },
+    select: { id: true, emailVerified: true, emailVerificationExpires: true },
+  });
+
+  if (!user) {
+    throw new AppError("Token de verificación inválido", 400);
+  }
+
+  if (user.emailVerified) {
+    return res.json({
+      message: "El correo ya está verificado",
+    });
+  }
+
+  if (isTokenExpired(user.emailVerificationExpires)) {
+    throw new AppError("El token de verificación ha expirado", 400);
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      emailVerified: true,
+      emailVerificationToken: null,
+      emailVerificationExpires: null,
+    },
+  });
+
+  return res.json({
+    message: "Correo verificado correctamente",
+  });
+}, "Error interno del servidor");
+
 module.exports = {
   register,
   login,
+  resendVerification,
+  verifyEmail,
 };

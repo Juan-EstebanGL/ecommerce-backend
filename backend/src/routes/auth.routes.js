@@ -4,6 +4,8 @@ const router = express.Router();
 const {
   register,
   login,
+  resendVerification,
+  verifyEmail,
 } = require("../controllers/auth.controller");
 
 /**
@@ -106,5 +108,69 @@ router.post("/register", register);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post("/login", login);
+
+/**
+ * @swagger
+ * /auth/resend-verification:
+ *   post:
+ *     summary: Reenviar correo de verificación
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *           example:
+ *             email: user@test.com
+ *     responses:
+ *       200:
+ *         description: Mensaje informativo (siempre retorna éxito por seguridad)
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Si el correo está registrado, recibirás un enlace de verificación
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post("/resend-verification", resendVerification);
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   get:
+ *     summary: Verificar correo electrónico con token
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Token de verificación recibido por correo
+ *     responses:
+ *       200:
+ *         description: Correo verificado correctamente
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Correo verificado correctamente
+ *       400:
+ *         description: Token inválido o expirado
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Token de verificación inválido
+ */
+router.get("/verify-email", verifyEmail);
 
 module.exports = router;

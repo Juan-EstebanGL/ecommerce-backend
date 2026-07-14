@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { showWarning } from "../utils/alerts";
+import { showWarning, showSuccess, showError } from "../utils/alerts";
+import { resendVerification } from "../api/auth";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -11,6 +12,8 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showVerifyPanel, setShowVerifyPanel] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -37,11 +40,38 @@ function LoginPage() {
       await login({ email: email.trim(), password });
       navigate("/products");
     } catch (err) {
+      const status = err?.response?.status;
       const message =
         err?.response?.data?.message || err?.message || "Credenciales inválidas";
-      setError(message);
+
+      if (status === 403) {
+        setShowVerifyPanel(true);
+        setError("");
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
+    }
+  }
+
+  function hideVerifyPanel() {
+    if (showVerifyPanel) setShowVerifyPanel(false);
+  }
+
+  async function handleResendVerification() {
+    setResendLoading(true);
+    try {
+      await resendVerification(email.trim());
+      showSuccess("Correo de verificación reenviado");
+    } catch (err) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudo reenviar el correo";
+      showError(message);
+    } finally {
+      setResendLoading(false);
     }
   }
 
@@ -85,6 +115,28 @@ function LoginPage() {
               <span>✕</span> {error}
             </div>
           )}
+          {showVerifyPanel && (
+            <div className="lp-verify">
+              <div className="lp-verify__icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="M22 4l-10 8L2 4" />
+                </svg>
+              </div>
+              <p className="lp-verify__title">Correo no verificado</p>
+              <p className="lp-verify__desc">
+                Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.
+              </p>
+              <button
+                type="button"
+                className="auth-btn lp-verify__btn"
+                onClick={handleResendVerification}
+                disabled={resendLoading}
+              >
+                {resendLoading ? "Reenviando..." : "Reenviar correo de verificación"}
+              </button>
+            </div>
+          )}
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-field">
               <label className="auth-field__label" htmlFor="login-email">
@@ -100,7 +152,7 @@ function LoginPage() {
                   className="auth-input"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); hideVerifyPanel(); }}
                   placeholder="tu@correo.com"
                   autoComplete="email"
                   required
@@ -122,7 +174,7 @@ function LoginPage() {
                   className="auth-input"
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); hideVerifyPanel(); }}
                   placeholder="••••••••"
                   autoComplete="current-password"
                   required
