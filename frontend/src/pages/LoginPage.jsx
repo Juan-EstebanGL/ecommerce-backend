@@ -207,9 +207,9 @@ function LoginPage() {
                 <input type="checkbox" />
                 <span>Recordarme</span>
               </label>
-              <a href="#" className="auth-link" onClick={(e) => e.preventDefault()}>
+              <Link to="/forgot-password" className="auth-link">
                 ¿Olvidaste tu contraseña?
-              </a>
+              </Link>
             </div>
             <button type="submit" className="auth-btn" disabled={loading}>
               {loading ? "Ingresando..." : "Ingresar"}

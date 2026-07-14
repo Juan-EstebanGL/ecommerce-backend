@@ -8,6 +8,8 @@ const {
   loginSchema,
   resendVerificationSchema,
   verifyEmailSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } = require("../validations/auth.validation");
 const {
   getZodErrorMessage,
@@ -18,7 +20,7 @@ const {
   getExpiryDate,
   isTokenExpired,
 } = require("../services/token.service");
-const { sendVerificationEmail } = require("../services/email.service");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("../services/email.service");
 
 const register = asyncHandler(async (req, res) => {
   const validation = registerSchema.safeParse(req.body || {});
@@ -228,9 +230,96 @@ const verifyEmail = asyncHandler(async (req, res) => {
   });
 }, "Error interno del servidor");
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  const validation = forgotPasswordSchema.safeParse(req.body || {});
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
+  }
+
+  const { email } = validation.data;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+
+  if (!user) {
+    return res.json({
+      message: "Si el correo existe, recibirás un enlace para restablecer tu contraseña",
+    });
+  }
+
+  const rawToken = generateToken();
+  const hashedToken = hashToken(rawToken);
+  const tokenExpires = getExpiryDate(1);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordResetToken: hashedToken,
+      passwordResetExpires: tokenExpires,
+    },
+  });
+
+  try {
+    await sendPasswordResetEmail(email, rawToken);
+  } catch (emailError) {
+    console.error("[auth] No se pudo enviar el correo de restablecimiento:", emailError.message);
+  }
+
+  return res.json({
+    message: "Si el correo existe, recibirás un enlace para restablecer tu contraseña",
+  });
+}, "Error interno del servidor");
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const validation = resetPasswordSchema.safeParse(req.body || {});
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
+  }
+
+  const { token, password } = validation.data;
+  const hashedToken = hashToken(token);
+
+  const user = await prisma.user.findFirst({
+    where: {
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { not: null },
+    },
+    select: { id: true, passwordResetExpires: true },
+  });
+
+  if (!user) {
+    throw new AppError("Token de restablecimiento inválido", 400);
+  }
+
+  if (isTokenExpired(user.passwordResetExpires)) {
+    throw new AppError("El token de restablecimiento ha expirado", 400);
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      password: hashedPassword,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+    },
+  });
+
+  return res.json({
+    message: "Contraseña actualizada correctamente",
+  });
+}, "Error interno del servidor");
+
 module.exports = {
   register,
   login,
   resendVerification,
   verifyEmail,
+  forgotPassword,
+  resetPassword,
 };

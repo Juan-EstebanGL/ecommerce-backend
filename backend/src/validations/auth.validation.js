@@ -23,6 +23,22 @@ const verifyEmailSchema = z.object({
     .min(1, "El token no puede estar vacío"),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z
+    .string({ error: "El correo electrónico es obligatorio" })
+    .trim()
+    .email("Ingrese un correo electrónico válido"),
+});
+
+const resetPasswordSchema = z.object({
+  token: z
+    .string({ error: "El token es obligatorio" })
+    .min(1, "El token no puede estar vacío"),
+  password: z
+    .string({ error: "La contraseña es obligatoria" })
+    .min(6, "La contraseña debe tener al menos 6 caracteres"),
+});
+
 const registerSchema = authSchema;
 const loginSchema = authSchema;
 
@@ -31,4 +47,6 @@ module.exports = {
   loginSchema,
   resendVerificationSchema,
   verifyEmailSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 };

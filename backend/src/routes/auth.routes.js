@@ -6,6 +6,8 @@ const {
   login,
   resendVerification,
   verifyEmail,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/auth.controller");
 
 /**
@@ -172,5 +174,78 @@ router.post("/resend-verification", resendVerification);
  *               message: Token de verificación inválido
  */
 router.get("/verify-email", verifyEmail);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Solicitar restablecimiento de contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *           example:
+ *             email: user@test.com
+ *     responses:
+ *       200:
+ *         description: Mensaje informativo (siempre retorna éxito por seguridad)
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Si el correo existe, recibirás un enlace para restablecer tu contraseña
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post("/forgot-password", forgotPassword);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Restablecer contraseña con token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token, password]
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *           example:
+ *             token: abc123...
+ *             password: nuevaPassword123
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada correctamente
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Contraseña actualizada correctamente
+ *       400:
+ *         description: Token inválido o expirado
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Token de restablecimiento inválido
+ */
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

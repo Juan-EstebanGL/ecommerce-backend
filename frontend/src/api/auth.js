@@ -15,3 +15,11 @@ export function verifyEmail(token) {
 export function resendVerification(email) {
   return api.post("/auth/resend-verification", { email });
 }
+
+export function forgotPassword(email) {
+  return api.post("/auth/forgot-password", { email });
+}
+
+export function resetPassword({ token, password }) {
+  return api.post("/auth/reset-password", { token, password });
+}
