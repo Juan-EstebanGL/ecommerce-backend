@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { verifyEmail } from "../api/auth";
 
 const ERROR_MESSAGES = {
@@ -15,8 +15,10 @@ const ERROR_MESSAGES = {
 
 function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [status, setStatus] = useState("loading");
   const [errorMsg, setErrorMsg] = useState(null);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -30,11 +32,24 @@ function VerifyEmailPage() {
       return;
     }
 
+    const currentRequest = ++requestIdRef.current;
+    console.log(`[VerifyEmail] effect fired, requestId=${currentRequest}`);
+
     verifyEmail(token)
       .then(() => {
+        console.log(`[VerifyEmail] success, requestId=${currentRequest}, current=${requestIdRef.current}`);
+        if (requestIdRef.current !== currentRequest) return;
         setStatus("success");
+
+        try {
+          const bc = new BroadcastChannel("auth_verification");
+          bc.postMessage({ type: "email-verified" });
+          bc.close();
+        } catch {}
       })
       .catch((err) => {
+        console.log(`[VerifyEmail] error, requestId=${currentRequest}, current=${requestIdRef.current}`, err?.response?.data?.message);
+        if (requestIdRef.current !== currentRequest) return;
         const message =
           err?.response?.data?.message ||
           err?.message ||
@@ -46,6 +61,16 @@ function VerifyEmailPage() {
         setStatus("error");
       });
   }, [searchParams]);
+
+  useEffect(() => {
+    if (status !== "success") return;
+
+    const timer = setTimeout(() => {
+      navigate("/login", { replace: true });
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [status, navigate]);
 
   return (
     <main className="auth-page">
@@ -96,11 +121,8 @@ function VerifyEmailPage() {
               </div>
               <h2 className="ve-state__title">Correo verificado</h2>
               <p className="ve-state__desc">
-                Tu correo fue verificado correctamente. Ya puedes iniciar sesión y empezar a comprar.
+                Tu correo fue verificado correctamente. Serás redirigido al inicio de sesión...
               </p>
-              <Link to="/login" className="auth-btn ve-btn">
-                Iniciar sesión
-              </Link>
             </div>
           )}
 

@@ -3081,6 +3081,32 @@ body {
   background: #9a3412 !important;
 }
 
+.lp-verify__success {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #16a34a;
+  line-height: 1.5;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lp-verify__error {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #dc2626;
+  line-height: 1.5;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* ── Auth responsive ── */
 
 @media (max-width: 768px) {

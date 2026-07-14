@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { showWarning, showSuccess, showError } from "../utils/alerts";
+import { showWarning } from "../utils/alerts";
 import { resendVerification } from "../api/auth";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,12 +14,89 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [showVerifyPanel, setShowVerifyPanel] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [verifySentMessage, setVerifySentMessage] = useState("");
+  const [verifyErrorMessage, setVerifyErrorMessage] = useState("");
+  const [autoLoginMessage, setAutoLoginMessage] = useState("");
+  const autoLoggingInRef = useRef(false);
+  const verifyPanelRef = useRef(showVerifyPanel);
+  const emailRef = useRef(email);
+  const passwordRef = useRef(password);
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  verifyPanelRef.current = showVerifyPanel;
+  emailRef.current = email;
+  passwordRef.current = password;
+
+  useEffect(() => {
+    let bc;
+    try {
+      bc = new BroadcastChannel("auth_verification");
+    } catch {
+      return;
+    }
+
+    bc.onmessage = (event) => {
+      if (event.data?.type !== "email-verified") return;
+      if (autoLoggingInRef.current) return;
+      if (!verifyPanelRef.current) return;
+      if (!emailRef.current.trim() || !passwordRef.current) return;
+
+      console.log("[Login] BroadcastChannel: email-verified received, auto-login starting");
+      autoLoggingInRef.current = true;
+      setAutoLoginMessage("Correo verificado. Iniciando sesión...");
+      setVerifySentMessage("");
+      setVerifyErrorMessage("");
+      setLoading(true);
+
+      login({ email: emailRef.current.trim(), password: passwordRef.current })
+        .then(() => {
+          console.log("[Login] auto-login successful");
+          navigate("/products");
+        })
+        .catch((err) => {
+          console.log("[Login] auto-login failed", err?.response?.data?.message);
+          setAutoLoginMessage("");
+          setVerifyErrorMessage(
+            "No se pudo iniciar sesión automáticamente. Por favor, intenta manualmente."
+          );
+          autoLoggingInRef.current = false;
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    };
+
+    console.log("[Login] BroadcastChannel listener attached");
+    return () => {
+      console.log("[Login] BroadcastChannel closed");
+      bc.close();
+    };
+  }, [login, navigate]);
+
+  async function autoResend(userEmail) {
+    setResendLoading(true);
+    setVerifySentMessage("");
+    setVerifyErrorMessage("");
+    try {
+      await resendVerification(userEmail);
+      setVerifySentMessage(
+        "Se ha enviado un nuevo enlace de verificación a tu correo electrónico."
+      );
+    } catch {
+      setVerifyErrorMessage(
+        "No se pudo enviar el correo de verificación automáticamente. Puedes reintentar con el botón."
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+    setVerifySentMessage("");
+    setVerifyErrorMessage("");
 
     if (!email.trim()) {
       showWarning("Campo requerido", "Por favor ingresa tu correo electrónico.");
@@ -47,6 +124,7 @@ function LoginPage() {
       if (status === 403) {
         setShowVerifyPanel(true);
         setError("");
+        autoResend(email.trim());
       } else {
         setError(message);
       }
@@ -56,20 +134,28 @@ function LoginPage() {
   }
 
   function hideVerifyPanel() {
-    if (showVerifyPanel) setShowVerifyPanel(false);
+    if (showVerifyPanel) {
+      setShowVerifyPanel(false);
+      setVerifySentMessage("");
+      setVerifyErrorMessage("");
+      setAutoLoginMessage("");
+      autoLoggingInRef.current = false;
+    }
   }
 
   async function handleResendVerification() {
     setResendLoading(true);
+    setVerifySentMessage("");
+    setVerifyErrorMessage("");
     try {
       await resendVerification(email.trim());
-      showSuccess("Correo de verificación reenviado");
-    } catch (err) {
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "No se pudo reenviar el correo";
-      showError(message);
+      setVerifySentMessage(
+        "Se ha enviado un nuevo enlace de verificación a tu correo electrónico."
+      );
+    } catch {
+      setVerifyErrorMessage(
+        "No se pudo enviar el correo de verificación. Puedes reintentar con el botón."
+      );
     } finally {
       setResendLoading(false);
     }
@@ -125,15 +211,24 @@ function LoginPage() {
               </div>
               <p className="lp-verify__title">Correo no verificado</p>
               <p className="lp-verify__desc">
-                Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.
+                Debes verificar tu correo electrónico antes de iniciar sesión.
               </p>
+              {autoLoginMessage && (
+                <p className="lp-verify__success">{autoLoginMessage}</p>
+              )}
+              {verifySentMessage && !autoLoginMessage && (
+                <p className="lp-verify__success">{verifySentMessage}</p>
+              )}
+              {verifyErrorMessage && !autoLoginMessage && (
+                <p className="lp-verify__error">{verifyErrorMessage}</p>
+              )}
               <button
                 type="button"
                 className="auth-btn lp-verify__btn"
                 onClick={handleResendVerification}
-                disabled={resendLoading}
+                disabled={resendLoading || !!autoLoginMessage}
               >
-                {resendLoading ? "Reenviando..." : "Reenviar correo de verificación"}
+                {resendLoading ? "Enviando correo..." : "Reenviar correo de verificación"}
               </button>
             </div>
           )}

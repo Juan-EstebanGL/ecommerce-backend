@@ -194,21 +194,25 @@ const verifyEmail = asyncHandler(async (req, res) => {
   const { token } = validation.data;
   const hashedToken = hashToken(token);
 
+  console.log(`[auth] verify-email request received`);
+
   const user = await prisma.user.findFirst({
     where: {
       emailVerificationToken: hashedToken,
       emailVerificationExpires: { not: null },
     },
-    select: { id: true, emailVerified: true, emailVerificationExpires: true },
+    select: { id: true, email: true, emailVerified: true, emailVerificationExpires: true },
   });
 
   if (!user) {
+    console.log(`[auth] verify-email: token not found → 400`);
     throw new AppError("Token de verificación inválido", 400);
   }
 
   if (user.emailVerified) {
+    console.log(`[auth] verify-email: user ${user.email} already verified → 200 (idempotent)`);
     return res.json({
-      message: "El correo ya está verificado",
+      message: "Correo verificado correctamente",
     });
   }
 
@@ -220,10 +224,10 @@ const verifyEmail = asyncHandler(async (req, res) => {
     where: { id: user.id },
     data: {
       emailVerified: true,
-      emailVerificationToken: null,
-      emailVerificationExpires: null,
     },
   });
+
+  console.log(`[auth] verify-email: user ${user.email} verified successfully → 200`);
 
   return res.json({
     message: "Correo verificado correctamente",

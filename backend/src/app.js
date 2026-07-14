@@ -5,6 +5,7 @@ const env = require("./config/env");
 
 const authRoutes = require("./routes/auth.routes");
 const testRoutes = require("./routes/test.routes");
+const authDevRoutes = require("./routes/auth.dev.routes");
 const productRoutes = require("./routes/product.routes");
 const cartRoutes = require("./routes/cart.routes");
 const orderRoutes = require("./routes/order.routes");
@@ -32,7 +33,7 @@ const allowedOrigins = env.FRONTEND_URL
 console.log("[app] Iniciando servidor Express...");
 console.log(
   "[app] Rutas registradas: /auth, /products, /cart, /orders, /favorites, /upload" +
-    (env.NODE_ENV === "development" ? ", /test" : "")
+    (env.NODE_ENV === "development" ? ", /test, /auth/dev" : "")
 );
 
 app.use(
@@ -57,7 +58,9 @@ app.use((req, res, next) => {
 app.use("/auth", authRoutes);
 
 if (env.NODE_ENV === "development") {
+  console.log("[auth.dev] Dev auth routes loaded → POST /auth/dev/*");
   app.use("/test", testRoutes);
+  app.use("/auth/dev", authDevRoutes);
 }
 
 app.use("/products", productRoutes);

@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "dev": "node --watch src/server.js",
+    "dev": "cross-env NODE_ENV=development node --watch src/server.js",
     "start": "node src/server.js",
     "test": "node tests/run-jest.js --runInBand"
   },
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.2",
+    "cross-env": "^10.1.0",
     "jest": "^30.4.2",
     "prisma": "^7.8.0",
     "supertest": "^7.2.2",
