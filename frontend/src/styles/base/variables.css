@@ -1,0 +1,64 @@
+:root {
+  /* ── Brand / Primary ── */
+  --primary: #0ea5a4;
+  --primary-700: #0b8f8d;
+
+  /* ── Accent ── */
+  --accent: #7c3aed;
+
+  /* ── Background ── */
+  --background: #f6f7fb;
+  --surface: #ffffff;
+
+  /* ── Text ── */
+  --text: #111827;
+  --text-secondary: #6b7280;
+
+  /* ── Semantic ── */
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #f59e0b;
+
+  /* ── Border ── */
+  --border: #e5e7eb;
+
+  /* ── Typography ── */
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-base: 16px;
+  --fs-lg: 20px;
+  --fs-xl: 24px;
+  --fs-2xl: 32px;
+
+  /* ── Spacing ── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* ── Border Radius ── */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 6px 18px rgba(13, 19, 38, 0.08);
+  --shadow-lg: 0 12px 40px rgba(13, 19, 38, 0.12);
+
+  /* ── Transitions ── */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* ── Legacy aliases (backward compat during migration) ── */
+  --brand: var(--primary);
+  --brand-700: var(--primary-700);
+  --bg: var(--background);
+  --card-bg: var(--surface);
+  --muted: var(--text-secondary);
+}

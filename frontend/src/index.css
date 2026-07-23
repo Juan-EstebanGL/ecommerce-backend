@@ -1,44 +1,7 @@
-﻿*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: var(--bg);
-  color: var(--text);
-}
-
-:root{
-  /* Palette */
-  --brand: #0ea5a4;
-  --brand-700: #0b8f8d;
-  --accent: #7c3aed;
-  --bg: #f6f7fb;
-  --card-bg: #ffffff;
-  --muted: #6b7280;
-  --danger: #dc2626;
-
-  /* Typography */
-  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  --fs-base: 16px;
-  --fs-lg: 20px;
-  --fs-sm: 14px;
-
-  /* Spacing */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-
-  /* Radius / shadows */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --shadow-sm: 0 1px 2px rgba(16,24,40,0.04);
-  --shadow-md: 0 6px 18px rgba(13,19,38,0.08);
-}
+﻿/* ══════════════════════════════════════════════════════════
+   LEGACY STYLES — to be migrated into styles/components/ and styles/pages/
+   Variables, reset, typography, animations, and utilities now live in styles/base/
+   ══════════════════════════════════════════════════════════ */
 
 /* Layout helpers */
 .app-container{max-width:1200px;margin:0 auto;padding:var(--space-lg);}

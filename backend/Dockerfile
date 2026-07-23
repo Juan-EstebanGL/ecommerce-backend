@@ -26,9 +26,10 @@ COPY tsconfig.json ./
 RUN npm install
 
 # Genera Prisma Client (no conecta a la DB, solo genera código)
-# La variable se setea solo para que prisma.config.ts no falle al resolver el datasource
-ENV DATABASE_URL="postgresql://postgres:juanes2710@postgres:5432/ecommerce_db"
-RUN npx prisma generate
+# Se usa un DATABASE_URL dummy porque prisma.config.ts lo requiere al resolver el datasource,
+# pero prisma generate solo genera código TypeScript/JS, nunca abre conexión.
+ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+RUN DATABASE_URL=$DATABASE_URL npx prisma generate
 
 # Copia el resto del código fuente
 COPY . .
