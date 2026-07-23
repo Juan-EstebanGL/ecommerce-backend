@@ -1,1 +1,90 @@
-/* admin/users.css � to be populated during refactor */
+/* ══════════════════════════════════════════════════════════
+   Admin Users — Table, Avatar, Badges, Modal
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Stats ── */
+.ad-users-stats {
+  margin-bottom: 24px;
+}
+
+/* ── User Avatar ── */
+.ad-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ad-user-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: flex;
+}
+
+.ad-user-avatar__fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), #0d9488);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ── Cell Styles ── */
+.ad-users-cell-name {
+  font-weight: 600;
+  min-width: 140px;
+}
+
+.ad-users-cell-email {
+  color: var(--ad-text-2);
+}
+
+.ad-users-cell-date {
+  color: var(--ad-text-2);
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+/* ── Role Badges ── */
+.ad-users-badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.ad-users-badge--admin { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
+.ad-users-badge--admin::before { background: #7c3aed; }
+.ad-users-badge--user { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+.ad-users-badge--user::before { background: #3b82f6; }
+
+/* ── Action Variants ── */
+.ad-users-btn--role {
+  background: rgba(245, 158, 11, 0.08);
+  color: #b45309;
+}
+
+.ad-users-btn--role:hover {
+  background: rgba(245, 158, 11, 0.16);
+}
+
+.ad-users-btn--delete:disabled,
+.ad-users-btn--role:disabled,
+.ad-users-btn--view:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════════════════════
+   USERS MODAL (Glass)
+   ══════════════════════════════════════════════════════════ */
+.ad-users-modal {
+  max-width: 420px;
+}

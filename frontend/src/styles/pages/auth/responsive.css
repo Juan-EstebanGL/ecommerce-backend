@@ -1,0 +1,24 @@
+/* ══════════════════════════════════════════════════════════
+   Auth Responsive — Soft Glass Premium
+   ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .auth-left {
+    display: none;
+  }
+
+  .auth-right {
+    padding: var(--space-md);
+    animation: auth-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .auth-card {
+    padding: 36px 24px 28px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .auth-left__title {
+    font-size: 1.75rem;
+  }
+}

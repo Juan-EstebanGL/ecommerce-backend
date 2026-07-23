@@ -1,6 +1,11 @@
 /* ══════════════════════════════════════════════════════════
-   Form components — Soft Glass Premium
-   (Additional form components beyond inputs.css)
+   Auth Pages — Soft Glass Premium
+   Aggregator: imports all auth styles in correct order
    ══════════════════════════════════════════════════════════ */
 
-/* Forms content will be populated as pages are migrated */
+@import './animations.css';
+@import './layout.css';
+@import './card.css';
+@import './forms.css';
+@import './states.css';
+@import './responsive.css';

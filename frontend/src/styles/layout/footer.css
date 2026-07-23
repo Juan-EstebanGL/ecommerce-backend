@@ -1,1 +1,123 @@
-/* footer.css — to be populated during refactor */
+/* ══════════════════════════════════════════════════════════
+   Footer — Soft Glass Premium
+   ══════════════════════════════════════════════════════════ */
+
+.footer {
+  background: var(--text);
+  color: #94a3b8;
+  padding: 60px var(--space-lg) 0;
+  margin-top: var(--space-3xl);
+}
+
+.footer__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  gap: var(--space-2xl);
+}
+
+.footer__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.footer__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.footer__logo-icon {
+  font-size: 1.2rem;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.footer__logo-text {
+  font-size: 1.15rem;
+  font-weight: var(--fw-bold);
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.footer__desc {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 300px;
+}
+
+.footer__heading {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: #ffffff;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.footer__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer__nav a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: var(--fs-sm);
+  transition: color var(--transition-base);
+  width: fit-content;
+}
+
+.footer__nav a:hover {
+  color: var(--primary);
+}
+
+.footer__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer__list li {
+  font-size: var(--fs-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: #94a3b8;
+}
+
+.footer__list li svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.footer__bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: var(--space-2xl);
+  padding: 20px 0;
+  text-align: center;
+}
+
+.footer__bottom p {
+  font-size: var(--fs-xs);
+  margin: 0;
+  color: #64748b;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .footer { padding: var(--space-2xl) var(--space-md) 0; }
+  .footer__inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+  .footer__desc { max-width: none; }
+}

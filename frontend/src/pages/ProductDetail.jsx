@@ -233,6 +233,8 @@ function ProductDetail() {
   if (loading) {
     return (
       <main className="pd-page">
+        <div className="pd-page__glow pd-page__glow--teal" />
+        <div className="pd-page__glow pd-page__glow--purple" />
         <div className="app-container">
           <div className="pd-loading">
             <Loader />
@@ -245,6 +247,8 @@ function ProductDetail() {
   if (error) {
     return (
       <main className="pd-page">
+        <div className="pd-page__glow pd-page__glow--teal" />
+        <div className="pd-page__glow pd-page__glow--purple" />
         <div className="app-container">
           <Card className="error-state">
             <p className="form-error">{error}</p>
@@ -257,6 +261,8 @@ function ProductDetail() {
   if (!product) {
     return (
       <main className="pd-page">
+        <div className="pd-page__glow pd-page__glow--teal" />
+        <div className="pd-page__glow pd-page__glow--purple" />
         <div className="app-container">
           <Card className="error-state">
             <h2>Producto no encontrado</h2>
@@ -280,6 +286,8 @@ function ProductDetail() {
 
   return (
     <main className="pd-page">
+      <div className="pd-page__glow pd-page__glow--teal" />
+      <div className="pd-page__glow pd-page__glow--purple" />
       <div className="app-container">
         <nav className="pd-breadcrumb">
           <Link to="/">Inicio</Link>

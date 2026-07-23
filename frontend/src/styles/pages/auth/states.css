@@ -1,0 +1,232 @@
+/* ══════════════════════════════════════════════════════════
+   Auth States — Soft Glass Premium
+   Verify email, check email, forgot password, reset password states
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Shared centered card states ── */
+.ve-card,
+.ce-card,
+.fp-card {
+  text-align: center;
+}
+
+/* ── State container ── */
+.ve-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Spinner ── */
+.ve-spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid rgba(14, 165, 164, 0.15);
+  border-top-color: var(--primary);
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 4px;
+}
+
+/* ── Icon containers ── */
+.ve-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.ve-icon--success {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.ve-icon--error {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* ── State text ── */
+.ve-state__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+
+.ve-state__desc {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 340px;
+}
+
+.ve-state__text {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+/* ── State button ── */
+.ve-btn {
+  margin-top: 8px;
+  text-decoration: none;
+  text-align: center;
+}
+
+/* ── Check Email (ce) ── */
+.ce-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(14, 165, 164, 0.1), rgba(124, 58, 237, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-md);
+  color: var(--primary);
+}
+
+.ce-info {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  background: var(--surface-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin: var(--space-md) 0 var(--space-lg);
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  text-align: left;
+}
+
+.ce-resend-btn {
+  width: 100%;
+}
+
+/* ── Forgot Password (fp) ── */
+.fp-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(14, 165, 164, 0.1), rgba(124, 58, 237, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-md);
+  color: var(--primary);
+}
+
+/* ── Reset Password Strength (rp) ── */
+.rp-strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.rp-strength__bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.rp-strength__fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.rp-strength__label {
+  font-size: 0.75rem;
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* ── Login Verify Panel (lp) ── */
+.lp-verify {
+  background: var(--warning-light);
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-sm);
+  animation: lp-verify-in 0.3s ease-out;
+}
+
+.lp-verify__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fff1e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c2410c;
+  margin-bottom: var(--space-xs);
+}
+
+.lp-verify__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: var(--fw-bold);
+  color: #9a3412;
+}
+
+.lp-verify__desc {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: #9a3412;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.lp-verify__btn {
+  margin-top: 6px;
+  background: #c2410c !important;
+}
+
+.lp-verify__btn:hover:not(:disabled) {
+  background: #9a3412 !important;
+}
+
+.lp-verify__success {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--success);
+  line-height: 1.5;
+  background: var(--success-light);
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lp-verify__error {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--danger);
+  line-height: 1.5;
+  background: var(--danger-light);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}

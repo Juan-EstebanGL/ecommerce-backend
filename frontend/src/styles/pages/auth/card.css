@@ -1,0 +1,61 @@
+/* ══════════════════════════════════════════════════════════
+   Auth Card — Soft Glass Premium
+   Glass card with blur, border light, and entrance animation
+   ══════════════════════════════════════════════════════════ */
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+  background: var(--auth-card-bg);
+  backdrop-filter: blur(var(--auth-card-blur));
+  -webkit-backdrop-filter: blur(var(--auth-card-blur));
+  border-radius: var(--auth-card-radius);
+  padding: 44px 40px 36px;
+  box-shadow: var(--auth-card-shadow);
+  animation: auth-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+.auth-card__title {
+  font-size: 1.5rem;
+  font-weight: var(--fw-bold);
+  margin: 0 0 var(--space-xs) 0;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.auth-card__subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0 0 var(--space-lg) 0;
+  line-height: 1.5;
+}
+
+/* ── Error message ── */
+.auth-card__error {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ── Success message ── */
+.auth-card__success {
+  background: var(--success-light);
+  color: var(--success);
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}

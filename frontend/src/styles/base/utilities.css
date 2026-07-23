@@ -1,3 +1,8 @@
+/* ══════════════════════════════════════════════════════════
+   Utilities — Soft Glass Premium
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Screen reader only ── */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -10,31 +15,46 @@
   border: 0;
 }
 
+/* ── Display ── */
+.hidden { display: none; }
+.block { display: block; }
+.inline-block { display: inline-block; }
 .flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.grid { display: grid; }
+
+/* ── Flex ── */
 .flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
 .flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
 .items-center { align-items: center; }
 .items-start { align-items: flex-start; }
 .items-end { align-items: flex-end; }
 .justify-center { justify-content: center; }
 .justify-between { justify-content: space-between; }
 .justify-end { justify-content: flex-end; }
+
+/* ── Gap ── */
 .gap-xs { gap: var(--space-xs); }
 .gap-sm { gap: var(--space-sm); }
 .gap-md { gap: var(--space-md); }
 .gap-lg { gap: var(--space-lg); }
+.gap-xl { gap: var(--space-xl); }
 
-.grid { display: grid; }
-
-.hidden { display: none; }
-.block { display: block; }
-.inline-block { display: inline-block; }
-
+/* ── Sizing ── */
 .w-full { width: 100%; }
 .h-full { height: 100%; }
+.min-h-screen { min-height: 100vh; }
 
+/* ── Text ── */
 .text-center { text-align: center; }
 .text-right { text-align: right; }
+.text-xs { font-size: var(--fs-xs); }
+.text-sm { font-size: var(--fs-sm); }
+.text-base { font-size: var(--fs-base); }
+.text-lg { font-size: var(--fs-lg); }
+.text-muted { color: var(--text-secondary); }
 
 .truncate {
   overflow: hidden;
@@ -42,10 +62,36 @@
   white-space: nowrap;
 }
 
+/* ── Spacing ── */
+.m-auto { margin: auto; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+
+/* ── Border radius ── */
 .rounded-sm { border-radius: var(--radius-sm); }
 .rounded-md { border-radius: var(--radius-md); }
 .rounded-lg { border-radius: var(--radius-lg); }
+.rounded-full { border-radius: var(--radius-pill); }
 
+/* ── Shadows ── */
+.shadow-xs { box-shadow: var(--shadow-xs); }
 .shadow-sm { box-shadow: var(--shadow-sm); }
 .shadow-md { box-shadow: var(--shadow-md); }
 .shadow-lg { box-shadow: var(--shadow-lg); }
+
+/* ── Overflow ── */
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+
+/* ── Position ── */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.sticky { position: sticky; }
+
+/* ── Cursor ── */
+.cursor-pointer { cursor: pointer; }

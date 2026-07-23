@@ -1,7 +1,25 @@
+/* ══════════════════════════════════════════════════════════
+   Container & Layout — Soft Glass Premium
+   ══════════════════════════════════════════════════════════ */
+
+/* ── App layout ── */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Containers ── */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--space-md);
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-lg);
 }
 
 .container--narrow {
@@ -10,4 +28,14 @@
 
 .container--wide {
   max-width: 1400px;
+}
+
+/* ── Page padding ── */
+.page {
+  padding: var(--space-2xl) 0;
+}
+
+@media (max-width: 768px) {
+  .app-container { padding: var(--space-md); }
+  .container { padding: 0 var(--space-sm); }
 }

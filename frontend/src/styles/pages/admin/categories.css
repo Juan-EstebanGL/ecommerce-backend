@@ -1,1 +1,185 @@
-/* admin/categories.css � to be populated during refactor */
+/* ══════════════════════════════════════════════════════════
+   Admin Categories — Table, Description Cell, Detail Modal, Form
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Category Compact Form Modal ── */
+.ad-form-modal--compact {
+  max-width: 420px;
+}
+
+/* ── Description Cell ── */
+.ad-categories-cell-desc {
+  max-width: 200px;
+  font-size: 0.82rem;
+  color: var(--ad-text);
+  line-height: 1.4;
+}
+
+.ad-categories-no-desc {
+  color: #d1d5db;
+}
+
+/* ── Form Textarea & Hint ── */
+.ad-form__textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.ad-form__hint {
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   CATEGORY DETAIL MODAL (Glass)
+   ══════════════════════════════════════════════════════════ */
+.ad-categories-detail-modal {
+  max-width: 680px;
+}
+
+.ad-categories-detail-body {
+  padding: 0 24px;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.ad-categories-detail-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.ad-categories-detail-top {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.ad-categories-detail-img {
+  width: 160px;
+  height: 160px;
+  border-radius: var(--ad-radius-md);
+  background: var(--ad-skeleton-2);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: transform 0.2s ease;
+}
+
+.ad-categories-detail-img:hover {
+  transform: scale(1.05);
+}
+
+.ad-categories-detail-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ad-categories-detail-img__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.ad-categories-detail-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-categories-detail-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ad-text);
+  margin: 0 0 8px;
+}
+
+.ad-categories-detail-desc {
+  font-size: 0.88rem;
+  color: var(--ad-text);
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.ad-categories-detail-desc--empty {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.ad-categories-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.ad-categories-detail-meta__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ad-categories-detail-meta__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ad-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ad-categories-detail-meta__value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ad-text);
+}
+
+.ad-categories-detail-products {
+  margin-top: 8px;
+  border-top: 1px solid var(--ad-border);
+  padding-top: 16px;
+}
+
+.ad-categories-detail-products__title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ad-text);
+  margin: 0 0 12px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — Categories
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .ad-categories-detail-top {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ad-categories-detail-img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .ad-categories-detail-info {
+    text-align: center;
+  }
+
+  .ad-categories-detail-meta {
+    justify-content: center;
+  }
+
+  .ad-categories-detail-modal {
+    max-width: 100%;
+    margin: 0 10px;
+  }
+}

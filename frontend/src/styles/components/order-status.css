@@ -1,0 +1,120 @@
+/* ══════════════════════════════════════════════════════════
+   Order Status Badge — Soft Glass Premium
+   Prefix: .ost
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Base Status Badge ── */
+.ost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition: background var(--transition-base),
+              color var(--transition-base);
+}
+
+/* ── Status indicator dot ── */
+.ost__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: ost-pulse 2s ease-in-out infinite;
+}
+@keyframes ost-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ── Status Variants ── */
+.ost--PENDING {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
+}
+.ost--PENDING .ost__dot {
+  background: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.ost--PAID {
+  background: rgba(22, 163, 74, 0.1);
+  color: #15803d;
+}
+.ost--PAID .ost__dot {
+  background: #16a34a;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+.ost--PROCESSING {
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+}
+.ost--PROCESSING .ost__dot {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.ost--SHIPPED {
+  background: rgba(124, 58, 237, 0.1);
+  color: #6d28d9;
+}
+.ost--SHIPPED .ost__dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+.ost--DELIVERED {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--success);
+}
+.ost--DELIVERED .ost__dot {
+  background: var(--success);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+.ost--DELIVERED .ost__dot {
+  animation: none;
+}
+
+.ost--CANCELLED {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger);
+}
+.ost--CANCELLED .ost__dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+  animation: none;
+}
+
+/* ── Sizes ── */
+.ost--sm {
+  padding: 3px 10px;
+  font-size: 10px;
+  gap: 4px;
+}
+.ost--sm .ost__dot {
+  width: 5px;
+  height: 5px;
+}
+
+.ost--lg {
+  padding: 7px 18px;
+  font-size: var(--fs-sm);
+  gap: 8px;
+}
+.ost--lg .ost__dot {
+  width: 9px;
+  height: 9px;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .ost__dot {
+    animation: none;
+  }
+}

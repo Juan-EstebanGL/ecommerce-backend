@@ -1,0 +1,40 @@
+/* ══════════════════════════════════════════════════════════
+   Auth Animations — Soft Glass Premium
+   ══════════════════════════════════════════════════════════ */
+
+@keyframes auth-page-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes auth-left-in {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes auth-right-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes auth-card-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes lp-verify-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .auth-page,
+  .auth-left,
+  .auth-right,
+  .auth-card,
+  .lp-verify {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

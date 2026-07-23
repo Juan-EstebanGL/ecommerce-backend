@@ -127,6 +127,8 @@ function Favorites() {
 
   return (
     <main className="fv-page">
+      <div className="fv-page__glow fv-page__glow--teal" />
+      <div className="fv-page__glow fv-page__glow--rose" />
       <div className="app-container">
         <nav className="breadcrumb fv-breadcrumb" aria-label="Navegación">
           <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }}>Inicio</a>

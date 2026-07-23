@@ -13,7 +13,8 @@
 @import './layout/navbar.css';
 @import './layout/footer.css';
 
-/* Components (placeholders — will grow during refactor) */
+/* Components */
+@import './components/glass.css';
 @import './components/buttons.css';
 @import './components/cards.css';
 @import './components/forms.css';
@@ -31,8 +32,15 @@
 @import './components/skeleton.css';
 @import './components/loading.css';
 @import './components/empty-state.css';
+@import './components/product-card.css';
+@import './components/quantity-input.css';
+@import './components/review-modal.css';
+@import './components/order-status.css';
+@import './components/order-card.css';
+@import './components/order-timeline.css';
 
-/* Pages (placeholders — will grow during refactor) */
+/* Pages */
+@import './pages/auth/index.css';
 @import './pages/home.css';
 @import './pages/products.css';
 @import './pages/product-detail.css';
@@ -41,12 +49,16 @@
 @import './pages/favorites.css';
 @import './pages/orders.css';
 @import './pages/profile.css';
+/* Admin */
+@import './pages/admin/base.css';
 @import './pages/admin/dashboard.css';
 @import './pages/admin/products.css';
 @import './pages/admin/categories.css';
 @import './pages/admin/orders.css';
 @import './pages/admin/users.css';
-@import './pages/admin/reports.css';
+@import './pages/admin/reviews.css';
+@import './pages/admin/favorites.css';
+@import './pages/admin/settings.css';
 
 /* Theme */
 @import './theme/light.css';

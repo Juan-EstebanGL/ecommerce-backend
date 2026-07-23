@@ -1,20 +1,25 @@
-*,
-*::before,
-*::after {
+/* ══════════════════════════════════════════════════════════
+   Reset — Soft Glass Premium
+   ══════════════════════════════════════════════════════════ */
+
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
+  font-size: var(--fs-base);
   background: var(--background);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
 
 img {
   max-width: 100%;
+  height: auto;
   display: block;
 }
 
@@ -25,4 +30,26 @@ a {
 
 button {
   font-family: inherit;
+  cursor: pointer;
+}
+
+input, textarea, select {
+  font-family: inherit;
+}
+
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  line-height: 1.2;
+  font-weight: var(--fw-bold);
+}
+
+p {
+  margin: 0;
+  line-height: 1.6;
 }

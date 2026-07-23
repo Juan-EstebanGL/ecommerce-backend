@@ -22,46 +22,41 @@ const TIMELINE_STEPS = [
 
 const STATUS_ORDER = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
 
-function Badge({ status, children }) {
-  const cls = `badge ${status ? `badge--${status}` : ""}`;
-  return <span className={cls}>{children}</span>;
-}
-
 function Timeline({ status }) {
   const currentIndex = STATUS_ORDER.indexOf(status);
   if (currentIndex === -1) return null;
 
   return (
-    <div className="od-timeline">
+    <div className="otl" role="list" aria-label="Progreso del pedido">
       {TIMELINE_STEPS.map((step, idx) => {
         const isActive = idx <= currentIndex;
         const isLast = idx === TIMELINE_STEPS.length - 1;
 
         return (
-          <div key={step.key} className="od-timeline__step">
+          <div key={step.key} className="otl__step" role="listitem">
             <div
-              className={`od-timeline__dot ${
-                isActive ? "od-timeline__dot--active" : "od-timeline__dot--future"
+              className={`otl__dot ${
+                isActive ? "otl__dot--active" : "otl__dot--future"
               }`}
+              aria-current={idx === currentIndex ? "step" : undefined}
             >
               {isActive ? "✓" : idx + 1}
             </div>
-            <div className="od-timeline__text">
-              <span
-                className={`od-timeline__label ${
-                  isActive ? "od-timeline__label--active" : "od-timeline__label--future"
-                }`}
-              >
-                {step.label}
-              </span>
-            </div>
+            <span
+              className={`otl__label ${
+                isActive ? "otl__label--active" : "otl__label--future"
+              }`}
+            >
+              {step.label}
+            </span>
             {!isLast && (
               <div
-                className={`od-timeline__connector ${
+                className={`otl__connector ${
                   isActive && currentIndex > idx
-                    ? "od-timeline__connector--active"
-                    : "od-timeline__connector--future"
+                    ? "otl__connector--active"
+                    : "otl__connector--future"
                 }`}
+                aria-hidden="true"
               />
             )}
           </div>
@@ -102,6 +97,8 @@ function OrderDetail() {
   if (loading) {
     return (
       <main className="od-page">
+        <div className="od-page__glow od-page__glow--teal" />
+        <div className="od-page__glow od-page__glow--purple" />
         <div className="app-container">
           <div className="od-loading">
             <Loader />
@@ -115,9 +112,11 @@ function OrderDetail() {
   if (error) {
     return (
       <main className="od-page">
+        <div className="od-page__glow od-page__glow--teal" />
+        <div className="od-page__glow od-page__glow--purple" />
         <div className="app-container">
           <div className="od-error">
-            <div className="od-error__icon">
+            <div className="or-error__icon">
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
@@ -137,6 +136,8 @@ function OrderDetail() {
   if (!order) {
     return (
       <main className="od-page">
+        <div className="od-page__glow od-page__glow--teal" />
+        <div className="od-page__glow od-page__glow--purple" />
         <div className="app-container">
           <div className="od-not-found">
             <div className="od-not-found__icon">
@@ -167,6 +168,9 @@ function OrderDetail() {
 
   return (
     <main className="od-page">
+      <div className="od-page__glow od-page__glow--teal" />
+      <div className="od-page__glow od-page__glow--purple" />
+
       <div className="app-container">
         <nav className="breadcrumb" aria-label="Navegación">
           <Link to="/">Inicio</Link>
@@ -180,7 +184,7 @@ function OrderDetail() {
           <div className="od-header__text">
             <h1 className="od-header__title">Pedido #{order.id}</h1>
             <p className="od-header__date">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "-2px", marginRight: "4px" }}>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                 <line x1="16" y1="2" x2="16" y2="6" />
                 <line x1="8" y1="2" x2="8" y2="6" />
@@ -195,9 +199,10 @@ function OrderDetail() {
               })}
             </p>
           </div>
-          <Badge status={order.status}>
+          <span className={`ost ost--lg ost--${order.status}`}>
+            <span className="ost__dot" />
             {STATUS_LABELS[order.status] || order.status}
-          </Badge>
+          </span>
         </header>
 
         {order.status === "CANCELLED" ? (
@@ -210,7 +215,9 @@ function OrderDetail() {
             <span>Este pedido fue cancelado.</span>
           </div>
         ) : (
-          <Timeline status={order.status} />
+          <div className="od-timeline">
+            <Timeline status={order.status} />
+          </div>
         )}
 
         <div className="od-layout">
@@ -249,7 +256,6 @@ function OrderDetail() {
                           <span className="od-item__meta-field">
                             Cantidad: <strong>{qty}</strong>
                           </span>
-                          <span className="od-item__meta-dot">·</span>
                           <span className="od-item__meta-field">
                             Precio: <strong>${unitPrice.toFixed(2)}</strong>
                           </span>

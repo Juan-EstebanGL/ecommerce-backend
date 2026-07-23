@@ -1,1 +1,53 @@
-/* cards.css � to be populated during refactor */
+/* ══════════════════════════════════════════════════════════
+   Cards — Soft Glass Premium
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Base card ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+  padding: var(--space-md);
+  transition: box-shadow var(--transition-base);
+}
+
+/* ── Interactive card (hoverable) ── */
+.card--interactive {
+  cursor: pointer;
+  transition: box-shadow var(--transition-base), transform var(--transition-smooth);
+}
+
+.card--interactive:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* ── Glass card ── */
+.card--glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.card--glass:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Card sections ── */
+.card__header {
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.card__body {
+  flex: 1;
+}
+
+.card__footer {
+  padding-top: var(--space-md);
+  margin-top: var(--space-md);
+  border-top: 1px solid var(--border-subtle);
+}

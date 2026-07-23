@@ -12,11 +12,6 @@ const STATUS_LABELS = {
   CANCELLED: "Cancelado",
 };
 
-function Badge({ status, children }) {
-  const cls = `badge ${status ? `badge--${status}` : ""}`;
-  return <span className={cls}>{children}</span>;
-}
-
 function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -41,15 +36,19 @@ function Orders() {
     loadOrders();
   }, []);
 
+  const formatDate = (dateStr) =>
+    new Date(dateStr).toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
   return (
     <main className="or-page">
-      <div className="app-container">
-        <nav className="breadcrumb or-breadcrumb" aria-label="Navegación">
-          <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }}>Inicio</a>
-          <span className="breadcrumb__sep">/</span>
-          <span className="breadcrumb__current">Mis pedidos</span>
-        </nav>
+      <div className="or-page__glow or-page__glow--teal" />
+      <div className="or-page__glow or-page__glow--purple" />
 
+      <div className="app-container">
         <header className="or-header">
           <div className="or-header__text">
             <h1 className="or-header__title">Mis pedidos</h1>
@@ -79,7 +78,7 @@ function Orders() {
         {error && !loading && (
           <div className="or-error">
             <div className="or-error__icon">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -120,46 +119,55 @@ function Orders() {
             {orders.map((order, idx) => (
               <div
                 key={order.id}
-                className="or-card"
+                className="orc"
                 style={{ animationDelay: `${idx * 0.05}s` }}
               >
-                <div className="or-card__info">
-                  <span className="or-card__number">Pedido #{order.id}</span>
-                  <span className="or-card__date">
-                    {new Date(order.createdAt).toLocaleDateString("es-ES", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
+                <div className="orc__head">
+                  <div className="orc__identity">
+                    <span className="orc__number">
+                      <span className="orc__number-hash">#</span>{order.id}
+                    </span>
+                    <span className="orc__date">
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                      {formatDate(order.createdAt)}
+                    </span>
+                  </div>
+                  <span className={`ost ost--${order.status}`}>
+                    <span className="ost__dot" />
+                    {STATUS_LABELS[order.status] || order.status}
                   </span>
                 </div>
 
-                <div className="or-card__divider" />
-
-                <div className="or-card__badge">
-                  <Badge status={order.status}>
-                    {STATUS_LABELS[order.status] || order.status}
-                  </Badge>
-                </div>
-
-                <div className="or-card__stats">
-                  <div className="or-card__stat">
-                    <span className="or-card__stat-label">Productos</span>
-                    <span className="or-card__stat-value">
-                      {order.items?.length || 0}
-                    </span>
-                  </div>
-                  <div className="or-card__stat">
-                    <span className="or-card__stat-label">Total</span>
-                    <span className="or-card__stat-value or-card__stat-value--price">
-                      ${order.total.toFixed(2)}
-                    </span>
+                <div className="orc__body">
+                  <div className="orc__stats">
+                    <div className="orc__stat">
+                      <span className="orc__stat-label">Productos</span>
+                      <span className="orc__stat-value">
+                        {order.items?.length || 0}
+                      </span>
+                    </div>
+                    <div className="orc__stat">
+                      <span className="orc__stat-label">Total</span>
+                      <span className="orc__stat-value orc__stat-value--price">
+                        ${order.total.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="or-card__action">
+                <div className="orc__divider" />
+
+                <div className="orc__foot">
+                  <span className="orc__date" style={{ fontSize: "var(--fs-xs)" }}>
+                    Pedido realizado el {formatDate(order.createdAt)}
+                  </span>
                   <button
-                    className="or-card__btn"
+                    className="orc__btn"
                     onClick={() => navigate(`/orders/${order.id}`)}
                   >
                     Ver detalle

@@ -1,0 +1,133 @@
+/* ══════════════════════════════════════════════════════════
+   Order Timeline — Soft Glass Premium
+   Prefix: .otl
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Timeline Container ── */
+.otl {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 28px 36px;
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+  position: relative;
+}
+.otl::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.80), transparent);
+  pointer-events: none;
+}
+
+/* ── Step ── */
+.otl__step {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+/* ── Dot ── */
+.otl__dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  flex-shrink: 0;
+  transition: background var(--transition-smooth),
+              color var(--transition-smooth),
+              box-shadow var(--transition-smooth);
+}
+.otl__dot--active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-700));
+  color: var(--text-on-primary);
+  box-shadow: 0 0 0 4px rgba(14, 165, 164, 0.12),
+              0 2px 8px rgba(14, 165, 164, 0.2);
+}
+.otl__dot--future {
+  background: var(--background-subtle);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border);
+}
+
+/* ── Label ── */
+.otl__label {
+  margin-left: 12px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  transition: color var(--transition-smooth);
+}
+.otl__label--active {
+  color: var(--text);
+}
+.otl__label--future {
+  color: var(--text-tertiary);
+}
+
+/* ── Connector ── */
+.otl__connector {
+  width: 52px;
+  height: 2px;
+  margin: 0 14px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  transition: background var(--transition-smooth);
+}
+.otl__connector--active {
+  background: linear-gradient(90deg, var(--primary), var(--primary-600));
+}
+.otl__connector--future {
+  background: var(--border);
+}
+
+/* ── Cancelled State ── */
+.otl--cancelled .otl__dot--active {
+  background: linear-gradient(135deg, var(--danger), #b91c1c);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1),
+              0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+/* ══════════════════════════════════════════════════════════
+   Responsive
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .otl {
+    padding: 20px 24px;
+  }
+  .otl__connector {
+    width: 32px;
+    margin: 0 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .otl {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 20px;
+  }
+  .otl__step {
+    width: 100%;
+  }
+  .otl__connector {
+    width: 2px;
+    height: 24px;
+    margin: 0 0 0 17px;
+  }
+}

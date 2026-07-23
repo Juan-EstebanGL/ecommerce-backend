@@ -387,6 +387,8 @@ function Profile() {
 
   return (
     <main className="pf-page">
+      <div className="pf-page__glow pf-page__glow--teal" />
+      <div className="pf-page__glow pf-page__glow--purple" />
       <div className="app-container">
         <div className="pf-header">
           <h1 className="pf-header__title">Mi cuenta</h1>
