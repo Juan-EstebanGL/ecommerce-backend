@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import ReviewRating from "./ReviewRating";
 
 const placeholderImg = (
@@ -7,6 +8,68 @@ const placeholderImg = (
     <polyline points="21 15 16 10 5 21" />
   </svg>
 );
+
+function ExpandableText({ text, className }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const toggle = useCallback(() => {
+    setExpanded((prev) => !prev);
+  }, []);
+
+  if (!text) return <span className={className}>—</span>;
+
+  return (
+    <span
+      className={`${className} ${expanded ? "is-expanded" : "is-collapsed"}`}
+      onClick={toggle}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      }}
+    >
+      {text}
+    </span>
+  );
+}
+
+function UserAvatar({ user }) {
+  if (user?.avatarUrl) {
+    return (
+      <div className="ad-reviews-user-avatar">
+        <img
+          src={user.avatarUrl}
+          alt=""
+          className="ad-reviews-user-avatar__img"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+            e.currentTarget.nextSibling.style.display = "flex";
+          }}
+        />
+        <span className="ad-reviews-user-avatar__fallback" style={{ display: "none" }}>
+          {((user.firstName?.charAt(0) || user.email?.charAt(0)) || "?").toUpperCase()}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ad-reviews-user-avatar">
+      <span className="ad-reviews-user-avatar__fallback">
+        {((user?.firstName?.charAt(0) || user?.email?.charAt(0)) || "?").toUpperCase()}
+      </span>
+    </div>
+  );
+}
+
+function UserName({ user }) {
+  const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
+  if (name) return <span className="ad-reviews-user-name">{name}</span>;
+  return null;
+}
 
 export default function ReviewTable({ reviews, onView, onDelete, deletingId }) {
   if (!reviews.length) {
@@ -61,24 +124,26 @@ export default function ReviewTable({ reviews, onView, onDelete, deletingId }) {
                         {placeholderImg}
                       </span>
                     </div>
-                    <span className="ad-reviews-product-name">{review.product?.name || "—"}</span>
+                    <ExpandableText
+                      text={review.product?.name}
+                      className="ad-reviews-product-name"
+                    />
                   </div>
                 </td>
                 <td>
                   <div className="ad-reviews-cell-user">
-                    <div className="ad-reviews-user-avatar">
-                      <span>{(review.user?.email?.charAt(0) || "?").toUpperCase()}</span>
-                    </div>
-                    <span className="ad-reviews-user-email">{review.user?.email || "—"}</span>
+                    <UserAvatar user={review.user} />
+                    <UserName user={review.user} />
                   </div>
                 </td>
                 <td>
                   <ReviewRating rating={review.rating} />
                 </td>
                 <td>
-                  <div className="ad-reviews-cell-comment" title={review.comment}>
-                    {review.comment}
-                  </div>
+                  <ExpandableText
+                    text={review.comment}
+                    className="ad-reviews-cell-comment"
+                  />
                 </td>
                 <td className="ad-reviews-cell-date">
                   {new Date(review.createdAt).toLocaleDateString("es-CL", {

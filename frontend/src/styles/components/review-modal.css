@@ -133,6 +133,20 @@
   color: var(--border);
 }
 
+/* ── Light Theme: Star Contrast Fix ── */
+[data-theme="light"] .rm-star {
+  color: #cbd5e1;
+}
+[data-theme="light"] .rm-star--active {
+  color: #f59e0b;
+}
+[data-theme="light"] .rm-star:hover {
+  color: #fbbf24;
+}
+[data-theme="light"] .rm-star:hover ~ .rm-star {
+  color: #cbd5e1;
+}
+
 /* ── Textarea ── */
 .rm-textarea {
   width: 100%;

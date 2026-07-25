@@ -17,6 +17,8 @@ const getProductReviews = async (productId) => {
         select: {
           id: true,
           email: true,
+          firstName: true,
+          lastName: true,
         },
       },
     },
@@ -32,6 +34,8 @@ const getProductReviews = async (productId) => {
     user: {
       id: review.user.id,
       email: review.user.email,
+      firstName: review.user.firstName,
+      lastName: review.user.lastName,
     },
   }));
 };
@@ -70,6 +74,8 @@ const createReview = async (userId, productId, data) => {
         select: {
           id: true,
           email: true,
+          firstName: true,
+          lastName: true,
         },
       },
     },
@@ -84,6 +90,8 @@ const createReview = async (userId, productId, data) => {
     user: {
       id: review.user.id,
       email: review.user.email,
+      firstName: review.user.firstName,
+      lastName: review.user.lastName,
     },
   };
 };
@@ -118,6 +126,9 @@ const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
           select: {
             id: true,
             email: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
           },
         },
         product: {
@@ -147,6 +158,9 @@ const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
       user: {
         id: review.user.id,
         email: review.user.email,
+        firstName: review.user.firstName,
+        lastName: review.user.lastName,
+        avatarUrl: review.user.avatarUrl,
       },
       product: {
         id: review.product.id,
@@ -183,6 +197,8 @@ const updateReview = async (userId, reviewId, data) => {
         select: {
           id: true,
           email: true,
+          firstName: true,
+          lastName: true,
         },
       },
     },
@@ -197,6 +213,8 @@ const updateReview = async (userId, reviewId, data) => {
     user: {
       id: updated.user.id,
       email: updated.user.email,
+      firstName: updated.user.firstName,
+      lastName: updated.user.lastName,
     },
   };
 };

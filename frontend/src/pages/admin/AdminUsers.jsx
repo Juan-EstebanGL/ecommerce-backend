@@ -86,10 +86,11 @@ export default function AdminUsers() {
   async function handleRoleToggle(user) {
     const newRole = user.role === "ADMIN" ? "USER" : "ADMIN";
     const actionLabel = newRole === "ADMIN" ? "Promocionar" : "Degradar";
+    const userName = (user.firstName || user.lastName) ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : user.email;
     const message =
       newRole === "ADMIN"
-        ? `¿Estás seguro de promocionar a ${user.email} como administrador?`
-        : `¿Estás seguro de degradar a ${user.email} a usuario normal?`;
+        ? `¿Estás seguro de promocionar a ${userName} como administrador?`
+        : `¿Estás seguro de degradar a ${userName} a usuario normal?`;
 
     const result = await showConfirm(
       `${actionLabel} usuario`,

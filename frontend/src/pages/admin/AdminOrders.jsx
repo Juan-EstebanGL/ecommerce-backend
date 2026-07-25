@@ -54,6 +54,7 @@ export default function AdminOrders() {
       (o) =>
         String(o.id).includes(q) ||
         (o.user?.email && o.user.email.toLowerCase().includes(q)) ||
+        ((o.user?.firstName || o.user?.lastName) && `${o.user.firstName || ""} ${o.user.lastName || ""}`.trim().toLowerCase().includes(q)) ||
         (STATUS_LABELS[o.status] && STATUS_LABELS[o.status].toLowerCase().includes(q)) ||
         o.status.toLowerCase().includes(q)
     );
@@ -241,7 +242,7 @@ export default function AdminOrders() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar por ID, email o estado..."
+            placeholder="Buscar por ID, nombre o estado..."
             className="ad-products-search__input"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -333,7 +334,7 @@ function OrderViewModal({ order, onClose }) {
             </div>
             <div className="ad-modal__field">
               <span className="ad-modal__label">Cliente</span>
-              <span className="ad-modal__value">{order.user?.email || "—"}</span>
+              <span className="ad-modal__value">{(order.user?.firstName || order.user?.lastName) ? `${order.user.firstName || ""} ${order.user.lastName || ""}`.trim() : order.user?.email || "—"}</span>
             </div>
             <div className="ad-modal__field">
               <span className="ad-modal__label">Fecha</span>

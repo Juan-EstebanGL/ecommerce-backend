@@ -10,7 +10,24 @@ export default function UserViewModal({ user, onClose }) {
     <div className="ad-modal-overlay" onClick={onClose}>
       <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
         <div className="ad-modal__header">
-          <div className="ad-modal__header-icon">👤</div>
+          {user.avatarUrl ? (
+            <div className="ad-modal__header-avatar">
+              <img
+                src={user.avatarUrl}
+                alt=""
+                className="ad-modal__header-avatar-img"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  e.currentTarget.nextSibling.style.display = "flex";
+                }}
+              />
+              <span className="ad-modal__header-avatar-fallback" style={{ display: "none" }}>
+                👤
+              </span>
+            </div>
+          ) : (
+            <div className="ad-modal__header-icon">👤</div>
+          )}
           <div className="ad-modal__header-text">
             <h2 className="ad-modal__title">Detalles del usuario</h2>
             <p className="ad-modal__subtitle">Información de la cuenta</p>
@@ -25,6 +42,10 @@ export default function UserViewModal({ user, onClose }) {
 
         <div className="ad-modal__body">
           <div className="ad-modal__grid">
+            <div className="ad-modal__field ad-modal__field--full">
+              <span className="ad-modal__label">Nombre completo</span>
+              <span className="ad-modal__value">{(user.firstName || user.lastName) ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "Sin nombre"}</span>
+            </div>
             <div className="ad-modal__field ad-modal__field--full">
               <span className="ad-modal__label">Correo electrónico</span>
               <span className="ad-modal__value">{user.email}</span>

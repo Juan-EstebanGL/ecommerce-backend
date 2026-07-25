@@ -21,13 +21,13 @@
 .ad-reviews-cell-product {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-width: 180px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .ad-reviews-product-thumb {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--ad-radius-xs);
   overflow: hidden;
   background: rgba(255, 255, 255, 0.04);
@@ -62,13 +62,37 @@
   color: var(--ad-muted);
 }
 
+/* ── Product Name (Expandable) ── */
 .ad-reviews-product-name {
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--ad-text);
+  min-width: 0;
+}
+
+.ad-reviews-product-name.is-collapsed {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.ad-reviews-product-name.is-collapsed:hover {
+  color: var(--primary);
+}
+
+.ad-reviews-product-name.is-expanded {
+  display: block;
+  white-space: normal;
+  word-break: break-word;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.ad-reviews-product-name.is-expanded:hover {
+  color: var(--primary);
 }
 
 /* ── User Cell ── */
@@ -76,30 +100,52 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 160px;
+  min-width: 0;
 }
 
 .ad-reviews-user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid var(--ad-border);
+  transition: border-color 0.2s;
+}
+
+.ad-reviews-user-avatar:hover {
+  border-color: var(--primary);
+}
+
+.ad-reviews-user-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: flex;
+}
+
+.ad-reviews-user-avatar__fallback {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: var(--text-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  flex-shrink: 0;
   box-shadow: 0 0 10px rgba(14, 165, 164, 0.2);
 }
 
-.ad-reviews-user-email {
-  color: var(--ad-text-2);
-  font-size: 0.85rem;
+.ad-reviews-user-name {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--ad-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 /* ── Stars ── */
@@ -109,24 +155,44 @@
   align-items: center;
 }
 
-/* ── Comment Cell ── */
+/* ── Comment Cell (Expandable) ── */
 .ad-reviews-cell-comment {
-  max-width: 240px;
+  color: var(--ad-text-2);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.ad-reviews-cell-comment.is-collapsed {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-height: 1.4;
-  color: var(--ad-text-2);
-  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.ad-reviews-cell-comment.is-collapsed:hover {
+  color: var(--ad-text);
+}
+
+.ad-reviews-cell-comment.is-expanded {
+  display: block;
+  white-space: normal;
+  word-break: break-word;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.ad-reviews-cell-comment.is-expanded:hover {
+  color: var(--ad-text);
 }
 
 /* ── Date Cell ── */
 .ad-reviews-cell-date {
   color: var(--ad-text-3);
   white-space: nowrap;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -228,6 +294,48 @@
 }
 
 /* ══════════════════════════════════════════════════════════
+   TABLE LAYOUT — Prevent horizontal scroll
+   ══════════════════════════════════════════════════════════ */
+.ad-reviews-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.ad-reviews-table th:nth-child(1),
+.ad-reviews-table td:nth-child(1) {
+  width: 24%;
+}
+
+.ad-reviews-table th:nth-child(2),
+.ad-reviews-table td:nth-child(2) {
+  width: 16%;
+}
+
+.ad-reviews-table th:nth-child(3),
+.ad-reviews-table td:nth-child(3) {
+  width: 12%;
+}
+
+.ad-reviews-table th:nth-child(4),
+.ad-reviews-table td:nth-child(4) {
+  width: 26%;
+}
+
+.ad-reviews-table th:nth-child(5),
+.ad-reviews-table td:nth-child(5) {
+  width: 10%;
+}
+
+.ad-reviews-table th:nth-child(6),
+.ad-reviews-table td:nth-child(6) {
+  width: 6%;
+}
+
+.ad-reviews-table td {
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════
    RESPONSIVE — Reviews
    ══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
@@ -237,9 +345,12 @@
   }
 
   .ad-reviews-product-thumb {
-    width: 38px;
-    height: 38px;
-    padding: 2px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .ad-reviews-table {
+    table-layout: auto;
   }
 }
 

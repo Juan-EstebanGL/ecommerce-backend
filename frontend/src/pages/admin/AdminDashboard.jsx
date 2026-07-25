@@ -442,7 +442,7 @@ export default function AdminDashboard() {
               {latestOrders.map((o) => (
                 <div key={o.id} className="ad-dash-orders-table__row">
                   <span className="ad-orders-cell-id">#{o.id}</span>
-                  <span className="ad-orders-cell-client__email">{o.usuario.email}</span>
+                  <span className="ad-orders-cell-client__email">{(o.usuario.firstName || o.usuario.lastName) ? `${o.usuario.firstName || ""} ${o.usuario.lastName || ""}`.trim() : o.usuario.email}</span>
                   <span className="ad-orders-cell-total">{formatCurrency(o.total)}</span>
                   <OrderStatusBadge status={o.status} />
                   <span className="ad-orders-cell-date">{formatDate(o.createdAt)}</span>
@@ -468,10 +468,10 @@ export default function AdminDashboard() {
                 <div key={i} className="ad-dash-review">
                   <div className="ad-dash-review__header">
                     <div className="ad-dash-review__avatar">
-                      {r.usuario.email.charAt(0).toUpperCase()}
+                      {((r.usuario.firstName?.charAt(0) || r.usuario.email?.charAt(0)) || "?").toUpperCase()}
                     </div>
                     <div className="ad-dash-review__meta">
-                      <span className="ad-dash-review__email">{r.usuario.email}</span>
+                      <span className="ad-dash-review__email">{(r.usuario.firstName || r.usuario.lastName) ? `${r.usuario.firstName || ""} ${r.usuario.lastName || ""}`.trim() : r.usuario.email}</span>
                       <span className="ad-dash-review__date">{formatDate(r.createdAt)}</span>
                     </div>
                   </div>

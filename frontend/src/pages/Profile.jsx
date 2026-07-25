@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -15,6 +15,13 @@ import {
   setDefaultAddress,
 } from "../api/users";
 import { showSuccess, showError, showConfirm, showWarning } from "../utils/alerts";
+import {
+  validateFirstName,
+  validateLastName,
+  validateEmail,
+  validatePhone,
+  filterPhoneDigits,
+} from "../utils/validators";
 
 const ROLES = {
   admin: "Administrador",
@@ -50,8 +57,11 @@ function Profile() {
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+  const [originalForm, setOriginalForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+  const [profileTouched, setProfileTouched] = useState({});
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
 
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [pwLoading, setPwLoading] = useState(false);
@@ -64,6 +74,27 @@ function Profile() {
   const [editingAddress, setEditingAddress] = useState(null);
   const [addressForm, setAddressForm] = useState({ ...EMPTY_ADDRESS });
   const [addressLoading, setAddressLoading] = useState(false);
+
+  const profileErrors = useMemo(() => ({
+    firstName: profileTouched.firstName ? validateFirstName(profileForm.firstName) : "",
+    lastName: profileTouched.lastName ? validateLastName(profileForm.lastName) : "",
+    email: profileTouched.email ? validateEmail(profileForm.email) : "",
+    phone: profileTouched.phone ? validatePhone(profileForm.phone) : "",
+  }), [profileForm.firstName, profileForm.lastName, profileForm.email, profileForm.phone, profileTouched]);
+
+  const isProfileValid = useMemo(() => (
+    !validateFirstName(profileForm.firstName) &&
+    !validateLastName(profileForm.lastName) &&
+    !validateEmail(profileForm.email) &&
+    !validatePhone(profileForm.phone)
+  ), [profileForm.firstName, profileForm.lastName, profileForm.email, profileForm.phone]);
+
+  const isProfileDirty = useMemo(() => (
+    profileForm.firstName.trim() !== originalForm.firstName.trim() ||
+    profileForm.lastName.trim() !== originalForm.lastName.trim() ||
+    profileForm.email.trim() !== originalForm.email.trim() ||
+    profileForm.phone.trim() !== originalForm.phone.trim()
+  ), [profileForm, originalForm]);
 
   useEffect(() => {
     if (!user) {
@@ -111,9 +142,41 @@ function Profile() {
     };
   }, [previewUrl]);
 
+  // Unsaved changes: warn on tab close / refresh
+  useEffect(() => {
+    if (!editingProfile || !isProfileDirty) return;
+    function onBeforeUnload(e) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [editingProfile, isProfileDirty]);
+
+  function markProfileTouched(field) {
+    setProfileTouched((prev) => ({ ...prev, [field]: true }));
+  }
+
+  function profileInputClass(field) {
+    const base = "pf-input";
+    if (!profileTouched[field]) return base;
+    if (profileErrors[field]) return `${base} pf-input--error`;
+    return `${base} pf-input--valid`;
+  }
+
+  function isFieldChanged(field) {
+    return editingProfile && profileForm[field].trim() !== originalForm[field].trim();
+  }
+
+  function profileFieldClass(field) {
+    let cls = "pf-form-group";
+    if (isFieldChanged(field)) cls += " pf-form-group--changed";
+    return cls;
+  }
+
   if (!user) return null;
 
-  const avatarLetter = user.email?.charAt(0).toUpperCase() || "U";
+  const avatarLetter = (user.firstName?.charAt(0) || user.email?.charAt(0) || "U").toUpperCase();
   const roleLabel = ROLES[user.role?.toLowerCase()] || user.role || "Usuario";
   const isAdmin = user.role?.toLowerCase() === "admin";
   const createdDate = user.createdAt
@@ -180,30 +243,41 @@ function Profile() {
   }
 
   function handleStartEditProfile() {
-    setProfileForm({
+    const form = {
       firstName: user.firstName || "",
       lastName: user.lastName || "",
       email: user.email || "",
       phone: user.phone || "",
-    });
+    };
+    setProfileForm(form);
+    setOriginalForm(form);
+    setProfileTouched({});
     setEditingProfile(true);
     setProfileSuccess(false);
+    setProfileSaved(false);
   }
 
   async function handleSaveProfile(e) {
     e.preventDefault();
     setProfileSuccess(false);
 
-    if (!profileForm.email.trim()) {
-      showWarning("Campo requerido", "El correo electrónico es obligatorio.");
+    if (!isProfileDirty) {
+      showWarning("Sin cambios", "No hay cambios para guardar.");
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(profileForm.email.trim())) {
-      showWarning("Email inválido", "El formato del correo electrónico no es válido.");
-      return;
-    }
+    const allTouched = { firstName: true, lastName: true, email: true, phone: true };
+    setProfileTouched(allTouched);
+
+    const fErr = validateFirstName(profileForm.firstName);
+    const lErr = validateLastName(profileForm.lastName);
+    const eErr = validateEmail(profileForm.email);
+    const pErr = validatePhone(profileForm.phone);
+
+    if (fErr) { showWarning("Campo requerido", fErr); return; }
+    if (lErr) { showWarning("Campo requerido", lErr); return; }
+    if (eErr) { showWarning("Email inválido", eErr); return; }
+    if (pErr) { showWarning("Teléfono inválido", pErr); return; }
 
     setProfileLoading(true);
     try {
@@ -214,9 +288,12 @@ function Profile() {
         phone: profileForm.phone.trim() || null,
       });
       updateUser(res.data);
+      setOriginalForm({ ...profileForm });
       setProfileSuccess(true);
+      setProfileSaved(true);
       setEditingProfile(false);
       showSuccess("Perfil actualizado");
+      setTimeout(() => setProfileSaved(false), 3000);
     } catch (err) {
       showError(err?.response?.data?.message || "Error al actualizar el perfil");
     } finally {
@@ -525,62 +602,101 @@ function Profile() {
           {editingProfile ? (
             <form className="pf-profile-form" onSubmit={handleSaveProfile} noValidate>
               <div className="pf-profile-form__grid">
-                <div className="pf-form-group">
-                  <label className="pf-form-group__label" htmlFor="pf-firstName">Nombre</label>
+                <div className={profileFieldClass("firstName")}>
+                  <label className="pf-form-group__label" htmlFor="pf-firstName">
+                    Nombre
+                    {isFieldChanged("firstName") && <span className="pf-form-group__dot" />}
+                  </label>
                   <input
                     id="pf-firstName"
-                    className="pf-input"
+                    className={profileInputClass("firstName")}
                     type="text"
                     value={profileForm.firstName}
                     onChange={(e) => setProfileForm((p) => ({ ...p, firstName: e.target.value }))}
+                    onBlur={() => markProfileTouched("firstName")}
                     placeholder="Tu nombre"
+                    disabled={profileLoading}
                   />
+                  {profileErrors.firstName && <span className="pf-form-group__err">{profileErrors.firstName}</span>}
                 </div>
-                <div className="pf-form-group">
-                  <label className="pf-form-group__label" htmlFor="pf-lastName">Apellido</label>
+                <div className={profileFieldClass("lastName")}>
+                  <label className="pf-form-group__label" htmlFor="pf-lastName">
+                    Apellido
+                    {isFieldChanged("lastName") && <span className="pf-form-group__dot" />}
+                  </label>
                   <input
                     id="pf-lastName"
-                    className="pf-input"
+                    className={profileInputClass("lastName")}
                     type="text"
                     value={profileForm.lastName}
                     onChange={(e) => setProfileForm((p) => ({ ...p, lastName: e.target.value }))}
+                    onBlur={() => markProfileTouched("lastName")}
                     placeholder="Tu apellido"
+                    disabled={profileLoading}
                   />
+                  {profileErrors.lastName && <span className="pf-form-group__err">{profileErrors.lastName}</span>}
                 </div>
-                <div className="pf-form-group">
-                  <label className="pf-form-group__label" htmlFor="pf-email">Correo electrónico</label>
+                <div className={profileFieldClass("email")}>
+                  <label className="pf-form-group__label" htmlFor="pf-email">
+                    Correo electrónico
+                    {isFieldChanged("email") && <span className="pf-form-group__dot" />}
+                  </label>
                   <input
                     id="pf-email"
-                    className="pf-input"
+                    className={profileInputClass("email")}
                     type="email"
                     value={profileForm.email}
                     onChange={(e) => setProfileForm((p) => ({ ...p, email: e.target.value }))}
+                    onBlur={() => markProfileTouched("email")}
                     placeholder="tu@correo.com"
                     required
+                    disabled={profileLoading}
                   />
+                  {profileErrors.email && <span className="pf-form-group__err">{profileErrors.email}</span>}
                 </div>
-                <div className="pf-form-group">
-                  <label className="pf-form-group__label" htmlFor="pf-phone">Teléfono</label>
+                <div className={profileFieldClass("phone")}>
+                  <label className="pf-form-group__label" htmlFor="pf-phone">
+                    Teléfono
+                    {isFieldChanged("phone") && <span className="pf-form-group__dot" />}
+                  </label>
                   <input
                     id="pf-phone"
-                    className="pf-input"
+                    className={profileInputClass("phone")}
                     type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={profileForm.phone}
-                    onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))}
-                    placeholder="Opcional"
+                    onChange={(e) => setProfileForm((p) => ({ ...p, phone: filterPhoneDigits(e.target.value) }))}
+                    onBlur={() => markProfileTouched("phone")}
+                    placeholder="Solo números (7-15 dígitos)"
+                    disabled={profileLoading}
                   />
+                  {profileErrors.phone && <span className="pf-form-group__err">{profileErrors.phone}</span>}
                 </div>
               </div>
               <div className="pf-profile-form__actions">
                 <button type="button" className="pf-btn pf-btn--ghost" onClick={() => setEditingProfile(false)} disabled={profileLoading}>
                   Cancelar
                 </button>
-                <button type="submit" className="pf-btn pf-btn--primary" disabled={profileLoading}>
+                <button
+                  type="submit"
+                  className={`pf-btn pf-btn--primary${profileSaved ? " pf-btn--saved" : ""}`}
+                  disabled={profileLoading || !isProfileValid || !isProfileDirty}
+                >
                   {profileLoading ? (
                     <span className="pf-btn__inner">
                       <span className="pf-spinner--sm" />
                       Guardando...
                     </span>
+                  ) : profileSaved ? (
+                    <span className="pf-btn__inner">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Cambios guardados
+                    </span>
+                  ) : !isProfileDirty ? (
+                    "Sin cambios"
                   ) : (
                     "Guardar cambios"
                   )}

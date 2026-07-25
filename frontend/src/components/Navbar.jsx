@@ -36,7 +36,10 @@ function Navbar() {
 
   const closeDrawer = () => setDrawerOpen(false);
 
-  const avatarLetter = user?.email?.charAt(0).toUpperCase() || "U";
+  const displayName = (user?.firstName || user?.lastName)
+    ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+    : "Usuario";
+  const avatarLetter = (user?.firstName?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase();
 
   return (
     <>
@@ -117,7 +120,7 @@ function Navbar() {
                 {({ close }) => (
                   <>
                     <div className="navbar__dropdown-header">
-                      <span className="navbar__dropdown-name">{user.email}</span>
+                      <span className="navbar__dropdown-name">{displayName}</span>
                       <span className="navbar__dropdown-role">
                         {user.role || "Usuario"}
                       </span>
@@ -266,7 +269,7 @@ function Navbar() {
         <div className="navbar__drawer-divider" />
         {user ? (
           <div className="navbar__drawer-user">
-            <span className="navbar__drawer-email">{user.email}</span>
+            <span className="navbar__drawer-email">{displayName}</span>
             <button
               className="navbar__drawer-logout"
               onClick={() => { closeDrawer(); logout(); }}

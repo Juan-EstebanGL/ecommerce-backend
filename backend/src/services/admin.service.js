@@ -74,7 +74,7 @@ const getDashboard = async () => {
       orderBy: { createdAt: "desc" },
       take: 5,
       include: {
-        user: { select: { id: true, email: true } },
+        user: { select: { id: true, email: true, firstName: true, lastName: true } },
       },
     }),
     prisma.favorite.groupBy({
@@ -94,7 +94,7 @@ const getDashboard = async () => {
       orderBy: { createdAt: "desc" },
       take: 5,
       include: {
-        user: { select: { id: true, email: true } },
+        user: { select: { id: true, email: true, firstName: true, lastName: true } },
         product: { select: { id: true, name: true, imageUrl: true } },
       },
     }),
@@ -159,14 +159,14 @@ const getDashboard = async () => {
 
   const latestOrdersResult = latestOrders.map((order) => ({
     id: order.id,
-    usuario: { id: order.user.id, email: order.user.email },
+    usuario: { id: order.user.id, email: order.user.email, firstName: order.user.firstName, lastName: order.user.lastName },
     total: Number(order.total),
     status: order.status,
     createdAt: order.createdAt,
   }));
 
   const recentReviewsResult = recentReviews.map((review) => ({
-    usuario: { id: review.user.id, email: review.user.email },
+    usuario: { id: review.user.id, email: review.user.email, firstName: review.user.firstName, lastName: review.user.lastName },
     producto: {
       id: review.product.id,
       name: review.product.name,

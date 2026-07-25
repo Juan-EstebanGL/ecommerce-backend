@@ -92,7 +92,7 @@ export default function OrderTable({ orders, onView, onStatusChange, loadingId }
               <tr key={order.id} className={isLoading ? "ad-orders-row--loading" : ""}>
                 <td className="ad-orders-cell-id">#{order.id}</td>
                 <td className="ad-orders-cell-client">
-                  <span className="ad-orders-cell-client__email">{order.user?.email || "—"}</span>
+                  <span className="ad-orders-cell-client__email">{(order.user?.firstName || order.user?.lastName) ? `${order.user.firstName || ""} ${order.user.lastName || ""}`.trim() : order.user?.email || "—"}</span>
                 </td>
                 <td>{order.items?.length || 0}</td>
                 <td className="ad-orders-cell-total">

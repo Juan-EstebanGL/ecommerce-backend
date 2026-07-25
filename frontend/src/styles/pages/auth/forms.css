@@ -82,6 +82,15 @@
   box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
 }
 
+/* ── Input valid state ── */
+.auth-input--valid {
+  border-color: var(--success);
+}
+
+.auth-input--valid:focus {
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
+}
+
 /* ── Field error message ── */
 .auth-field__err {
   font-size: var(--fs-xs);

@@ -1285,7 +1285,7 @@
   border: 1px solid var(--ad-glass-border);
   border-radius: var(--ad-radius-lg);
   box-shadow: var(--ad-shadow-sm);
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .ad-products-table,

@@ -54,7 +54,7 @@ const register = asyncHandler(async (req, res) => {
     throw new AppError(getZodErrorMessage(validation.error), 400);
   }
 
-  const { email, password } = validation.data;
+  const { email, password, firstName, lastName, phone } = validation.data;
 
   // verificar si usuario existe
   const existingUser = await prisma.user.findUnique({
@@ -76,6 +76,9 @@ const register = asyncHandler(async (req, res) => {
     data: {
       email,
       password: hashedPassword,
+      firstName,
+      lastName,
+      phone,
       emailVerificationToken: hashedToken,
       emailVerificationExpires: tokenExpires,
     },

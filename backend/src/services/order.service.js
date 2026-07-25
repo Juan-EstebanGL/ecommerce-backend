@@ -176,6 +176,8 @@ const getAllOrders = async ({ page = 1, limit = 8 } = {}) => {
           select: {
             id: true,
             email: true,
+            firstName: true,
+            lastName: true,
             role: true,
           },
         },

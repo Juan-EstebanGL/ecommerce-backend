@@ -45,6 +45,7 @@ export default function AdminReviews() {
       (r) =>
         (r.product?.name && r.product.name.toLowerCase().includes(q)) ||
         (r.user?.email && r.user.email.toLowerCase().includes(q)) ||
+        ((r.user?.firstName || r.user?.lastName) && `${r.user.firstName || ""} ${r.user.lastName || ""}`.trim().toLowerCase().includes(q)) ||
         (r.comment && r.comment.toLowerCase().includes(q))
     );
   }, [reviews, debouncedSearch]);
@@ -221,7 +222,7 @@ export default function AdminReviews() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar por producto, email o comentario..."
+            placeholder="Buscar por producto, nombre o comentario..."
             className="ad-products-search__input"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -321,7 +322,7 @@ function ReviewViewModal({ review, onClose }) {
           <div className="ad-modal__grid">
             <div className="ad-modal__field">
               <span className="ad-modal__label">Usuario</span>
-              <span className="ad-modal__value">{review.user?.email || "—"}</span>
+              <span className="ad-modal__value">{(review.user?.firstName || review.user?.lastName) ? `${review.user.firstName || ""} ${review.user.lastName || ""}`.trim() : review.user?.email || "—"}</span>
             </div>
             <div className="ad-modal__field">
               <span className="ad-modal__label">Calificación</span>

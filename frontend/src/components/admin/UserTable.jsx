@@ -53,7 +53,7 @@ export default function UserTable({ users, onView, onRoleToggle, onDelete, delet
                     </span>
                   </div>
                 </td>
-                <td className="ad-users-cell-name">{user.name || user.email.split("@")[0]}</td>
+                <td className="ad-users-cell-name">{(user.firstName || user.lastName) ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "Sin nombre"}</td>
                 <td className="ad-users-cell-email">{user.email}</td>
                 <td><UserRoleBadge role={user.role} /></td>
                 <td className="ad-users-cell-date">

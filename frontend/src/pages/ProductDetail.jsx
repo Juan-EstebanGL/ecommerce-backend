@@ -429,11 +429,11 @@ function ProductDetail() {
               {reviews.map((review) => (
                 <div key={review.id} className="pd-review">
                   <div className="pd-review__avatar">
-                    {review.user?.email?.charAt(0)?.toUpperCase() || "?"}
+                    {(review.user?.firstName?.charAt(0) || review.user?.email?.charAt(0) || "?").toUpperCase()}
                   </div>
                   <div className="pd-review__body">
                     <div className="pd-review__header">
-                      <span className="pd-review__user">{review.user?.email || "Usuario"}</span>
+                      <span className="pd-review__user">{(review.user?.firstName || review.user?.lastName) ? `${review.user.firstName || ""} ${review.user.lastName || ""}`.trim() : "Usuario"}</span>
                       {review.user?.email?.toLowerCase() === currentUserEmail && (
                         <span className="pd-review__mine">Tu reseña</span>
                       )}

@@ -420,6 +420,46 @@
 .pf-input::placeholder {
   color: var(--text-tertiary);
 }
+.pf-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.pf-input--error {
+  border-color: var(--danger);
+}
+.pf-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+.pf-input--valid {
+  border-color: var(--success);
+}
+.pf-input--valid:focus {
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+.pf-form-group__err {
+  font-size: var(--fs-xs);
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.pf-form-group__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+  animation: pf-dot-pulse 2s ease-in-out infinite;
+}
+.pf-form-group--changed .pf-form-group__label {
+  color: var(--primary);
+}
+@keyframes pf-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
 .pf-input--textarea {
   resize: vertical;
   min-height: 56px;
@@ -496,6 +536,10 @@
 .pf-btn--primary:hover:not(:disabled) {
   box-shadow: 0 6px 20px rgba(14, 165, 164, 0.35);
   transform: translateY(-1px);
+}
+.pf-btn--saved {
+  background: linear-gradient(135deg, var(--success) 0%, #15803d 100%);
+  pointer-events: none;
 }
 .pf-btn--ghost {
   background: transparent;
