@@ -10,7 +10,7 @@ const authSchema = z.object({
     .min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
-const resendVerificationSchema = z.object({
+const emailOnlySchema = z.object({
   email: z
     .string({ error: "El correo electrónico es obligatorio" })
     .trim()
@@ -41,11 +41,16 @@ const resetPasswordSchema = z.object({
 
 const registerSchema = authSchema;
 const loginSchema = authSchema;
+const resendVerificationSchema = emailOnlySchema;
+const unverifyUserSchema = emailOnlySchema;
+const resetVerificationSchema = emailOnlySchema;
 
 module.exports = {
   registerSchema,
   loginSchema,
   resendVerificationSchema,
+  unverifyUserSchema,
+  resetVerificationSchema,
   verifyEmailSchema,
   forgotPasswordSchema,
   resetPasswordSchema,

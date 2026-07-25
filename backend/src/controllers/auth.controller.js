@@ -7,6 +7,8 @@ const {
   registerSchema,
   loginSchema,
   resendVerificationSchema,
+  unverifyUserSchema,
+  resetVerificationSchema,
   verifyEmailSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -21,6 +23,29 @@ const {
   isTokenExpired,
 } = require("../services/token.service");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../services/email.service");
+
+// ─── Reusable helpers ──────────────────────────────────────
+
+async function findUserByEmail(email, select) {
+  return prisma.user.findUnique({ where: { email }, select });
+}
+
+function generateVerificationData() {
+  const rawToken = generateToken();
+  const hashedToken = hashToken(rawToken);
+  const tokenExpires = getExpiryDate();
+  return { rawToken, hashedToken, tokenExpires };
+}
+
+async function sendSafe(fn) {
+  try {
+    await fn();
+  } catch (err) {
+    console.error("[auth] Error enviando correo:", err.message);
+  }
+}
+
+// ─── Controllers ───────────────────────────────────────────
 
 const register = asyncHandler(async (req, res) => {
   const validation = registerSchema.safeParse(req.body || {});
@@ -44,9 +69,7 @@ const register = asyncHandler(async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // generar token de verificación
-  const rawToken = generateToken();
-  const hashedToken = hashToken(rawToken);
-  const tokenExpires = getExpiryDate();
+  const { rawToken, hashedToken, tokenExpires } = generateVerificationData();
 
   // crear usuario
   await prisma.user.create({
@@ -59,11 +82,7 @@ const register = asyncHandler(async (req, res) => {
   });
 
   // enviar correo de verificación (no bloquear respuesta si falla)
-  try {
-    await sendVerificationEmail(email, rawToken);
-  } catch (emailError) {
-    console.error("[auth] No se pudo enviar el correo de verificación:", emailError.message);
-  }
+  await sendSafe(() => sendVerificationEmail(email, rawToken));
 
   return res.status(201).json({
     message: "Usuario creado correctamente",
@@ -142,27 +161,25 @@ const resendVerification = asyncHandler(async (req, res) => {
 
   const { email } = validation.data;
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true, emailVerified: true },
-  });
+  const user = await findUserByEmail(email, { id: true, emailVerified: true });
 
   if (!user) {
     return res.json({
+      success: true,
       message: "Si el correo está registrado, recibirás un enlace de verificación",
     });
   }
 
+  // Si el usuario ya está verificado, no hacer nada
   if (user.emailVerified) {
-    return res.json({
-      message: "El correo ya está verificado",
+    return res.status(409).json({
+      success: false,
+      message: "El usuario ya se encuentra verificado.",
     });
   }
 
   // generar nuevo token e invalidar el anterior
-  const rawToken = generateToken();
-  const hashedToken = hashToken(rawToken);
-  const tokenExpires = getExpiryDate();
+  const { rawToken, hashedToken, tokenExpires } = generateVerificationData();
 
   await prisma.user.update({
     where: { id: user.id },
@@ -173,14 +190,91 @@ const resendVerification = asyncHandler(async (req, res) => {
   });
 
   // enviar correo de verificación (no bloquear respuesta si falla)
-  try {
-    await sendVerificationEmail(email, rawToken);
-  } catch (emailError) {
-    console.error("[auth] No se pudo enviar el correo de verificación:", emailError.message);
-  }
+  await sendSafe(() => sendVerificationEmail(email, rawToken));
 
   return res.json({
-    message: "Si el correo está registrado, recibirás un enlace de verificación",
+    success: true,
+    message: "Nuevo correo de verificación enviado.",
+  });
+}, "Error interno del servidor");
+
+const unverifyUser = asyncHandler(async (req, res) => {
+  const validation = unverifyUserSchema.safeParse(req.body || {});
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
+  }
+
+  const { email } = validation.data;
+
+  const user = await findUserByEmail(email, { id: true, emailVerified: true });
+
+  if (!user) {
+    throw new AppError("Usuario no encontrado", 404);
+  }
+
+  // Si ya está desverificado, no modificar nada
+  if (!user.emailVerified) {
+    return res.json({
+      success: true,
+      message: "El usuario ya se encontraba desverificado.",
+    });
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      emailVerified: false,
+    },
+  });
+
+  return res.json({
+    success: true,
+    message: "Usuario desverificado correctamente.",
+  });
+}, "Error interno del servidor");
+
+const resetVerification = asyncHandler(async (req, res) => {
+  const validation = resetVerificationSchema.safeParse(req.body || {});
+
+  if (!validation.success) {
+    throw new AppError(getZodErrorMessage(validation.error), 400);
+  }
+
+  const { email } = validation.data;
+
+  const user = await findUserByEmail(email, { id: true, emailVerified: true });
+
+  if (!user) {
+    throw new AppError("Usuario no encontrado", 404);
+  }
+
+  // generar nuevo token e invalidar el anterior
+  const { rawToken, hashedToken, tokenExpires } = generateVerificationData();
+
+  const updateData = {
+    emailVerificationToken: hashedToken,
+    emailVerificationExpires: tokenExpires,
+  };
+
+  // Solo cambiar verified si actualmente está verificado
+  if (user.emailVerified) {
+    updateData.emailVerified = false;
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: updateData,
+  });
+
+  // enviar correo de verificación
+  await sendSafe(() => sendVerificationEmail(email, rawToken));
+
+  return res.json({
+    success: true,
+    message: user.emailVerified
+      ? "Usuario desverificado y nuevo correo de verificación enviado."
+      : "Nuevo correo de verificación enviado.",
   });
 }, "Error interno del servidor");
 
@@ -243,10 +337,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   const { email } = validation.data;
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true },
-  });
+  const user = await findUserByEmail(email, { id: true });
 
   if (!user) {
     return res.json({
@@ -266,11 +357,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     },
   });
 
-  try {
-    await sendPasswordResetEmail(email, rawToken);
-  } catch (emailError) {
-    console.error("[auth] No se pudo enviar el correo de restablecimiento:", emailError.message);
-  }
+  await sendSafe(() => sendPasswordResetEmail(email, rawToken));
 
   return res.json({
     message: "Si el correo existe, recibirás un enlace para restablecer tu contraseña",
@@ -323,6 +410,8 @@ module.exports = {
   register,
   login,
   resendVerification,
+  unverifyUser,
+  resetVerification,
   verifyEmail,
   forgotPassword,
   resetPassword,

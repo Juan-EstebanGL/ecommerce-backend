@@ -5,6 +5,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/AppError");
 const { generateToken, hashToken, getExpiryDate } = require("../services/token.service");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../services/email.service");
+const { resetVerification } = require("../controllers/auth.controller");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,41 +24,8 @@ async function sendSafe(fn) {
   }
 }
 
-router.post(
-  "/unverify-email",
-  asyncHandler(async (req, res) => {
-    const { email } = req.body || {};
-
-    if (!email || !EMAIL_RE.test(email.trim())) {
-      throw new AppError("Ingrese un correo electrónico válido", 400);
-    }
-
-    const user = await findUserByEmail(email.trim());
-
-    if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
-    }
-
-    const rawToken = generateToken();
-    const hashedToken = hashToken(rawToken);
-    const tokenExpires = getExpiryDate();
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerified: false,
-        emailVerificationToken: hashedToken,
-        emailVerificationExpires: tokenExpires,
-      },
-    });
-
-    await sendSafe(() => sendVerificationEmail(user.email, rawToken));
-
-    return res.json({
-      message: "Usuario desverificado correctamente. Se envió un nuevo correo de verificación.",
-    });
-  })
-);
+// POST /auth/dev/unverify-email → reutiliza resetVerification del controlador
+router.post("/unverify-email", resetVerification);
 
 router.post(
   "/reset-password-email",

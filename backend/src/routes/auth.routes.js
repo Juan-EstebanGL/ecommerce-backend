@@ -5,6 +5,8 @@ const {
   register,
   login,
   resendVerification,
+  unverifyUser,
+  resetVerification,
   verifyEmail,
   forgotPassword,
   resetPassword,
@@ -116,6 +118,7 @@ router.post("/login", login);
  * /auth/resend-verification:
  *   post:
  *     summary: Reenviar correo de verificación
+ *     description: Genera un nuevo token y reenvía el correo. Funciona para usuarios verificados y no verificados.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -132,11 +135,12 @@ router.post("/login", login);
  *             email: user@test.com
  *     responses:
  *       200:
- *         description: Mensaje informativo (siempre retorna éxito por seguridad)
+ *         description: Correo reenviado (o mensaje genérico si el usuario no existe)
  *         content:
  *           application/json:
  *             example:
- *               message: Si el correo está registrado, recibirás un enlace de verificación
+ *               success: true
+ *               message: Se envió un nuevo correo de verificación.
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -145,6 +149,92 @@ router.post("/login", login);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post("/resend-verification", resendVerification);
+
+/**
+ * @swagger
+ * /auth/unverify-user:
+ *   post:
+ *     summary: Desverificar usuario (sin enviar correo)
+ *     description: Marca al usuario como no verificado y genera un nuevo token. No envía correo.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *           example:
+ *             email: user@test.com
+ *     responses:
+ *       200:
+ *         description: Usuario desverificado
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: Usuario desverificado correctamente.
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Usuario no encontrado
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Usuario no encontrado
+ */
+router.post("/unverify-user", unverifyUser);
+
+/**
+ * @swagger
+ * /auth/reset-verification:
+ *   post:
+ *     summary: Desverificar usuario y reenviar correo
+ *     description: Marca al usuario como no verificado, genera un nuevo token y envía un nuevo correo de verificación.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *           example:
+ *             email: user@test.com
+ *     responses:
+ *       200:
+ *         description: Usuario desverificado y correo enviado
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: Usuario desverificado y nuevo correo de verificación enviado.
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Usuario no encontrado
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Usuario no encontrado
+ */
+router.post("/reset-verification", resetVerification);
 
 /**
  * @swagger
