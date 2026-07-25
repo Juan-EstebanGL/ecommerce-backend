@@ -157,7 +157,7 @@
 /* ── Login Verify Panel (lp) ── */
 .lp-verify {
   background: var(--warning-light);
-  border: 1px solid #fed7aa;
+  border: 1px solid var(--warning-light);
   border-radius: var(--radius-md);
   padding: var(--space-md);
   margin-bottom: var(--space-md);
@@ -173,11 +173,11 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #fff1e6;
+  background: var(--warning-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c2410c;
+  color: var(--warning);
   margin-bottom: var(--space-xs);
 }
 
@@ -185,24 +185,25 @@
   margin: 0;
   font-size: 0.95rem;
   font-weight: var(--fw-bold);
-  color: #9a3412;
+  color: var(--warning);
 }
 
 .lp-verify__desc {
   margin: 0;
   font-size: var(--fs-xs);
-  color: #9a3412;
+  color: var(--warning);
   line-height: 1.5;
   opacity: 0.8;
 }
 
 .lp-verify__btn {
   margin-top: 6px;
-  background: #c2410c !important;
+  background: var(--warning) !important;
 }
 
 .lp-verify__btn:hover:not(:disabled) {
-  background: #9a3412 !important;
+  background: var(--warning) !important;
+  opacity: 0.85;
 }
 
 .lp-verify__success {
@@ -211,7 +212,7 @@
   color: var(--success);
   line-height: 1.5;
   background: var(--success-light);
-  border: 1px solid #bbf7d0;
+  border: 1px solid var(--success-light);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
   width: 100%;
@@ -224,7 +225,7 @@
   color: var(--danger);
   line-height: 1.5;
   background: var(--danger-light);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--danger-light);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
   width: 100%;

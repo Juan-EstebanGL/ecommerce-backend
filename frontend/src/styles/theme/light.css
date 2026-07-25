@@ -1,2 +1,162 @@
-/* light.css — default theme (tokens already defined in variables.css) */
-/* Dark mode overrides will be added in Phase 2 */
+/* ══════════════════════════════════════════════════════════
+   Light Theme — Soft Glass Premium
+   ══════════════════════════════════════════════════════════ */
+
+[data-theme="light"],
+.theme-light {
+  /* ── Brand / Primary ── */
+  --primary: #0ea5a4;
+  --primary-50: #f0fdfa;
+  --primary-100: #ccfbf1;
+  --primary-200: #99f6e4;
+  --primary-600: #0d9488;
+  --primary-700: #0b8f8d;
+
+  /* ── Accent ── */
+  --accent: #7c3aed;
+
+  /* ── Background ── */
+  --background: #f6f7fb;
+  --background-subtle: #eef0f4;
+  --surface: #ffffff;
+  --surface-hover: #f9fafb;
+  --surface-2: #f1f3f9;
+
+  /* ── Text ── */
+  --text: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --text-on-primary: #ffffff;
+  --text-inverse: #ffffff;
+
+  /* ── Semantic ── */
+  --danger: #dc2626;
+  --danger-light: #fef2f2;
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+  --warning: #f59e0b;
+  --warning-light: #fffbeb;
+  --info: #3b82f6;
+  --info-light: #eff6ff;
+
+  /* ── Border ── */
+  --border: #e5e7eb;
+  --border-subtle: #f0f2f5;
+  --border-focus: var(--primary-600);
+
+  /* ── Glass ── */
+  --glass-bg: rgba(255, 255, 255, 0.60);
+  --glass-bg-hover: rgba(255, 255, 255, 0.75);
+  --glass-bg-strong: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.50);
+  --glass-border-subtle: rgba(0, 0, 0, 0.05);
+  --glass-blur: 14px;
+  --glass-blur-strong: 20px;
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.03);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.04), 0 1px 2px rgba(16, 24, 40, 0.02);
+  --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, 0.04), 0 12px 24px -4px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 8px 16px -4px rgba(16, 24, 40, 0.06), 0 20px 40px -8px rgba(16, 24, 40, 0.12);
+  --shadow-xl: 0 12px 24px -6px rgba(16, 24, 40, 0.08), 0 32px 64px -12px rgba(16, 24, 40, 0.16);
+  --shadow-primary: 0 4px 14px -3px rgba(14, 165, 164, 0.3);
+  --shadow-danger: 0 4px 14px -3px rgba(220, 38, 38, 0.25);
+
+  /* ── Interactive overlay colors ── */
+  --hover-bg: rgba(0, 0, 0, 0.03);
+  --hover-bg-strong: rgba(0, 0, 0, 0.06);
+  --overlay-bg: rgba(0, 0, 0, 0.25);
+  --scrolled-border: rgba(0, 0, 0, 0.06);
+  --scrolled-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+
+  /* ── Hero / Dark sections ── */
+  --hero-bg: #0b1121;
+  --hero-text: #ffffff;
+  --hero-text-secondary: #94a3b8;
+  --hero-accent: #5eead4;
+
+  /* ── Spinner ── */
+  --spinner-track: rgba(255, 255, 255, 0.3);
+  --spinner-fill: #ffffff;
+
+  /* ── Toggle knob ── */
+  --toggle-knob: #ffffff;
+  --toggle-knob-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+
+  /* ── Skeleton shimmer ── */
+  --skeleton-shimmer: rgba(255, 255, 255, 0.5);
+
+  /* ── Auth ── */
+  --auth-gradient: linear-gradient(135deg, #0ea5a4 0%, #0b8f8d 35%, #075e5d 70%, #7c3aed 100%);
+  --auth-card-bg: rgba(255, 255, 255, 0.85);
+  --auth-card-border: rgba(255, 255, 255, 0.50);
+  --auth-card-blur: 12px;
+  --auth-card-radius: var(--radius-xl);
+  --auth-card-shadow: 0 4px 6px -2px rgba(16, 24, 40, 0.03), 0 12px 24px -4px rgba(16, 24, 40, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  --auth-input-border: #e6e9ef;
+  --auth-input-radius: var(--radius-md);
+  --auth-btn-radius: var(--radius-md);
+
+  /* ── Scrollbar ── */
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a1a1a1;
+
+  /* ── Status colors ── */
+  --status-pending: #a78bfa;
+  --status-processing: #60a5fa;
+  --status-shipped: #fbbf24;
+  --status-delivered: #4ade80;
+  --status-cancelled: #f87171;
+
+  /* ── Badge colors ── */
+  --badge-admin: #7c3aed;
+  --badge-admin-bg: #f5f3ff;
+  --badge-user: #3b82f6;
+  --badge-user-bg: #eff6ff;
+  --badge-seller: #f59e0b;
+  --badge-seller-bg: #fffbeb;
+
+  /* ── Glass panel top highlight ── */
+  --glass-panel-top: rgba(255, 255, 255, 0.70);
+  --glass-highlight: rgba(255, 255, 255, 0.75);
+
+  /* ── Card border radius accent ── */
+  --card-border-top-accent: rgba(255, 255, 255, 0.50);
+
+  /* ── Danger section ── */
+  --danger-section-bg: linear-gradient(135deg, rgba(254, 242, 242, 0.90) 0%, rgba(255, 255, 255, 0.85) 100%);
+
+  /* ── Body ambient background ── */
+  --ambient-teal: rgba(14, 165, 164, 0.065);
+  --ambient-accent: rgba(124, 58, 237, 0.045);
+  --ambient-primary: rgba(14, 165, 164, 0.07);
+  --ambient-secondary: rgba(124, 58, 237, 0.05);
+
+  /* ── Page body ── */
+  body {
+    background: var(--background);
+    color: var(--text);
+  }
+
+  /* ── SweetAlert2 Theme ── */
+  --swal-bg: #ffffff;
+  --swal-text: #111827;
+  --swal-text-secondary: #6b7280;
+  --swal-border: rgba(0, 0, 0, 0.06);
+  --swal-shadow: 0 20px 60px rgba(16, 24, 40, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  --swal-radius: 16px;
+  --swal-confirm-bg: #0ea5a4;
+  --swal-confirm-hover: #0d9488;
+  --swal-confirm-text: #ffffff;
+  --swal-cancel-bg: #f3f4f6;
+  --swal-cancel-hover: #e5e7eb;
+  --swal-cancel-text: #374151;
+  --swal-focus-ring: rgba(14, 165, 164, 0.35);
+  --swal-icon-bg-success: rgba(22, 163, 74, 0.1);
+  --swal-icon-bg-error: rgba(220, 38, 38, 0.1);
+  --swal-icon-bg-warning: rgba(245, 158, 11, 0.1);
+  --swal-icon-bg-info: rgba(59, 130, 246, 0.1);
+  --swal-progress-track: rgba(14, 165, 164, 0.12);
+  --swal-progress-fill: #0ea5a4;
+}

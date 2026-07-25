@@ -126,7 +126,7 @@ export default function AdminOrders() {
       value: orders.length,
       color: "teal",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
           <line x1="3" y1="6" x2="21" y2="6" />
           <path d="M16 10a4 4 0 01-8 0" />
@@ -138,7 +138,7 @@ export default function AdminOrders() {
       value: statsData.totalPending,
       color: "warning",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
@@ -149,7 +149,7 @@ export default function AdminOrders() {
       value: statsData.totalDelivered,
       color: "success",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
@@ -160,7 +160,7 @@ export default function AdminOrders() {
       value: statsData.totalCancelled,
       color: "danger",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="15" y1="9" x2="9" y2="15" />
           <line x1="9" y1="9" x2="15" y2="15" />
@@ -171,11 +171,11 @@ export default function AdminOrders() {
 
   if (loading) {
     return (
-      <div>
+      <div className="ad-orders">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Órdenes</h1>
-            <p className="ad-header__subtitle">Administración de órdenes</p>
+            <p className="ad-header__subtitle">Gestiona los pedidos de tu tienda</p>
           </div>
         </div>
         <div className="ad-orders-loader">
@@ -188,11 +188,11 @@ export default function AdminOrders() {
 
   if (error) {
     return (
-      <div>
+      <div className="ad-orders">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Órdenes</h1>
-            <p className="ad-header__subtitle">Administración de órdenes</p>
+            <p className="ad-header__subtitle">Gestiona los pedidos de tu tienda</p>
           </div>
         </div>
         <div className="ad-orders-error">
@@ -212,16 +212,18 @@ export default function AdminOrders() {
 
   return (
     <div className="ad-orders">
-      <div className="ad-header">
-        <div>
-          <h1 className="ad-header__title">Órdenes</h1>
-          <p className="ad-header__subtitle">Administración de órdenes</p>
+      <div className="ad-orders-header">
+        <div className="ad-header">
+          <div>
+            <h1 className="ad-header__title">Órdenes</h1>
+            <p className="ad-header__subtitle">Gestiona los pedidos de tu tienda</p>
+          </div>
         </div>
       </div>
 
-      <div className="ad-stats ad-orders-stats" ref={tableRef}>
-        {stats.map((s) => (
-          <div key={s.label} className={`ad-card ad-card--${s.color}`}>
+      <div className="ad-products-stats" ref={tableRef}>
+        {stats.map((s, i) => (
+          <div key={s.label} className={`ad-card ad-card--${s.color}`} style={{ animationDelay: `${i * 0.06}s` }}>
             <div className="ad-card__top">
               <div className="ad-card__icon">{s.icon}</div>
             </div>
@@ -239,11 +241,27 @@ export default function AdminOrders() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar órdenes..."
+            placeholder="Buscar por ID, email o estado..."
             className="ad-products-search__input"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
+          {search && (
+            <button
+              className="ad-products-search__clear"
+              onClick={() => { setSearch(""); setPage(1); }}
+              aria-label="Limpiar búsqueda"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <div className="ad-products-count">
+          <span className="ad-products-count__num">{filtered.length}</span>
+          <span className="ad-products-count__label">{filtered.length === 1 ? "orden" : "órdenes"}</span>
         </div>
       </div>
 
@@ -270,37 +288,56 @@ export default function AdminOrders() {
 function OrderViewModal({ order, onClose }) {
   if (!order) return null;
 
+  const statusMap = {
+    PENDING: { cls: "ad-modal__badge--warning", label: "Pendiente" },
+    PROCESSING: { cls: "ad-modal__badge--info", label: "Procesando" },
+    SHIPPED: { cls: "ad-modal__badge--info", label: "Enviado" },
+    DELIVERED: { cls: "ad-modal__badge--success", label: "Entregado" },
+    CANCELLED: { cls: "ad-modal__badge--danger", label: "Cancelado" },
+  };
+  const st = statusMap[order.status] || { cls: "ad-modal__badge--neutral", label: order.status };
+
   return (
-    <div className="ad-orders-modal-overlay" onClick={onClose}>
-      <div className="ad-orders-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ad-orders-modal__header">
-          <h2>Orden #{order.id}</h2>
-          <button className="ad-orders-modal__close" onClick={onClose}>
+    <div className="ad-modal-overlay" onClick={onClose}>
+      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="ad-modal__header">
+          <div className="ad-modal__header-icon">📋</div>
+          <div className="ad-modal__header-text">
+            <h2 className="ad-modal__title">Orden #{order.id}</h2>
+            <p className="ad-modal__subtitle">Detalle del pedido</p>
+          </div>
+          <button className="ad-modal__close" onClick={onClose} aria-label="Cerrar">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
-        <div className="ad-orders-modal__body">
-          <div className="ad-orders-modal__section">
-            <div className="ad-orders-modal__field">
-              <span className="ad-orders-modal__label">Estado</span>
-              <OrderStatusBadge status={order.status} />
+
+        <div className="ad-modal__body">
+          <div className="ad-modal__grid">
+            <div className="ad-modal__field">
+              <span className="ad-modal__label">Estado</span>
+              <span className="ad-modal__value">
+                <span className={`ad-modal__badge ${st.cls}`}>
+                  <span className="ad-modal__badge-dot" />
+                  {st.label}
+                </span>
+              </span>
             </div>
-            <div className="ad-orders-modal__field">
-              <span className="ad-orders-modal__label">Cliente</span>
-              <span className="ad-orders-modal__value">{order.user?.email || "—"}</span>
-            </div>
-            <div className="ad-orders-modal__field">
-              <span className="ad-orders-modal__label">Total</span>
-              <span className="ad-orders-modal__value ad-orders-modal__value--price">
+            <div className="ad-modal__field">
+              <span className="ad-modal__label">Total</span>
+              <span className="ad-modal__value ad-modal__value--price">
                 ${Number(order.total).toLocaleString("es-CL")}
               </span>
             </div>
-            <div className="ad-orders-modal__field">
-              <span className="ad-orders-modal__label">Fecha</span>
-              <span className="ad-orders-modal__value">
+            <div className="ad-modal__field">
+              <span className="ad-modal__label">Cliente</span>
+              <span className="ad-modal__value">{order.user?.email || "—"}</span>
+            </div>
+            <div className="ad-modal__field">
+              <span className="ad-modal__label">Fecha</span>
+              <span className="ad-modal__value ad-modal__value--muted">
                 {new Date(order.createdAt).toLocaleDateString("es-CL", {
                   year: "numeric",
                   month: "long",
@@ -311,47 +348,55 @@ function OrderViewModal({ order, onClose }) {
               </span>
             </div>
           </div>
-          <div className="ad-orders-modal__section">
-            <h3 className="ad-orders-modal__subtitle">Productos ({order.items?.length || 0})</h3>
-            <div className="ad-orders-modal__items">
-              {(order.items || []).map((item) => (
-                <div key={item.id} className="ad-orders-modal__item">
-                  <div className="ad-orders-modal__item-media">
-                    {item.imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.productName}
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          e.currentTarget.nextSibling.style.display = "flex";
-                        }}
-                      />
-                    ) : null}
-                    <span
-                      className="ad-orders-modal__item-placeholder"
-                      style={{ display: item.imageUrl ? "none" : "flex" }}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                      </svg>
+
+          {order.items && order.items.length > 0 && (
+            <>
+              <div className="ad-modal__separator" />
+              <h4 className="ad-modal__section-title">Productos ({order.items.length})</h4>
+              <div className="ad-modal__items">
+                {order.items.map((item) => (
+                  <div key={item.id} className="ad-modal__item">
+                    <div className="ad-modal__item-thumb">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.productName}
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextSibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <span
+                        className="ad-modal__media-thumb"
+                        style={{ display: item.imageUrl ? "none" : "flex" }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div className="ad-modal__item-info">
+                      <span className="ad-modal__item-name">{item.productName}</span>
+                      <span className="ad-modal__item-meta">
+                        {item.quantity} x ${Number(item.productPrice).toLocaleString("es-CL")}
+                      </span>
+                    </div>
+                    <span className="ad-modal__item-price">
+                      ${(item.quantity * Number(item.productPrice)).toLocaleString("es-CL")}
                     </span>
                   </div>
-                  <div className="ad-orders-modal__item-info">
-                    <span className="ad-orders-modal__item-name">{item.productName}</span>
-                    <span className="ad-orders-modal__item-meta">
-                      {item.quantity} x ${Number(item.productPrice).toLocaleString("es-CL")}
-                    </span>
-                  </div>
-                  <span className="ad-orders-modal__item-subtotal">
-                    ${(item.quantity * Number(item.productPrice)).toLocaleString("es-CL")}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="ad-modal__footer">
+          <button className="ad-modal__btn" onClick={onClose}>Cerrar</button>
         </div>
       </div>
     </div>

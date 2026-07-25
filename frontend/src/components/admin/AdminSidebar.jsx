@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { useTheme } from "../../context/ThemeContext";
 import UserMenu from "../UserMenu";
 
 const links = [
@@ -92,6 +93,10 @@ const links = [
 
 export default function AdminSidebar({ open, onClose }) {
   const { user, logout } = useAuth();
+  const { theme, setTheme, isDark } = useTheme();
+  const toggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
 
   return (
     <>
@@ -169,6 +174,16 @@ export default function AdminSidebar({ open, onClose }) {
             )}
           </UserMenu>
         </div>
+
+        <div className="ad-sidebar__divider" />
+
+        <button
+          className="ad-sidebar__theme-toggle"
+          onClick={toggleTheme}
+          aria-label={isDark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+        >
+          {isDark ? "☀️ Tema claro" : "🌙 Tema oscuro"}
+        </button>
       </aside>
     </>
   );

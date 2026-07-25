@@ -1,19 +1,35 @@
 /* ══════════════════════════════════════════════════════════
-   Admin Users — Table, Avatar, Badges, Modal
+   Admin Users — Complete Visual Reconstruction
+   Soft Glass Floating · Dark Ambient · Avatar · Role Badge
    ══════════════════════════════════════════════════════════ */
 
-/* ── Stats ── */
-.ad-users-stats {
-  margin-bottom: 24px;
+/* ── Page Container ── */
+.ad-users {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* ── User Avatar ── */
+/* ── Header Section ── */
+.ad-users-header {
+  animation: adFadeIn 0.5s ease both;
+}
+
+/* ══════════════════════════════════════════════════════════
+   USER AVATAR (Table)
+   ══════════════════════════════════════════════════════════ */
 .ad-user-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
+  border: 2px solid var(--ad-border);
+  transition: border-color 0.2s;
+}
+
+.ad-user-avatar:hover {
+  border-color: var(--primary);
 }
 
 .ad-user-avatar__img {
@@ -27,64 +43,106 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand), #0d9488);
-  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--text-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
+  box-shadow: 0 0 12px rgba(14, 165, 164, 0.2);
 }
 
-/* ── Cell Styles ── */
+/* ══════════════════════════════════════════════════════════
+   TABLE CELLS
+   ══════════════════════════════════════════════════════════ */
 .ad-users-cell-name {
   font-weight: 600;
+  color: var(--ad-text);
   min-width: 140px;
 }
 
 .ad-users-cell-email {
   color: var(--ad-text-2);
-}
-
-.ad-users-cell-date {
-  color: var(--ad-text-2);
-  white-space: nowrap;
   font-size: 0.85rem;
 }
 
-/* ── Role Badges ── */
-.ad-users-badge::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.ad-users-cell-date {
+  color: var(--ad-text-3);
+  white-space: nowrap;
+  font-size: 0.82rem;
 }
 
-.ad-users-badge--admin { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
-.ad-users-badge--admin::before { background: #7c3aed; }
-.ad-users-badge--user { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
-.ad-users-badge--user::before { background: #3b82f6; }
+/* ══════════════════════════════════════════════════════════
+   ROLE BADGES (Dark Glass Theme)
+   ══════════════════════════════════════════════════════════ */
+.ad-users-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 
-/* ── Action Variants ── */
+.ad-users-badge--admin {
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--badge-admin);
+}
+
+.ad-users-badge--admin::before {
+  background: var(--badge-admin);
+  box-shadow: 0 0 6px rgba(124, 58, 237, 0.4);
+}
+
+.ad-users-badge--user {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--badge-user);
+}
+
+.ad-users-badge--user::before {
+  background: var(--badge-user);
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+}
+
+/* ══════════════════════════════════════════════════════════
+   ACTION BUTTONS
+   ══════════════════════════════════════════════════════════ */
 .ad-users-btn--role {
-  background: rgba(245, 158, 11, 0.08);
-  color: #b45309;
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--warning);
 }
 
 .ad-users-btn--role:hover {
-  background: rgba(245, 158, 11, 0.16);
+  background: rgba(251, 191, 36, 0.18);
 }
 
 .ad-users-btn--delete:disabled,
 .ad-users-btn--role:disabled,
 .ad-users-btn--view:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* ══════════════════════════════════════════════════════════
-   USERS MODAL (Glass)
+   USERS VIEW MODAL (Glass)
    ══════════════════════════════════════════════════════════ */
 .ad-users-modal {
   max-width: 420px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — Users
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .ad-users-table th:nth-child(1),
+  .ad-users-table td:nth-child(1) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-users-table th:nth-child(3),
+  .ad-users-table td:nth-child(3) {
+    display: none;
+  }
 }

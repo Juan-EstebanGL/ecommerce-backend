@@ -112,7 +112,7 @@ export default function AdminReviews() {
       value: reviews.length,
       color: "teal",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
         </svg>
       ),
@@ -122,7 +122,7 @@ export default function AdminReviews() {
       value: avgRating,
       color: "amber",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       ),
@@ -132,7 +132,7 @@ export default function AdminReviews() {
       value: statsData.totalFiveStar,
       color: "success",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       ),
@@ -142,7 +142,7 @@ export default function AdminReviews() {
       value: statsData.totalOneStar,
       color: "danger",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       ),
@@ -151,11 +151,11 @@ export default function AdminReviews() {
 
   if (loading) {
     return (
-      <div>
+      <div className="ad-reviews">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Reseñas</h1>
-            <p className="ad-header__subtitle">Administración de reseñas</p>
+            <p className="ad-header__subtitle">Gestiona las opiniones de tus clientes</p>
           </div>
         </div>
         <div className="ad-reviews-loader">
@@ -168,11 +168,11 @@ export default function AdminReviews() {
 
   if (error) {
     return (
-      <div>
+      <div className="ad-reviews">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Reseñas</h1>
-            <p className="ad-header__subtitle">Administración de reseñas</p>
+            <p className="ad-header__subtitle">Gestiona las opiniones de tus clientes</p>
           </div>
         </div>
         <div className="ad-reviews-error">
@@ -192,16 +192,18 @@ export default function AdminReviews() {
 
   return (
     <div className="ad-reviews">
-      <div className="ad-header">
-        <div>
-          <h1 className="ad-header__title">Reseñas</h1>
-          <p className="ad-header__subtitle">Administración de reseñas</p>
+      <div className="ad-reviews-header">
+        <div className="ad-header">
+          <div>
+            <h1 className="ad-header__title">Reseñas</h1>
+            <p className="ad-header__subtitle">Gestiona las opiniones de tus clientes</p>
+          </div>
         </div>
       </div>
 
-      <div className="ad-stats ad-reviews-stats" ref={tableRef}>
-        {stats.map((s) => (
-          <div key={s.label} className={`ad-card ad-card--${s.color}`}>
+      <div className="ad-products-stats" ref={tableRef}>
+        {stats.map((s, i) => (
+          <div key={s.label} className={`ad-card ad-card--${s.color}`} style={{ animationDelay: `${i * 0.06}s` }}>
             <div className="ad-card__top">
               <div className="ad-card__icon">{s.icon}</div>
             </div>
@@ -219,11 +221,27 @@ export default function AdminReviews() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar reseñas..."
+            placeholder="Buscar por producto, email o comentario..."
             className="ad-products-search__input"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
+          {search && (
+            <button
+              className="ad-products-search__clear"
+              onClick={() => { setSearch(""); setPage(1); }}
+              aria-label="Limpiar búsqueda"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <div className="ad-products-count">
+          <span className="ad-products-count__num">{filtered.length}</span>
+          <span className="ad-products-count__label">{filtered.length === 1 ? "reseña" : "reseñas"}</span>
         </div>
       </div>
 
@@ -251,75 +269,91 @@ function ReviewViewModal({ review, onClose }) {
   if (!review) return null;
 
   return (
-    <div className="ad-reviews-modal-overlay" onClick={onClose}>
-      <div className="ad-reviews-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ad-reviews-modal__header">
-          <h2>Detalles de la reseña</h2>
-          <button className="ad-reviews-modal__close" onClick={onClose}>
+    <div className="ad-modal-overlay" onClick={onClose}>
+      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="ad-modal__header">
+          <div className="ad-modal__header-icon">⭐</div>
+          <div className="ad-modal__header-text">
+            <h2 className="ad-modal__title">Detalles de la reseña</h2>
+            <p className="ad-modal__subtitle">Reseña de producto</p>
+          </div>
+          <button className="ad-modal__close" onClick={onClose} aria-label="Cerrar">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
-        <div className="ad-reviews-modal__body">
-          <div className="ad-reviews-modal__product">
-            <div className="ad-reviews-modal__product-thumb">
-              {review.product?.imageUrl ? (
-                <img
-                  src={review.product.imageUrl}
-                  alt={review.product.name}
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    e.currentTarget.nextSibling.style.display = "flex";
-                  }}
-                />
-              ) : null}
-              <span
-                className="ad-reviews-modal__product-placeholder"
-                style={{ display: review.product?.imageUrl ? "none" : "flex" }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c0c4cc" strokeWidth="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
+
+        <div className="ad-modal__body">
+          {review.product && (
+            <div className="ad-modal__media-row">
+              <div className="ad-modal__media-thumb">
+                {review.product.imageUrl ? (
+                  <img
+                    src={review.product.imageUrl}
+                    alt={review.product.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextSibling.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                <span
+                  className="ad-modal__media-thumb"
+                  style={{ display: review.product.imageUrl ? "none" : "flex", position: "absolute" }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </span>
+              </div>
+              <div className="ad-modal__media-info">
+                <span className="ad-modal__media-label">Producto</span>
+                <span className="ad-modal__media-name">{review.product.name}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="ad-modal__grid">
+            <div className="ad-modal__field">
+              <span className="ad-modal__label">Usuario</span>
+              <span className="ad-modal__value">{review.user?.email || "—"}</span>
+            </div>
+            <div className="ad-modal__field">
+              <span className="ad-modal__label">Calificación</span>
+              <span className="ad-modal__value">
+                <ReviewRating rating={review.rating} size={18} />
               </span>
             </div>
-            <div className="ad-reviews-modal__product-info">
-              <span className="ad-reviews-modal__product-label">Producto</span>
-              <span className="ad-reviews-modal__product-name">{review.product?.name || "—"}</span>
+            <div className="ad-modal__field ad-modal__field--full">
+              <span className="ad-modal__label">Fecha</span>
+              <span className="ad-modal__value ad-modal__value--muted">
+                {new Date(review.createdAt).toLocaleDateString("es-CL", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
             </div>
           </div>
 
-          <div className="ad-reviews-modal__field">
-            <span className="ad-reviews-modal__label">Usuario</span>
-            <span className="ad-reviews-modal__value">{review.user?.email || "—"}</span>
-          </div>
+          {review.comment && (
+            <>
+              <div className="ad-modal__separator" />
+              <h4 className="ad-modal__section-title">Comentario</h4>
+              <p className="ad-modal__comment">{review.comment}</p>
+            </>
+          )}
+        </div>
 
-          <div className="ad-reviews-modal__field">
-            <span className="ad-reviews-modal__label">Calificación</span>
-            <ReviewRating rating={review.rating} size={20} />
-          </div>
-
-          <div className="ad-reviews-modal__field">
-            <span className="ad-reviews-modal__label">Comentario</span>
-            <p className="ad-reviews-modal__comment">{review.comment}</p>
-          </div>
-
-          <div className="ad-reviews-modal__field">
-            <span className="ad-reviews-modal__label">Fecha</span>
-            <span className="ad-reviews-modal__value">
-              {new Date(review.createdAt).toLocaleDateString("es-CL", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-          </div>
+        <div className="ad-modal__footer">
+          <button className="ad-modal__btn" onClick={onClose}>Cerrar</button>
         </div>
       </div>
     </div>

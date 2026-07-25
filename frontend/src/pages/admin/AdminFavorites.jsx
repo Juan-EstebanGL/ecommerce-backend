@@ -63,7 +63,7 @@ export default function AdminFavorites() {
           value: data.totalFavorites,
           color: "danger",
           icon: (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
           ),
@@ -73,7 +73,7 @@ export default function AdminFavorites() {
           value: data.totalUsersWithFavorites,
           color: "purple",
           icon: (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
               <circle cx="9" cy="7" r="4" />
               <path d="M23 21v-2a4 4 0 00-3-3.87" />
@@ -82,13 +82,13 @@ export default function AdminFavorites() {
           ),
         },
         {
-          label: "Producto más guardado",
+          label: "Más guardado",
           value: data.mostFavoritedProduct
             ? `${data.mostFavoritedProduct.totalFavorites} favs`
             : "—",
           color: "amber",
           icon: (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
             </svg>
           ),
@@ -98,7 +98,7 @@ export default function AdminFavorites() {
           value: data.averageFavoritesPerProduct,
           color: "teal",
           icon: (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="20" x2="18" y2="10" />
               <line x1="12" y1="20" x2="12" y2="4" />
               <line x1="6" y1="20" x2="6" y2="14" />
@@ -110,11 +110,11 @@ export default function AdminFavorites() {
 
   if (loading) {
     return (
-      <div>
+      <div className="ad-favorites">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Favoritos</h1>
-            <p className="ad-header__subtitle">Estadísticas de favoritos</p>
+            <p className="ad-header__subtitle">Análisis de productos favoritos</p>
           </div>
         </div>
         <div className="ad-favorites-loader">
@@ -127,11 +127,11 @@ export default function AdminFavorites() {
 
   if (error) {
     return (
-      <div>
+      <div className="ad-favorites">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Favoritos</h1>
-            <p className="ad-header__subtitle">Estadísticas de favoritos</p>
+            <p className="ad-header__subtitle">Análisis de productos favoritos</p>
           </div>
         </div>
         <div className="ad-favorites-error">
@@ -151,16 +151,18 @@ export default function AdminFavorites() {
 
   return (
     <div className="ad-favorites">
-      <div className="ad-header">
-        <div>
-          <h1 className="ad-header__title">Favoritos</h1>
-          <p className="ad-header__subtitle">Estadísticas de favoritos</p>
+      <div className="ad-favorites-header">
+        <div className="ad-header">
+          <div>
+            <h1 className="ad-header__title">Favoritos</h1>
+            <p className="ad-header__subtitle">Análisis de productos favoritos</p>
+          </div>
         </div>
       </div>
 
-      <div className="ad-stats ad-favorites-stats" ref={tableRef}>
-        {stats.map((s) => (
-          <div key={s.label} className={`ad-card ad-card--${s.color}`}>
+      <div className="ad-products-stats" ref={tableRef}>
+        {stats.map((s, i) => (
+          <div key={s.label} className={`ad-card ad-card--${s.color}`} style={{ animationDelay: `${i * 0.06}s` }}>
             <div className="ad-card__top">
               <div className="ad-card__icon">{s.icon}</div>
             </div>
@@ -178,11 +180,27 @@ export default function AdminFavorites() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar productos..."
+            placeholder="Buscar productos favoritos..."
             className="ad-products-search__input"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
+          {search && (
+            <button
+              className="ad-products-search__clear"
+              onClick={() => { setSearch(""); setPage(1); }}
+              aria-label="Limpiar búsqueda"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <div className="ad-products-count">
+          <span className="ad-products-count__num">{filtered.length}</span>
+          <span className="ad-products-count__label">{filtered.length === 1 ? "producto" : "productos"}</span>
         </div>
       </div>
 
@@ -213,20 +231,25 @@ function FavoriteViewModal({ product, totalFavorites, onClose }) {
     : 0;
 
   return (
-    <div className="ad-favorites-modal-overlay" onClick={onClose}>
-      <div className="ad-favorites-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ad-favorites-modal__header">
-          <h2>Detalles del producto</h2>
-          <button className="ad-favorites-modal__close" onClick={onClose}>
+    <div className="ad-modal-overlay" onClick={onClose}>
+      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="ad-modal__header">
+          <div className="ad-modal__header-icon">❤️</div>
+          <div className="ad-modal__header-text">
+            <h2 className="ad-modal__title">Detalle de favorito</h2>
+            <p className="ad-modal__subtitle">Producto más popular</p>
+          </div>
+          <button className="ad-modal__close" onClick={onClose} aria-label="Cerrar">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
-        <div className="ad-favorites-modal__body">
-          <div className="ad-favorites-modal__product">
-            <div className="ad-favorites-modal__product-thumb">
+
+        <div className="ad-modal__body">
+          <div className="ad-modal__media-row">
+            <div className="ad-modal__media-thumb">
               {product.imageUrl ? (
                 <img
                   src={product.imageUrl}
@@ -239,31 +262,40 @@ function FavoriteViewModal({ product, totalFavorites, onClose }) {
                 />
               ) : null}
               <span
-                className="ad-favorites-modal__product-placeholder"
-                style={{ display: product.imageUrl ? "none" : "flex" }}
+                className="ad-modal__media-thumb"
+                style={{ display: product.imageUrl ? "none" : "flex", position: "absolute" }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c0c4cc" strokeWidth="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
                 </svg>
               </span>
             </div>
-            <div className="ad-favorites-modal__product-info">
-              <span className="ad-favorites-modal__product-label">Producto</span>
-              <span className="ad-favorites-modal__product-name">{product.name}</span>
+            <div className="ad-modal__media-info">
+              <span className="ad-modal__media-label">Producto</span>
+              <span className="ad-modal__media-name">{product.name}</span>
             </div>
           </div>
 
-          <div className="ad-favorites-modal__field">
-            <span className="ad-favorites-modal__label">Favoritos</span>
-            <span className="ad-favorites-modal__value">{product.totalFavorites}</span>
+          <div className="ad-modal__grid">
+            <div className="ad-modal__field">
+              <span className="ad-modal__label">Favoritos</span>
+              <span className="ad-modal__value ad-modal__value--price">{product.totalFavorites}</span>
+            </div>
+            <div className="ad-modal__field">
+              <span className="ad-modal__label">Porcentaje del total</span>
+              <span className="ad-modal__value">
+                <span className="ad-modal__badge ad-modal__badge--info">
+                  {percentage}%
+                </span>
+              </span>
+            </div>
           </div>
+        </div>
 
-          <div className="ad-favorites-modal__field">
-            <span className="ad-favorites-modal__label">Porcentaje del total</span>
-            <span className="ad-favorites-modal__value">{percentage}%</span>
-          </div>
+        <div className="ad-modal__footer">
+          <button className="ad-modal__btn" onClick={onClose}>Cerrar</button>
         </div>
       </div>
     </div>

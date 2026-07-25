@@ -1,11 +1,23 @@
 import Swal from "sweetalert2";
 
-const BRAND = "#0ea5a4";
-const DANGER = "#dc2626";
-const MUTED = "#6b7280";
+function isDark() {
+  return document.documentElement.getAttribute("data-theme") === "dark";
+}
+
+function baseOpts() {
+  return {
+    customClass: {
+      popup: isDark() ? "swal-dark" : "swal-light",
+    },
+    didOpen: (popup) => {
+      popup.style.setProperty("font-family", "inherit");
+    },
+  };
+}
 
 export function showSuccess(message) {
   return Swal.fire({
+    ...baseOpts(),
     icon: "success",
     title: message,
     toast: true,
@@ -18,6 +30,7 @@ export function showSuccess(message) {
 
 export function showError(message) {
   return Swal.fire({
+    ...baseOpts(),
     icon: "error",
     title: message,
     toast: true,
@@ -30,24 +43,23 @@ export function showError(message) {
 
 export function showWarning(title, message) {
   return Swal.fire({
+    ...baseOpts(),
     icon: "warning",
     title,
     text: message,
-    confirmButtonColor: BRAND,
     confirmButtonText: "Aceptar",
   });
 }
 
 export function showConfirm(title, message, confirmText = "Eliminar", cancelText = "Cancelar") {
   return Swal.fire({
+    ...baseOpts(),
     title,
     text: message,
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: confirmText,
     cancelButtonText: cancelText,
-    confirmButtonColor: DANGER,
-    cancelButtonColor: MUTED,
     reverseButtons: true,
   });
 }

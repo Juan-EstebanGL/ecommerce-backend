@@ -1,6 +1,36 @@
 /* ══════════════════════════════════════════════════════════
-   Form components — Soft Glass Premium
+   Forms — Soft Glass Premium
    (Additional form components beyond inputs.css)
    ══════════════════════════════════════════════════════════ */
 
-/* Forms content will be populated as pages are migrated */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+.form-hint {
+  font-size: var(--fs-xs);
+  color: var(--text-tertiary);
+}
+
+.form-error {
+  font-size: var(--fs-xs);
+  color: var(--danger);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 640px) {
+  .form-row { grid-template-columns: 1fr; }
+}

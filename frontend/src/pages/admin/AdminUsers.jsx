@@ -142,7 +142,7 @@ export default function AdminUsers() {
       value: users.length,
       color: "teal",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="M23 21v-2a4 4 0 00-3-3.87" />
@@ -155,7 +155,7 @@ export default function AdminUsers() {
       value: statsData.totalAdmins,
       color: "purple",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
         </svg>
       ),
@@ -165,7 +165,7 @@ export default function AdminUsers() {
       value: statsData.totalClients,
       color: "blue",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
           <circle cx="9" cy="7" r="4" />
         </svg>
@@ -176,7 +176,7 @@ export default function AdminUsers() {
       value: statsData.totalNewThisMonth,
       color: "success",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
@@ -186,11 +186,11 @@ export default function AdminUsers() {
 
   if (loading) {
     return (
-      <div>
+      <div className="ad-users">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Usuarios</h1>
-            <p className="ad-header__subtitle">Administración de usuarios</p>
+            <p className="ad-header__subtitle">Gestiona los usuarios del sistema</p>
           </div>
         </div>
         <div className="ad-users-loader">
@@ -203,11 +203,11 @@ export default function AdminUsers() {
 
   if (error) {
     return (
-      <div>
+      <div className="ad-users">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Usuarios</h1>
-            <p className="ad-header__subtitle">Administración de usuarios</p>
+            <p className="ad-header__subtitle">Gestiona los usuarios del sistema</p>
           </div>
         </div>
         <div className="ad-users-error">
@@ -227,16 +227,18 @@ export default function AdminUsers() {
 
   return (
     <div className="ad-users">
-      <div className="ad-header">
-        <div>
-          <h1 className="ad-header__title">Usuarios</h1>
-          <p className="ad-header__subtitle">Administración de usuarios</p>
+      <div className="ad-users-header">
+        <div className="ad-header">
+          <div>
+            <h1 className="ad-header__title">Usuarios</h1>
+            <p className="ad-header__subtitle">Gestiona los usuarios del sistema</p>
+          </div>
         </div>
       </div>
 
-      <div className="ad-stats ad-users-stats" ref={tableRef}>
-        {stats.map((s) => (
-          <div key={s.label} className={`ad-card ad-card--${s.color}`}>
+      <div className="ad-products-stats" ref={tableRef}>
+        {stats.map((s, i) => (
+          <div key={s.label} className={`ad-card ad-card--${s.color}`} style={{ animationDelay: `${i * 0.06}s` }}>
             <div className="ad-card__top">
               <div className="ad-card__icon">{s.icon}</div>
             </div>
@@ -254,11 +256,27 @@ export default function AdminUsers() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar usuarios..."
+            placeholder="Buscar por nombre o email..."
             className="ad-products-search__input"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
+          {search && (
+            <button
+              className="ad-products-search__clear"
+              onClick={() => { setSearch(""); setPage(1); }}
+              aria-label="Limpiar búsqueda"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <div className="ad-products-count">
+          <span className="ad-products-count__num">{filtered.length}</span>
+          <span className="ad-products-count__label">{filtered.length === 1 ? "usuario" : "usuarios"}</span>
         </div>
       </div>
 

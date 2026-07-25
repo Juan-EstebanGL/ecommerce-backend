@@ -121,7 +121,7 @@ export default function AdminCategories() {
       value: categories.length,
       color: "teal",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
         </svg>
       ),
@@ -131,7 +131,7 @@ export default function AdminCategories() {
       value: totalWithImage,
       color: "success",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
           <circle cx="8.5" cy="8.5" r="1.5" />
           <polyline points="21 15 16 10 5 21" />
@@ -143,7 +143,7 @@ export default function AdminCategories() {
       value: totalWithout,
       color: "warning",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="17" />
@@ -155,7 +155,7 @@ export default function AdminCategories() {
       value: categories.filter((c) => c.productCount === 0).length,
       color: "danger",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="15" y1="9" x2="9" y2="15" />
           <line x1="9" y1="9" x2="15" y2="15" />
@@ -166,11 +166,11 @@ export default function AdminCategories() {
 
   if (loading) {
     return (
-      <div>
+      <div className="ad-categories">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Categorías</h1>
-            <p className="ad-header__subtitle">Administración de categorías</p>
+            <p className="ad-header__subtitle">Gestiona las categorías de productos</p>
           </div>
         </div>
         <div className="ad-products-loader">
@@ -183,11 +183,11 @@ export default function AdminCategories() {
 
   if (error) {
     return (
-      <div>
+      <div className="ad-categories">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Categorías</h1>
-            <p className="ad-header__subtitle">Administración de categorías</p>
+            <p className="ad-header__subtitle">Gestiona las categorías de productos</p>
           </div>
         </div>
         <div className="ad-products-error">
@@ -206,26 +206,28 @@ export default function AdminCategories() {
   }
 
   return (
-    <div className="ad-products">
-      <div className="ad-header">
-        <div>
-          <h1 className="ad-header__title">Categorías</h1>
-          <p className="ad-header__subtitle">Administración de categorías</p>
-        </div>
-        <div className="ad-header__right">
-          <button className="btn btn--primary" onClick={openCreateModal}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Nueva categoría
-          </button>
+    <div className="ad-categories">
+      <div className="ad-categories-header">
+        <div className="ad-header">
+          <div>
+            <h1 className="ad-header__title">Categorías</h1>
+            <p className="ad-header__subtitle">Organiza tu catálogo por secciones</p>
+          </div>
+          <div className="ad-header__right">
+            <button className="btn btn--primary" onClick={openCreateModal}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Nueva categoría
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="ad-stats ad-products-stats" ref={tableRef}>
-        {stats.map((s) => (
-          <div key={s.label} className={`ad-card ad-card--${s.color}`}>
+      <div className="ad-products-stats" ref={tableRef}>
+        {stats.map((s, i) => (
+          <div key={s.label} className={`ad-card ad-card--${s.color}`} style={{ animationDelay: `${i * 0.06}s` }}>
             <div className="ad-card__top">
               <div className="ad-card__icon">{s.icon}</div>
             </div>
@@ -243,11 +245,27 @@ export default function AdminCategories() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar categorías..."
+            placeholder="Buscar por nombre o descripción..."
             className="ad-products-search__input"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
+          {search && (
+            <button
+              className="ad-products-search__clear"
+              onClick={() => { setSearch(""); setPage(1); }}
+              aria-label="Limpiar búsqueda"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <div className="ad-products-count">
+          <span className="ad-products-count__num">{filtered.length}</span>
+          <span className="ad-products-count__label">{filtered.length === 1 ? "categoría" : "categorías"}</span>
         </div>
       </div>
 

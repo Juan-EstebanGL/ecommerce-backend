@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { useCartContext } from "../context/CartContext";
+import { useTheme } from "../context/ThemeContext";
 import UserMenu from "./UserMenu";
 
 function Navbar() {
   const { user, logout } = useAuth();
+  const { toggleTheme, isDark } = useTheme();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -88,9 +90,20 @@ function Navbar() {
               )}
             </nav>
           </div>
-          <div className="navbar__right">
+            <div className="navbar__right">
+            <button
+              className="navbar__theme-toggle"
+              onClick={toggleTheme}
+              aria-label={isDark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+              title={isDark ? "Tema claro" : "Tema oscuro"}
+            >
+              <span className={`navbar__theme-icon${isDark ? " navbar__theme-icon--dark" : ""}`}>
+                {isDark ? "☀️" : "🌙"}
+              </span>
+            </button>
             {user ? (
               <UserMenu
+                dropdownClassName="navbar__dropdown"
                 trigger={
                   <button className="navbar__avatar" aria-label="Menú de usuario">
                     {user.avatarUrl ? (
@@ -243,6 +256,13 @@ function Navbar() {
             </>
           )}
         </nav>
+        <div className="navbar__drawer-divider" />
+        <button
+          className="navbar__drawer-theme-toggle"
+          onClick={toggleTheme}
+        >
+          {isDark ? "☀️ Cambiar a tema claro" : "🌙 Cambiar a tema oscuro"}
+        </button>
         <div className="navbar__drawer-divider" />
         {user ? (
           <div className="navbar__drawer-user">

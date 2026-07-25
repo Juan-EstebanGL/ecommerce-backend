@@ -121,7 +121,7 @@ export default function AdminProducts() {
       value: products.length,
       color: "teal",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
           <line x1="3" y1="6" x2="21" y2="6" />
           <path d="M16 10a4 4 0 01-8 0" />
@@ -133,7 +133,7 @@ export default function AdminProducts() {
       value: statsData.totalAvailable,
       color: "success",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
@@ -144,7 +144,7 @@ export default function AdminProducts() {
       value: statsData.totalLowStock,
       color: "warning",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
           <line x1="12" y1="9" x2="12" y2="13" />
           <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -156,7 +156,7 @@ export default function AdminProducts() {
       value: statsData.totalOutOfStock,
       color: "danger",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="15" y1="9" x2="9" y2="15" />
           <line x1="9" y1="9" x2="15" y2="15" />
@@ -167,7 +167,7 @@ export default function AdminProducts() {
 
   if (loading) {
     return (
-      <div>
+      <div className="ad-products">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Productos</h1>
@@ -184,7 +184,7 @@ export default function AdminProducts() {
 
   if (error) {
     return (
-      <div>
+      <div className="ad-products">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Productos</h1>
@@ -208,25 +208,27 @@ export default function AdminProducts() {
 
   return (
     <div className="ad-products">
-      <div className="ad-header">
-        <div>
-          <h1 className="ad-header__title">Productos</h1>
-          <p className="ad-header__subtitle">Administración de productos</p>
-        </div>
-        <div className="ad-header__right">
-          <button className="btn btn--primary" onClick={openCreateModal}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Nuevo producto
-          </button>
+      <div className="ad-products-header">
+        <div className="ad-header">
+          <div>
+            <h1 className="ad-header__title">Productos</h1>
+            <p className="ad-header__subtitle">Gestiona el inventario de tu tienda</p>
+          </div>
+          <div className="ad-header__right">
+            <button className="btn btn--primary" onClick={openCreateModal}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Nuevo producto
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="ad-stats ad-products-stats" ref={tableRef}>
-        {stats.map((s) => (
-          <div key={s.label} className={`ad-card ad-card--${s.color}`}>
+      <div className="ad-products-stats" ref={tableRef}>
+        {stats.map((s, i) => (
+          <div key={s.label} className={`ad-card ad-card--${s.color}`} style={{ animationDelay: `${i * 0.06}s` }}>
             <div className="ad-card__top">
               <div className="ad-card__icon">{s.icon}</div>
             </div>
@@ -244,11 +246,27 @@ export default function AdminProducts() {
           </svg>
           <input
             type="text"
-            placeholder="Buscar productos..."
+            placeholder="Buscar por nombre o categoría..."
             className="ad-products-search__input"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
+          {search && (
+            <button
+              className="ad-products-search__clear"
+              onClick={() => { setSearch(""); setPage(1); }}
+              aria-label="Limpiar búsqueda"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <div className="ad-products-count">
+          <span className="ad-products-count__num">{filtered.length}</span>
+          <span className="ad-products-count__label">{filtered.length === 1 ? "producto" : "productos"}</span>
         </div>
       </div>
 

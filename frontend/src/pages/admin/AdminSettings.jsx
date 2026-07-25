@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { getSystemInfo } from "../../api/admin";
+import { useTheme } from "../../context/ThemeContext";
 
 function StatusDot({ ok }) {
   return (
     <span
-      className="ad-settings-status-dot"
-      style={{ background: ok ? "#16a34a" : "#dc2626" }}
+      className={`ad-settings-status-dot${ok ? " ad-settings-status-dot--ok" : " ad-settings-status-dot--error"}`}
     />
   );
 }
@@ -24,6 +24,7 @@ function formatUptime(seconds) {
 }
 
 export default function AdminSettings() {
+  const { theme, setTheme } = useTheme();
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -45,7 +46,7 @@ export default function AdminSettings() {
 
   if (loading) {
     return (
-      <div>
+      <div className="ad-settings">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Configuración</h1>
@@ -62,7 +63,7 @@ export default function AdminSettings() {
 
   if (error) {
     return (
-      <div>
+      <div className="ad-settings">
         <div className="ad-header">
           <div>
             <h1 className="ad-header__title">Configuración</h1>
@@ -88,15 +89,56 @@ export default function AdminSettings() {
 
   return (
     <div className="ad-settings">
-      <div className="ad-header">
-        <div>
-          <h1 className="ad-header__title">Configuración</h1>
-          <p className="ad-header__subtitle">Información del sistema</p>
+      <div className="ad-settings-header">
+        <div className="ad-header">
+          <div>
+            <h1 className="ad-header__title">Configuración</h1>
+            <p className="ad-header__subtitle">Información del sistema</p>
+          </div>
         </div>
       </div>
 
       <div className="ad-settings-grid">
-        <div className="ad-settings-card">
+        <div className="ad-settings-card" style={{ animationDelay: "0s" }}>
+          <h3 className="ad-settings-card__title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+            Apariencia
+          </h3>
+          <div className="ad-settings-card__body">
+            <div className="ad-settings-theme-row">
+              <button
+                className={`ad-settings-theme-btn${theme === "light" ? " ad-settings-theme-btn--active" : ""}`}
+                onClick={() => setTheme("light")}
+              >
+                ☀️ Claro
+              </button>
+              <button
+                className={`ad-settings-theme-btn${theme === "dark" ? " ad-settings-theme-btn--active" : ""}`}
+                onClick={() => setTheme("dark")}
+              >
+                🌙 Oscuro
+              </button>
+              <button
+                className={`ad-settings-theme-btn${theme === "system" ? " ad-settings-theme-btn--active" : ""}`}
+                onClick={() => setTheme("system")}
+              >
+                💻 Sistema
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="ad-settings-card" style={{ animationDelay: "0.05s" }}>
           <h3 className="ad-settings-card__title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="16 18 22 12 16 6" />
@@ -113,7 +155,7 @@ export default function AdminSettings() {
               <span className="ad-settings-field__label">Versión</span>
               <span className="ad-settings-field__value">{info?.version || "—"}</span>
             </div>
-            <div className="ad-settings-field">
+            <div className="ad-settings-field ad-settings-field--stack">
               <span className="ad-settings-field__label">Stack</span>
               <div className="ad-settings-tags">
                 <span className="ad-settings-tag">React</span>
@@ -128,7 +170,7 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        <div className="ad-settings-card">
+        <div className="ad-settings-card" style={{ animationDelay: "0.1s" }}>
           <h3 className="ad-settings-card__title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -156,7 +198,7 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        <div className="ad-settings-card">
+        <div className="ad-settings-card" style={{ animationDelay: "0.15s" }}>
           <h3 className="ad-settings-card__title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
@@ -185,7 +227,7 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        <div className="ad-settings-card">
+        <div className="ad-settings-card" style={{ animationDelay: "0.2s" }}>
           <h3 className="ad-settings-card__title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="20" x2="18" y2="10" />

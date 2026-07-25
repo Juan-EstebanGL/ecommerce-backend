@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { FavoriteProvider } from "./context/FavoriteContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 function AppContent() {
   const location = useLocation();
@@ -25,13 +26,15 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <FavoriteProvider>
-          <AppContent />
-        </FavoriteProvider>
-      </CartProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CartProvider>
+          <FavoriteProvider>
+            <AppContent />
+          </FavoriteProvider>
+        </CartProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

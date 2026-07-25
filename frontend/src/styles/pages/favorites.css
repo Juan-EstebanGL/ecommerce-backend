@@ -146,7 +146,7 @@
   border: none;
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-700) 100%);
-  color: #fff;
+  color: var(--text-on-primary);
   font-family: inherit;
   font-size: var(--fs-sm);
   font-weight: var(--fw-bold);

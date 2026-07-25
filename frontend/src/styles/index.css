@@ -32,6 +32,7 @@
 @import './components/skeleton.css';
 @import './components/loading.css';
 @import './components/empty-state.css';
+@import './components/swal.css';
 @import './components/product-card.css';
 @import './components/quantity-input.css';
 @import './components/review-modal.css';

@@ -58,7 +58,7 @@
 }
 
 .btn--ghost:hover:not(:disabled) {
-  background: var(--surface-hover);
+  background: var(--hover-bg);
   border-color: var(--border);
 }
 
@@ -91,7 +91,7 @@
 }
 
 .btn--subtle:hover:not(:disabled) {
-  background: var(--surface-hover);
+  background: var(--hover-bg);
   color: var(--text);
 }
 

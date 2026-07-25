@@ -1,8 +1,23 @@
 /* ══════════════════════════════════════════════════════════
-   Admin Categories — Table, Description Cell, Detail Modal, Form
+   Admin Categories — Complete Visual Reconstruction
+   Soft Glass Floating · Dark Ambient · Detail Modal
    ══════════════════════════════════════════════════════════ */
 
-/* ── Category Compact Form Modal ── */
+/* ── Page Container ── */
+.ad-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Header Section ── */
+.ad-categories-header {
+  animation: adFadeIn 0.5s ease both;
+}
+
+/* ══════════════════════════════════════════════════════════
+   CATEGORY FORM MODAL — Compact
+   ══════════════════════════════════════════════════════════ */
 .ad-form-modal--compact {
   max-width: 420px;
 }
@@ -11,15 +26,16 @@
 .ad-categories-cell-desc {
   max-width: 200px;
   font-size: 0.82rem;
-  color: var(--ad-text);
+  color: var(--ad-text-2);
   line-height: 1.4;
 }
 
 .ad-categories-no-desc {
-  color: #d1d5db;
+  color: var(--ad-muted);
+  font-style: italic;
 }
 
-/* ── Form Textarea & Hint ── */
+/* ── Form Textarea ── */
 .ad-form__textarea {
   resize: vertical;
   min-height: 80px;
@@ -30,8 +46,8 @@
 .ad-form__hint {
   display: block;
   text-align: right;
-  font-size: 0.75rem;
-  color: #9ca3af;
+  font-size: 0.72rem;
+  color: var(--ad-muted);
   margin-top: 4px;
 }
 
@@ -43,9 +59,22 @@
 }
 
 .ad-categories-detail-body {
-  padding: 0 24px;
+  padding: 0 24px 24px;
   max-height: 65vh;
   overflow-y: auto;
+}
+
+.ad-categories-detail-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ad-categories-detail-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ad-categories-detail-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 .ad-categories-detail-loading {
@@ -59,24 +88,27 @@
   display: flex;
   gap: 24px;
   margin-bottom: 24px;
+  padding-top: 20px;
 }
 
 .ad-categories-detail-img {
   width: 160px;
   height: 160px;
   border-radius: var(--ad-radius-md);
-  background: var(--ad-skeleton-2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ad-border);
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease, border-color 0.25s ease;
 }
 
 .ad-categories-detail-img:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
+  border-color: var(--ad-glass-border-hover);
 }
 
 .ad-categories-detail-img img {
@@ -91,6 +123,7 @@
   justify-content: center;
   width: 100%;
   height: 100%;
+  color: var(--ad-muted);
 }
 
 .ad-categories-detail-info {
@@ -107,34 +140,34 @@
 
 .ad-categories-detail-desc {
   font-size: 0.88rem;
-  color: var(--ad-text);
-  line-height: 1.5;
+  color: var(--ad-text-2);
+  line-height: 1.6;
   margin: 0 0 16px;
 }
 
 .ad-categories-detail-desc--empty {
-  color: #9ca3af;
+  color: var(--ad-muted);
   font-style: italic;
 }
 
 .ad-categories-detail-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 20px;
 }
 
 .ad-categories-detail-meta__item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .ad-categories-detail-meta__label {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--ad-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
 .ad-categories-detail-meta__value {
@@ -150,15 +183,33 @@
 }
 
 .ad-categories-detail-products__title {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--ad-text);
   margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ad-categories-detail-products__title::before {
+  content: "";
+  width: 4px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--primary);
+  flex-shrink: 0;
 }
 
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE — Categories
    ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .ad-products-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 640px) {
   .ad-categories-detail-top {
     flex-direction: column;
@@ -181,5 +232,11 @@
   .ad-categories-detail-modal {
     max-width: 100%;
     margin: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-products-stats {
+    grid-template-columns: 1fr;
   }
 }

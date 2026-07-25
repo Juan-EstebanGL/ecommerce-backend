@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-export default function UserMenu({ trigger, children, className = "", direction = "down" }) {
+export default function UserMenu({ trigger, children, className = "", dropdownClassName = "", direction = "down" }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -26,11 +26,17 @@ export default function UserMenu({ trigger, children, className = "", direction 
     </div>
   );
 
+  const dropdownClasses = [
+    "user-menu__dropdown",
+    direction === "up" ? "user-menu__dropdown--up" : "",
+    dropdownClassName,
+  ].filter(Boolean).join(" ");
+
   return (
     <div className={`user-menu${className ? " " + className : ""}`} ref={ref}>
       {triggerEl}
       {open && (
-        <div className={`user-menu__dropdown${direction === "up" ? " user-menu__dropdown--up" : ""}`} role="menu">
+        <div className={dropdownClasses} role="menu">
           {typeof children === "function" ? children({ close }) : children}
         </div>
       )}

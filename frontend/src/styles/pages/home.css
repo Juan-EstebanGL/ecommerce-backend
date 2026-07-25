@@ -151,7 +151,7 @@
   padding: 6px 16px;
   border-radius: var(--radius-pill);
   background: rgba(14, 165, 164, 0.12);
-  color: #5eead4;
+  color: var(--hero-accent);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -161,7 +161,7 @@
   font-size: 3.2rem;
   font-weight: 800;
   line-height: 1.1;
-  color: #fff;
+  color: var(--hero-text);
   letter-spacing: -0.03em;
 }
 .hm-hero__title-accent {
@@ -174,7 +174,7 @@
   margin: 0;
   font-size: 1.1rem;
   line-height: 1.7;
-  color: #94a3b8;
+  color: var(--hero-text-secondary);
   max-width: 520px;
 }
 .hm-hero__actions {
@@ -200,12 +200,12 @@
               border-color var(--transition-base);
 }
 .hm-hero__btn:focus-visible {
-  outline: 2px solid #5eead4;
+  outline: 2px solid var(--hero-accent);
   outline-offset: 2px;
 }
 .hm-hero__btn--primary {
   background: linear-gradient(135deg, var(--primary), var(--info));
-  color: #fff;
+  color: var(--text-on-primary);
 }
 .hm-hero__btn--primary:hover {
   box-shadow: 0 8px 28px rgba(14, 165, 164, 0.35);
@@ -214,7 +214,7 @@
 .hm-hero__btn--ghost {
   background: transparent;
   border: 1.5px solid rgba(255, 255, 255, 0.15);
-  color: #e2e8f0;
+  color: var(--text-secondary);
 }
 .hm-hero__btn--ghost:hover {
   border-color: rgba(255, 255, 255, 0.35);
@@ -398,7 +398,7 @@
 }
 .hm-cat:hover .hm-cat__icon {
   background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  color: var(--text-inverse);
   transform: scale(1.1);
 }
 .hm-cat__name {
@@ -411,7 +411,7 @@
   transition: color var(--transition-base);
 }
 .hm-cat:hover .hm-cat__name {
-  color: #fff;
+  color: var(--text-inverse);
 }
 .hm-cat__desc {
   position: relative;
@@ -472,7 +472,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 16px;
-  color: #fff;
+  color: var(--text-inverse);
 }
 .hm-benefit__icon--1 { background: linear-gradient(135deg, var(--primary), var(--info)); }
 .hm-benefit__icon--2 { background: linear-gradient(135deg, var(--accent), #a855f7); }
@@ -529,7 +529,7 @@
   padding: 6px 16px;
   border-radius: var(--radius-pill);
   background: rgba(14, 165, 164, 0.12);
-  color: #5eead4;
+  color: var(--hero-accent);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -538,7 +538,7 @@
   margin: 0;
   font-size: 2rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--hero-text);
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -546,7 +546,7 @@
   margin: 0;
   font-size: 1rem;
   line-height: 1.6;
-  color: #94a3b8;
+  color: var(--hero-text-secondary);
   max-width: 460px;
 }
 .hm-banner__btn {
@@ -556,7 +556,7 @@
   padding: 12px 24px;
   border: none;
   border-radius: var(--radius-md);
-  background: #fff;
+  background: var(--surface);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 0.92rem;
@@ -571,7 +571,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 .hm-banner__btn:focus-visible {
-  outline: 2px solid #5eead4;
+  outline: 2px solid var(--hero-accent);
   outline-offset: 2px;
 }
 
@@ -592,7 +592,7 @@
 .hm-banner__stat-value {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--hero-text);
   letter-spacing: -0.02em;
 }
 .hm-banner__stat-label {
@@ -707,7 +707,7 @@
   border: none;
   border-radius: var(--auth-btn-radius);
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   font-family: var(--font-sans);
   font-size: 0.95rem;
   font-weight: 700;
@@ -758,14 +758,14 @@
   margin: 0;
   font-size: 2.2rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--hero-text);
   letter-spacing: -0.02em;
 }
 .hm-cta__desc {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.6;
-  color: #94a3b8;
+  color: var(--hero-text-secondary);
   max-width: 480px;
 }
 .hm-cta__btn {
@@ -776,7 +776,7 @@
   border: none;
   border-radius: var(--radius-md);
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 700;
@@ -791,7 +791,7 @@
   transform: translateY(-2px);
 }
 .hm-cta__btn:focus-visible {
-  outline: 2px solid #5eead4;
+  outline: 2px solid var(--hero-accent);
   outline-offset: 2px;
 }
 

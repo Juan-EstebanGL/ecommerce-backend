@@ -19,21 +19,21 @@
 /* ── Status variants ── */
 .badge--PENDING {
   background: var(--info-light);
-  color: #1d4ed8;
+  color: var(--info);
 }
 
 .badge--PAID {
   background: var(--success-light);
-  color: #059669;
+  color: var(--success);
 }
 
 .badge--PROCESSING {
   background: var(--warning-light);
-  color: #c2410c;
+  color: var(--warning);
 }
 
 .badge--SHIPPED {
-  background: #f5f3ff;
+  background: var(--badge-admin-bg);
   color: var(--accent);
 }
 

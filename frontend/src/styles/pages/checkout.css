@@ -635,7 +635,7 @@
   height: 14px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border-top-color: var(--spinner-fill);
   animation: co-spin 0.6s linear infinite;
 }
 .co-spinner-dark {
@@ -874,7 +874,7 @@
   height: 18px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border-top-color: var(--spinner-fill);
   animation: co-spin 0.7s linear infinite;
   flex-shrink: 0;
 }

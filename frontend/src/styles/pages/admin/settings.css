@@ -1,41 +1,64 @@
 /* ══════════════════════════════════════════════════════════
-   Admin Settings — Grid, Cards, Fields, Tags
+   Admin Settings — Soft Glass Dark
    ══════════════════════════════════════════════════════════ */
 
-/* ── Settings Grid ── */
+/* ── Settings Container ── */
+.ad-settings {
+  padding: var(--ad-page-pad);
+  animation: adFadeIn 0.45s ease both;
+}
+
+.ad-settings-header {
+  margin-bottom: var(--ad-gap-lg);
+}
+
+/* ── Grid ── */
 .ad-settings-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--ad-gap-md);
 }
 
-/* ── Settings Card (Glass) ── */
+/* ── Card (Glass) ── */
 .ad-settings-card {
-  background: var(--glass-bg-strong);
-  backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
+  background: var(--ad-card);
+  border: 1px solid var(--ad-border);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  animation: adFadeIn 0.5s ease both;
 }
 
+.ad-settings-card:hover {
+  border-color: var(--brand);
+  box-shadow:
+    var(--shadow-sm),
+    0 0 24px rgba(14, 165, 164, 0.06);
+}
+
+/* ── Card Title ── */
 .ad-settings-card__title {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--ad-text);
   margin: 0;
   padding: 18px 24px;
   border-bottom: 1px solid var(--ad-border);
+  background: rgba(14, 165, 164, 0.03);
 }
 
 .ad-settings-card__title svg {
   color: var(--brand);
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
+/* ── Card Body ── */
 .ad-settings-card__body {
   padding: 20px 24px;
   display: flex;
@@ -43,35 +66,43 @@
   gap: 14px;
 }
 
-/* ── Settings Field ── */
+/* ── Field Row ── */
 .ad-settings-field {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+.ad-settings-field--stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
 .ad-settings-field__label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  color: var(--ad-text-2);
+  color: var(--ad-text-3);
 }
 
 .ad-settings-field__value {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--ad-text);
 }
 
 .ad-settings-field__value--env {
   text-transform: uppercase;
-  font-size: 0.8rem;
-  padding: 3px 10px;
-  border-radius: 6px;
-  background: rgba(14, 165, 164, 0.08);
+  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(14, 165, 164, 0.1);
   color: var(--brand);
+  border: 1px solid rgba(14, 165, 164, 0.15);
 }
 
-/* ── Settings Tags ── */
+/* ── Tags ── */
 .ad-settings-tags {
   display: flex;
   flex-wrap: wrap;
@@ -80,60 +111,217 @@
 
 .ad-settings-tag {
   padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 0.78rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
   font-weight: 600;
-  background: var(--ad-border);
-  color: #4b5062;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ad-text-2);
+  border: 1px solid var(--ad-border);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.ad-settings-tag:hover {
+  border-color: var(--brand);
+  color: var(--brand);
 }
 
 /* ── Status Row ── */
 .ad-settings-status-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.9rem;
+  gap: 12px;
+  font-size: 0.88rem;
   font-weight: 500;
   color: var(--ad-text);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
+.ad-settings-status-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--ad-border);
+}
+
+/* ── Status Dot ── */
 .ad-settings-status-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+  position: relative;
 }
 
-/* ── Stats ── */
+.ad-settings-status-dot--ok {
+  background: var(--success);
+  box-shadow: 0 0 8px rgba(22, 163, 74, 0.4);
+}
+
+.ad-settings-status-dot--error {
+  background: var(--danger);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+}
+
+.ad-settings-status-dot--ok::after,
+.ad-settings-status-dot--error::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  opacity: 0.2;
+}
+
+.ad-settings-status-dot--ok::after {
+  color: var(--success);
+}
+
+.ad-settings-status-dot--error::after {
+  color: var(--danger);
+}
+
+/* ── Stat Row ── */
 .ad-settings-stat {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid var(--ad-border-2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .ad-settings-stat:last-child {
   border-bottom: none;
+  padding-bottom: 0;
+}
+
+.ad-settings-stat:first-child {
+  padding-top: 0;
 }
 
 .ad-settings-stat__value {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--brand);
+  font-variant-numeric: tabular-nums;
 }
 
 .ad-settings-stat__label {
-  font-size: 0.85rem;
-  color: var(--ad-text-2);
+  font-size: 0.82rem;
+  color: var(--ad-text-3);
   font-weight: 500;
 }
 
+/* ── Loader ── */
+.ad-settings-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 24px;
+  color: var(--ad-text-3);
+  font-size: 0.9rem;
+}
+
+.ad-settings-loader__spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: adSpin 0.8s linear infinite;
+}
+
+/* ── Error ── */
+.ad-settings-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 24px;
+  text-align: center;
+  color: var(--ad-text-3);
+  font-size: 0.9rem;
+}
+
+.ad-settings-error svg {
+  color: var(--danger);
+  opacity: 0.8;
+}
+
+.ad-settings-error .btn {
+  margin-top: 4px;
+}
+
+/* ── Theme Selector Row ── */
+.ad-settings-theme-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.ad-settings-theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-xs);
+  background: transparent;
+  color: var(--ad-text-2);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.ad-settings-theme-btn:hover {
+  border-color: var(--ad-glass-border-hover);
+  color: var(--ad-text);
+  background: var(--ad-surface-hover);
+}
+
+.ad-settings-theme-btn--active {
+  border-color: var(--primary);
+  background: var(--ad-glow-brand);
+  color: var(--primary);
+}
+
+[data-theme="light"] .ad-settings-theme-btn {
+  border-color: var(--ad-border);
+  color: var(--ad-text-2);
+}
+
+[data-theme="light"] .ad-settings-theme-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .ad-settings-theme-btn--active {
+  background: rgba(14, 165, 164, 0.06);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 /* ══════════════════════════════════════════════════════════
-   RESPONSIVE — Settings
+   RESPONSIVE
    ══════════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .ad-settings-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .ad-settings {
+    padding: 16px;
+  }
+
+  .ad-settings-card__body {
+    padding: 16px 18px;
   }
 }

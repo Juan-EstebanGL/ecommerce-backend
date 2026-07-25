@@ -36,7 +36,7 @@
 .auth-card__error {
   background: var(--danger-light);
   color: var(--danger);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--danger-light);
   border-radius: var(--radius-md);
   padding: 10px 14px;
   font-size: var(--fs-sm);
@@ -50,7 +50,7 @@
 .auth-card__success {
   background: var(--success-light);
   color: var(--success);
-  border: 1px solid #bbf7d0;
+  border: 1px solid var(--success-light);
   border-radius: var(--radius-md);
   padding: 10px 14px;
   font-size: var(--fs-sm);
