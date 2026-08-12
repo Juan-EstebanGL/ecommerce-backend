@@ -92,8 +92,6 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
 
     try {
       if (mode === "edit" && !file) {
-        payload.imageUrl = product.imageUrl || null;
-        payload.publicId = product.publicId || null;
         setPhase("Actualizando producto...");
         await updateProduct(product.id, payload);
       } else {

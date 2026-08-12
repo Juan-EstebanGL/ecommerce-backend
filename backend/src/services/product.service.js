@@ -115,17 +115,20 @@ const updateProduct = async (userId, userRole, id, data) => {
 
   const { imageUrl, publicId, categoryId, ...productData } = data;
 
+  const categoryUpdate =
+    categoryId !== undefined
+      ? { categoryId: categoryId ? Number(categoryId) : null }
+      : {};
+
+  const previousPublicId = existingProduct.publicId;
+  const hasNewImage = Boolean(
+    publicId && previousPublicId && publicId !== previousPublicId
+  );
+
+  let product;
+
   try {
-    if (publicId && existingProduct.publicId) {
-      await cloudinaryService.deleteImage(existingProduct.publicId);
-    }
-
-    const categoryUpdate =
-      categoryId !== undefined
-        ? { categoryId: categoryId ? Number(categoryId) : null }
-        : {};
-
-    const product = await prisma.product.update({
+    product = await prisma.product.update({
       where: {
         id,
       },
@@ -137,10 +140,8 @@ const updateProduct = async (userId, userRole, id, data) => {
       },
       include: { category: true },
     });
-
-    return formatProduct(product);
   } catch (error) {
-    if (publicId) {
+    if (publicId && publicId !== previousPublicId) {
       await cloudinaryService.deleteImage(publicId).catch(() => {});
     }
 
@@ -150,6 +151,19 @@ const updateProduct = async (userId, userRole, id, data) => {
 
     throw error;
   }
+
+  if (hasNewImage) {
+    try {
+      await cloudinaryService.deleteImage(previousPublicId);
+    } catch (error) {
+      console.error(
+        "[product] No se pudo eliminar la imagen anterior:",
+        error.message
+      );
+    }
+  }
+
+  return formatProduct(product);
 };
 
 const patchProduct = async (userId, userRole, id, data) => {

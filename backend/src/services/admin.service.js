@@ -94,7 +94,9 @@ const getDashboard = async () => {
       orderBy: { createdAt: "desc" },
       take: 5,
       include: {
-        user: { select: { id: true, email: true, firstName: true, lastName: true } },
+        user: {
+          select: { id: true, email: true, firstName: true, lastName: true, avatarUrl: true },
+        },
         product: { select: { id: true, name: true, imageUrl: true } },
       },
     }),
@@ -166,7 +168,13 @@ const getDashboard = async () => {
   }));
 
   const recentReviewsResult = recentReviews.map((review) => ({
-    usuario: { id: review.user.id, email: review.user.email, firstName: review.user.firstName, lastName: review.user.lastName },
+    usuario: {
+      id: review.user.id,
+      email: review.user.email,
+      firstName: review.user.firstName,
+      lastName: review.user.lastName,
+      avatarUrl: review.user.avatarUrl,
+    },
     producto: {
       id: review.product.id,
       name: review.product.name,

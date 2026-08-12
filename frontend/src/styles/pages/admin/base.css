@@ -738,6 +738,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  width: 100%;
 }
 
 .ad-user__avatar {
@@ -856,7 +858,11 @@
    USER MENU (scoped to admin sidebar only)
    ══════════════════════════════════════════════════════════ */
 .ad-sidebar .user-menu { position: relative; }
-.ad-sidebar .user-menu__trigger { cursor: pointer; }
+.ad-sidebar .user-menu__trigger {
+  cursor: pointer;
+  display: flex;
+  width: 100%;
+}
 
 .ad-sidebar .user-menu__dropdown {
   position: absolute;

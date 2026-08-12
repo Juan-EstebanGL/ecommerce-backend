@@ -468,7 +468,27 @@ export default function AdminDashboard() {
                 <div key={i} className="ad-dash-review">
                   <div className="ad-dash-review__header">
                     <div className="ad-dash-review__avatar">
-                      {((r.usuario.firstName?.charAt(0) || r.usuario.email?.charAt(0)) || "?").toUpperCase()}
+                      {r.usuario.avatarUrl ? (
+                        <>
+                          <img
+                            src={r.usuario.avatarUrl}
+                            alt=""
+                            loading="lazy"
+                            className="ad-dash-review__avatar-img"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              e.currentTarget.nextSibling.style.display = "flex";
+                            }}
+                          />
+                          <span className="ad-dash-review__avatar-initial" style={{ display: "none" }}>
+                            {((r.usuario.firstName?.charAt(0) || r.usuario.email?.charAt(0)) || "?").toUpperCase()}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="ad-dash-review__avatar-initial">
+                          {((r.usuario.firstName?.charAt(0) || r.usuario.email?.charAt(0)) || "?").toUpperCase()}
+                        </span>
+                      )}
                     </div>
                     <div className="ad-dash-review__meta">
                       <span className="ad-dash-review__email">{(r.usuario.firstName || r.usuario.lastName) ? `${r.usuario.firstName || ""} ${r.usuario.lastName || ""}`.trim() : r.usuario.email}</span>
