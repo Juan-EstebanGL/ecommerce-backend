@@ -23,7 +23,7 @@ function Navbar() {
     if (user) {
       refreshCartCount();
     }
-  }, [user]);
+  }, [user, refreshCartCount]);
 
   useEffect(() => {
     if (!drawerOpen) return;

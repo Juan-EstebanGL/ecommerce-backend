@@ -1,40 +1,16 @@
 const prisma = require("../lib/prisma");
 const AppError = require("../utils/AppError");
-
-const productSelect = {
-  id: true,
-  name: true,
-  price: true,
-  stock: true,
-  imageUrl: true,
-};
+const { paginate } = require("../utils/pagination");
+const { productListItemSelect, formatProductListItem } = require("../utils/productListItem");
 
 const favoriteInclude = {
   product: {
-    select: productSelect,
+    select: productListItemSelect,
   },
 };
 
-const formatFavorite = (favorite) => {
-  if (!favorite) {
-    return favorite;
-  }
-
-  return {
-    ...favorite,
-    product: favorite.product
-      ? {
-          ...favorite.product,
-          price: Number(favorite.product.price),
-        }
-      : favorite.product,
-  };
-};
-
 const getFavorites = async (userId, { page = 1, limit = 20 } = {}) => {
-  const pageNum = Math.max(1, parseInt(page, 10) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
-  const skip = (pageNum - 1) * limitNum;
+  const { pageNum, limitNum, skip } = paginate(page, limit, 20);
 
   const [favorites, total] = await Promise.all([
     prisma.favorite.findMany({
@@ -48,7 +24,7 @@ const getFavorites = async (userId, { page = 1, limit = 20 } = {}) => {
   ]);
 
   return {
-    data: favorites.map(formatFavorite),
+    data: favorites.map(formatProductListItem),
     total,
     page: pageNum,
     totalPages: Math.ceil(total / limitNum),
@@ -79,7 +55,7 @@ const addFavorite = async (userId, productId) => {
     include: favoriteInclude,
   });
 
-  return formatFavorite(favorite);
+  return formatProductListItem(favorite);
 };
 
 const removeFavorite = async (userId, productId) => {
@@ -93,19 +69,11 @@ const removeFavorite = async (userId, productId) => {
     throw new AppError("Favorito no encontrado", 404);
   }
 
-  try {
-    await prisma.favorite.delete({
-      where: {
-        userId_productId: { userId, productId },
-      },
-    });
-  } catch (error) {
-    if (error.code === "P2025") {
-      throw new AppError("Favorito no encontrado", 404);
-    }
-
-    throw error;
-  }
+  await prisma.favorite.delete({
+    where: {
+      userId_productId: { userId, productId },
+    },
+  });
 };
 
 const getAdminFavoritesStats = async ({ page = 1, limit = 8 } = {}) => {
@@ -161,9 +129,7 @@ const getAdminFavoritesStats = async ({ page = 1, limit = 8 } = {}) => {
     ? Number((totalFavorites / allProducts.length).toFixed(2))
     : 0;
 
-  const pageNum = Math.max(1, parseInt(page, 10) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 8));
-  const skip = (pageNum - 1) * limitNum;
+  const { pageNum, limitNum, skip } = paginate(page, limit, 8);
   const products = allProducts.slice(skip, skip + limitNum);
 
   return {

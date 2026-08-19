@@ -1,12 +1,9 @@
 const favoriteService = require("../services/favorite.service");
-const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   favoriteParamsSchema,
 } = require("../validations/favorite.validation");
-const {
-  getZodErrorMessage,
-} = require("../validations/validation.helper");
+const { validate } = require("../validations/validation.helper");
 
 const getFavorites = asyncHandler(async (req, res) => {
   const { page, limit } = req.query;
@@ -15,34 +12,22 @@ const getFavorites = asyncHandler(async (req, res) => {
 }, "Error obteniendo favoritos");
 
 const addFavorite = asyncHandler(async (req, res) => {
-  const validation = favoriteParamsSchema.safeParse({
-    params: req.params,
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(favoriteParamsSchema, { params: req.params });
 
   const favorite = await favoriteService.addFavorite(
     req.userId,
-    validation.data.params.productId
+    data.params.productId
   );
 
   return res.status(201).json(favorite);
 }, "Error agregando favorito");
 
 const removeFavorite = asyncHandler(async (req, res) => {
-  const validation = favoriteParamsSchema.safeParse({
-    params: req.params,
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(favoriteParamsSchema, { params: req.params });
 
   await favoriteService.removeFavorite(
     req.userId,
-    validation.data.params.productId
+    data.params.productId
   );
 
   return res.status(204).send();

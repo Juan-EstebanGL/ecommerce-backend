@@ -1,43 +1,31 @@
 import { useEffect, useRef, useState } from "react";
+import AuthSidePanel from "../components/AuthSidePanel";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { verifyEmail } from "../api/auth";
-
-const ERROR_MESSAGES = {
-  "El token de verificación ha expirado": {
-    title: "El enlace ha expirado",
-    desc: "El enlace de verificación que recibiste ya no es válido porque ha pasado más de 24 horas.",
-  },
-  "Token de verificación inválido": {
-    title: "El enlace no es válido",
-    desc: "El enlace de verificación no es correcto o ya fue utilizado.",
-  },
-};
+import { verifyEmailErrorMessages as ERROR_MESSAGES } from "../utils/errorMessages";
 
 function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState("loading");
-  const [errorMsg, setErrorMsg] = useState(null);
+  const token = searchParams.get("token");
+  const [status, setStatus] = useState(token ? "loading" : "error");
+  const [errorMsg, setErrorMsg] = useState(
+    token
+      ? null
+      : {
+          title: "Token no encontrado",
+          desc: "El enlace de verificación no contiene un token válido.",
+        }
+  );
   const requestIdRef = useRef(0);
 
   useEffect(() => {
-    const token = searchParams.get("token");
-
-    if (!token) {
-      setStatus("error");
-      setErrorMsg({
-        title: "Token no encontrado",
-        desc: "El enlace de verificación no contiene un token válido.",
-      });
-      return;
-    }
+    if (!token) return;
 
     const currentRequest = ++requestIdRef.current;
-    console.log(`[VerifyEmail] effect fired, requestId=${currentRequest}`);
 
     verifyEmail(token)
       .then(() => {
-        console.log(`[VerifyEmail] success, requestId=${currentRequest}, current=${requestIdRef.current}`);
         if (requestIdRef.current !== currentRequest) return;
         setStatus("success");
 
@@ -45,10 +33,11 @@ function VerifyEmailPage() {
           const bc = new BroadcastChannel("auth_verification");
           bc.postMessage({ type: "email-verified" });
           bc.close();
-        } catch {}
+        } catch {
+          // BroadcastChannel no soportado: el auto-login se omite y el usuario inicia sesión manualmente
+        }
       })
       .catch((err) => {
-        console.log(`[VerifyEmail] error, requestId=${currentRequest}, current=${requestIdRef.current}`, err?.response?.data?.message);
         if (requestIdRef.current !== currentRequest) return;
         const message =
           err?.response?.data?.message ||
@@ -60,7 +49,7 @@ function VerifyEmailPage() {
         );
         setStatus("error");
       });
-  }, [searchParams]);
+  }, [searchParams, token]);
 
   useEffect(() => {
     if (status !== "success") return;
@@ -74,36 +63,8 @@ function VerifyEmailPage() {
 
   return (
     <main className="auth-page">
-      <div className="auth-left">
-        <div className="auth-left__bg">
-          <div className="auth-circle auth-circle--1" />
-          <div className="auth-circle auth-circle--2" />
-          <div className="auth-circle auth-circle--3" />
-          <div className="auth-circle auth-circle--4" />
-        </div>
-        <div className="auth-left__inner">
-          <h1 className="auth-left__title">Bienvenido a E-Shop</h1>
-          <p className="auth-left__desc">
-            Compra productos de calidad, administra tus pedidos y disfruta una experiencia moderna.
-          </p>
-          <ul className="auth-benefits">
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Compra segura</span>
-            </li>
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Envíos rápidos</span>
-            </li>
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Soporte 24/7</span>
-            </li>
-          </ul>
-          <p className="auth-left__footnote">Más de 1000 clientes satisfechos.</p>
-        </div>
-      </div>
-      <div className="auth-right">
+      <AuthSidePanel />
+<div className="auth-right">
         <div className="auth-card ve-card">
           {status === "loading" && (
             <div className="ve-state">

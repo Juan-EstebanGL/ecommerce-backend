@@ -1,5 +1,4 @@
 const productService = require("../services/product.service");
-const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   createProductSchema,
@@ -7,22 +6,14 @@ const {
   patchProductSchema,
   productParamsSchema,
 } = require("../validations/product.validation");
-const {
-  getZodErrorMessage,
-} = require("../validations/validation.helper");
+const { validate } = require("../validations/validation.helper");
 
 const createProduct = asyncHandler(async (req, res) => {
-  const validation = createProductSchema.safeParse({
-    body: req.body || {},
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(createProductSchema, { body: req.body || {} });
 
   const product = await productService.createProduct(
     req.userId,
-    validation.data.body
+    data.body
   );
 
   return res.status(201).json(product);
@@ -35,74 +26,52 @@ const getProducts = asyncHandler(async (req, res) => {
 }, "Error obteniendo productos");
 
 const getProductById = asyncHandler(async (req, res) => {
-  const validation = productParamsSchema.safeParse({
-    params: req.params,
-  });
+  const data = validate(productParamsSchema, { params: req.params });
 
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
-
-  const product = await productService.getProductById(
-    validation.data.params.id
-  );
+  const product = await productService.getProductById(data.params.id);
 
   return res.json(product);
 }, "Error obteniendo producto");
 
 const updateProduct = asyncHandler(async (req, res) => {
-  const validation = updateProductSchema.safeParse({
+  const data = validate(updateProductSchema, {
     params: req.params,
     body: req.body || {},
   });
 
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
-
   const product = await productService.updateProduct(
     req.userId,
     req.userRole,
-    validation.data.params.id,
-    validation.data.body
+    data.params.id,
+    data.body
   );
 
   return res.json(product);
 }, "Error actualizando producto");
 
 const patchProduct = asyncHandler(async (req, res) => {
-  const validation = patchProductSchema.safeParse({
+  const data = validate(patchProductSchema, {
     params: req.params,
     body: req.body || {},
   });
 
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
-
-  const product = await productService.patchProduct(
+  const product = await productService.updateProduct(
     req.userId,
     req.userRole,
-    validation.data.params.id,
-    validation.data.body
+    data.params.id,
+    data.body
   );
 
   return res.json(product);
 }, "Error actualizando producto");
 
 const deleteProduct = asyncHandler(async (req, res) => {
-  const validation = productParamsSchema.safeParse({
-    params: req.params,
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(productParamsSchema, { params: req.params });
 
   const result = await productService.deleteProduct(
     req.userId,
     req.userRole,
-    validation.data.params.id
+    data.params.id
   );
 
   return res.json(result);

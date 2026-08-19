@@ -58,6 +58,7 @@ export function ThemeProvider({ children }) {
   );
 }
 
+/* eslint-disable react-refresh/only-export-components -- Patrón estándar de React Context: el hook del consumidor y la exportación default del contexto viven en el mismo archivo que el Provider (ver https://react.dev/reference/react/createContext). Separarlos sería un refactor de otra fase. */
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {

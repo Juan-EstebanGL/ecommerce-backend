@@ -26,14 +26,14 @@ function StarPicker({ value, onChange }) {
 function ReviewModal({ isOpen, onClose, onSubmit, initialRating, initialComment, loading, title }) {
   const [rating, setRating] = useState(initialRating || 0);
   const [comment, setComment] = useState(initialComment || "");
+  const [prevOpen, setPrevOpen] = useState(isOpen);
   const overlayRef = useRef(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      setRating(initialRating || 0);
-      setComment(initialComment || "");
-    }
-  }, [isOpen, initialRating, initialComment]);
+  if (isOpen && !prevOpen) {
+    setPrevOpen(true);
+    setRating(initialRating || 0);
+    setComment(initialComment || "");
+  }
 
   useEffect(() => {
     if (!isOpen) return;

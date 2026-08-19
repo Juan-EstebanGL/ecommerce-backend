@@ -1,17 +1,23 @@
 const prisma = require("../lib/prisma");
 const AppError = require("../utils/AppError");
+const { paginate } = require("../utils/pagination");
+const { ORDER_STATUS } = require("../constants/order");
 
 const orderInclude = {
   items: true,
 };
 
-const ORDER_STATUS = {
-  PENDING: "PENDING",
-  PAID: "PAID",
-  PROCESSING: "PROCESSING",
-  SHIPPED: "SHIPPED",
-  DELIVERED: "DELIVERED",
-  CANCELLED: "CANCELLED",
+const restoreStock = async (tx, items) => {
+  for (const item of items) {
+    const updatedProduct = await tx.product.updateMany({
+      where: { id: item.productId },
+      data: { stock: { increment: item.quantity } },
+    });
+
+    if (updatedProduct.count === 0) {
+      throw new AppError("Producto no encontrado para restaurar stock", 404);
+    }
+  }
 };
 
 const formatOrder = async (order) => {
@@ -52,6 +58,49 @@ const formatOrder = async (order) => {
     total: Number(order.total),
     items,
   };
+};
+
+const formatOrders = async (orders) => {
+  const missingImageItems = orders.flatMap((order) =>
+    order.items
+      ? order.items.filter((item) => !item.imageUrl && item.productId)
+      : []
+  );
+
+  const missingProductIds = [...new Set(missingImageItems.map((i) => i.productId))];
+
+  const productMap = new Map();
+
+  if (missingProductIds.length > 0) {
+    const products = await prisma.product.findMany({
+      where: { id: { in: missingProductIds } },
+      select: { id: true, imageUrl: true },
+    });
+
+    for (const product of products) {
+      productMap.set(product.id, product.imageUrl);
+    }
+  }
+
+  return orders.map((order) => {
+    const items = order.items
+      ? order.items.map((item) => {
+          const imageUrl = item.imageUrl || productMap.get(item.productId) || null;
+
+          return {
+            ...item,
+            productPrice: Number(item.productPrice),
+            ...(imageUrl ? { imageUrl } : {}),
+          };
+        })
+      : [];
+
+    return {
+      ...order,
+      total: Number(order.total),
+      items,
+    };
+  });
 };
 
 const ORDER_STATUS_TRANSITIONS = {
@@ -164,9 +213,7 @@ const createOrder = async (userId, { addressId } = {}) => {
 };
 
 const getAllOrders = async ({ page = 1, limit = 8 } = {}) => {
-  const pageNum = Math.max(1, parseInt(page, 10) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 8));
-  const skip = (pageNum - 1) * limitNum;
+  const { pageNum, limitNum, skip } = paginate(page, limit, 8);
 
   const [orders, total, totalPending, totalDelivered, totalCancelled] = await Promise.all([
     prisma.order.findMany({
@@ -189,13 +236,13 @@ const getAllOrders = async ({ page = 1, limit = 8 } = {}) => {
       take: limitNum,
     }),
     prisma.order.count(),
-    prisma.order.count({ where: { status: "PENDING" } }),
-    prisma.order.count({ where: { status: "DELIVERED" } }),
-    prisma.order.count({ where: { status: "CANCELLED" } }),
+    prisma.order.count({ where: { status: ORDER_STATUS.PENDING } }),
+    prisma.order.count({ where: { status: ORDER_STATUS.DELIVERED } }),
+    prisma.order.count({ where: { status: ORDER_STATUS.CANCELLED } }),
   ]);
 
   return {
-    data: await Promise.all(orders.map(formatOrder)),
+    data: await formatOrders(orders),
     total,
     page: pageNum,
     totalPages: Math.ceil(total / limitNum),
@@ -218,7 +265,7 @@ const getMyOrders = async (userId) => {
     },
   });
 
-  return Promise.all(orders.map(formatOrder));
+  return formatOrders(orders);
 };
 
 const getOrderById = async (userId, orderId) => {
@@ -266,16 +313,7 @@ const updateOrderStatus = async (userId, userRole, orderId, status) => {
 
   const doUpdate = async (tx) => {
     if (status === ORDER_STATUS.CANCELLED) {
-      for (const item of order.items) {
-        const updatedProduct = await tx.product.updateMany({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        });
-
-        if (updatedProduct.count === 0) {
-          throw new AppError("Producto no encontrado para restaurar stock", 404);
-        }
-      }
+      await restoreStock(tx, order.items);
     }
 
     return tx.order.update({
@@ -313,22 +351,7 @@ const cancelOrder = async (userId, userRole, orderId) => {
       throw new AppError("Solo se pueden cancelar ordenes pendientes", 400);
     }
 
-    for (const item of order.items) {
-      const updatedProduct = await tx.product.updateMany({
-        where: {
-          id: item.productId,
-        },
-        data: {
-          stock: {
-            increment: item.quantity,
-          },
-        },
-      });
-
-      if (updatedProduct.count === 0) {
-        throw new AppError("Producto no encontrado para restaurar stock", 404);
-      }
-    }
+    await restoreStock(tx, order.items);
 
     const cancelledOrder = await tx.order.update({
       where: {

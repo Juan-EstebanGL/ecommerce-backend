@@ -2,20 +2,11 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { getAdminOrders, updateOrderStatus } from "../../api/orders";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import OrderTable from "../../components/admin/OrderTable";
-import OrderStatusBadge from "../../components/admin/OrderStatusBadge";
 import Pagination from "../../components/Pagination";
 import useDebounce from "../../hooks/useDebounce";
+import { ORDER_STATUS_LABELS as STATUS_LABELS } from "../../utils/orderLabels";
 
 const PAGE_SIZE = 8;
-
-const STATUS_LABELS = {
-  PENDING: "Pendiente",
-  PAID: "Pagado",
-  PROCESSING: "Procesando",
-  SHIPPED: "Enviado",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
-};
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -63,10 +54,6 @@ export default function AdminOrders() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [totalPages, page]);
 
   async function refreshOrders() {
     setLoading(true);

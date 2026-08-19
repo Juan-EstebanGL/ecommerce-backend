@@ -1,10 +1,5 @@
 const AppError = require("../utils/AppError");
-
-const getZodMessage = (error) => {
-  const firstIssue = error.issues && error.issues[0];
-
-  return firstIssue ? firstIssue.message : "Los datos enviados no son válidos";
-};
+const env = require("../config/env");
 
 const normalizePrismaError = (error) => {
   if (error.code === "P2025") {
@@ -34,17 +29,15 @@ const errorMiddleware = (error, req, res, next) => {
     return next(error);
   }
 
-  console.log(error);
+  if (env.NODE_ENV === "development") {
+    console.log(error);
+  } else if (!error.isOperational && !error.issues && error.name !== "MulterError") {
+    console.error("[error]", error.message || error);
+  }
 
   if (error.isOperational) {
     return res.status(error.statusCode).json({
       message: error.message,
-    });
-  }
-
-  if (error.issues) {
-    return res.status(400).json({
-      message: getZodMessage(error),
     });
   }
 

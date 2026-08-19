@@ -1,4 +1,5 @@
 const prisma = require("../lib/prisma");
+const { ORDER_STATUS } = require("../constants/order");
 
 const getSystemInfo = async () => {
   const [userCount, productCount, orderCount, reviewCount, favoriteCount] =
@@ -131,14 +132,9 @@ const getDashboard = async () => {
 
   const productMap = new Map(products.map((p) => [p.id, p]));
 
-  const statusMap = {
-    PENDING: 0,
-    PAID: 0,
-    PROCESSING: 0,
-    SHIPPED: 0,
-    DELIVERED: 0,
-    CANCELLED: 0,
-  };
+  const statusMap = Object.fromEntries(
+    ORDER_STATUS.map((status) => [status, 0])
+  );
 
   for (const entry of ordersByStatus) {
     statusMap[entry.status] = entry._count.id;

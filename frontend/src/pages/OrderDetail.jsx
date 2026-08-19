@@ -3,15 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { getOrderById } from "../api/orders";
 import Loader from "../components/Loader";
 import Button from "../components/Button";
-
-const STATUS_LABELS = {
-  PENDING: "Pendiente",
-  PAID: "Pagado",
-  PROCESSING: "Procesando",
-  SHIPPED: "Enviado",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
-};
+import { ORDER_STATUS_LABELS as STATUS_LABELS } from "../utils/orderLabels";
 
 const TIMELINE_STEPS = [
   { key: "PENDING", label: "Pedido recibido" },

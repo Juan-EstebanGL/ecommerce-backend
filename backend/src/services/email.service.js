@@ -5,6 +5,16 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 const FROM_ADDRESS = "Ecommerce <onboarding@resend.dev>";
 
+const sendSafe = async (fn) => {
+  try {
+    await fn();
+  } catch (err) {
+    if (env.NODE_ENV !== "test") {
+      console.error("[email] Error enviando correo:", err.message);
+    }
+  }
+};
+
 const buildVerificationHtml = (token) => {
   const verifyUrl = `${env.APP_URL}/verify-email?token=${token}`;
 
@@ -97,7 +107,9 @@ const sendVerificationEmail = async (email, token) => {
   });
 
   if (error) {
-    console.error("[email] Error enviando correo de verificación:", error.message);
+    if (env.NODE_ENV !== "test") {
+      console.error("[email] Error enviando correo de verificación:", error.message);
+    }
     throw error;
   }
 
@@ -200,7 +212,9 @@ const sendPasswordResetEmail = async (email, token) => {
   });
 
   if (error) {
-    console.error("[email] Error enviando correo de restablecimiento:", error.message);
+    if (env.NODE_ENV !== "test") {
+      console.error("[email] Error enviando correo de restablecimiento:", error.message);
+    }
     throw error;
   }
 
@@ -211,4 +225,4 @@ const sendPasswordResetEmail = async (email, token) => {
   return data;
 };
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail };
+module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendSafe };

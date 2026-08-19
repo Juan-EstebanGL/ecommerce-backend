@@ -93,7 +93,7 @@ const links = [
 
 export default function AdminSidebar({ open, onClose }) {
   const { user, logout } = useAuth();
-  const { theme, setTheme, isDark } = useTheme();
+  const { setTheme, isDark } = useTheme();
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
   };

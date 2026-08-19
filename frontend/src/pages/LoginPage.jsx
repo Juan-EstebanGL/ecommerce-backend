@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import AuthSidePanel from "../components/AuthSidePanel";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { showWarning } from "../utils/alerts";
+import { validateEmail } from "../utils/validators";
 import { resendVerification } from "../api/auth";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,9 +24,11 @@ function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  verifyPanelRef.current = showVerifyPanel;
-  emailRef.current = email;
-  passwordRef.current = password;
+  useEffect(() => {
+    verifyPanelRef.current = showVerifyPanel;
+    emailRef.current = email;
+    passwordRef.current = password;
+  });
 
   useEffect(() => {
     let bc;
@@ -42,7 +44,6 @@ function LoginPage() {
       if (!verifyPanelRef.current) return;
       if (!emailRef.current.trim() || !passwordRef.current) return;
 
-      console.log("[Login] BroadcastChannel: email-verified received, auto-login starting");
       autoLoggingInRef.current = true;
       setAutoLoginMessage("Correo verificado. Iniciando sesión...");
       setVerifySentMessage("");
@@ -51,11 +52,9 @@ function LoginPage() {
 
       login({ email: emailRef.current.trim(), password: passwordRef.current })
         .then(() => {
-          console.log("[Login] auto-login successful");
           navigate("/products");
         })
-        .catch((err) => {
-          console.log("[Login] auto-login failed", err?.response?.data?.message);
+        .catch(() => {
           setAutoLoginMessage("");
           setVerifyErrorMessage(
             "No se pudo iniciar sesión automáticamente. Por favor, intenta manualmente."
@@ -67,9 +66,7 @@ function LoginPage() {
         });
     };
 
-    console.log("[Login] BroadcastChannel listener attached");
     return () => {
-      console.log("[Login] BroadcastChannel closed");
       bc.close();
     };
   }, [login, navigate]);
@@ -102,7 +99,7 @@ function LoginPage() {
       showWarning("Campo requerido", "Por favor ingresa tu correo electrónico.");
       return;
     }
-    if (!EMAIL_RE.test(email.trim())) {
+    if (validateEmail(email.trim())) {
       showWarning("Email inválido", "El formato del correo electrónico no es válido.");
       return;
     }
@@ -163,36 +160,8 @@ function LoginPage() {
 
   return (
     <main className="auth-page">
-      <div className="auth-left">
-        <div className="auth-left__bg">
-          <div className="auth-circle auth-circle--1" />
-          <div className="auth-circle auth-circle--2" />
-          <div className="auth-circle auth-circle--3" />
-          <div className="auth-circle auth-circle--4" />
-        </div>
-        <div className="auth-left__inner">
-          <h1 className="auth-left__title">Bienvenido a E-Shop</h1>
-          <p className="auth-left__desc">
-            Compra productos de calidad, administra tus pedidos y disfruta una experiencia moderna.
-          </p>
-          <ul className="auth-benefits">
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Compra segura</span>
-            </li>
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Envíos rápidos</span>
-            </li>
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Soporte 24/7</span>
-            </li>
-          </ul>
-          <p className="auth-left__footnote">Más de 1000 clientes satisfechos.</p>
-        </div>
-      </div>
-      <div className="auth-right">
+      <AuthSidePanel />
+<div className="auth-right">
         <div className="auth-card">
           <h2 className="auth-card__title">Iniciar sesión</h2>
           <p className="auth-card__subtitle">Ingresa para continuar.</p>

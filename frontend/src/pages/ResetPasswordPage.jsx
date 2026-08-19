@@ -1,32 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useSearchParams, Navigate } from "react-router-dom";
+import AuthSidePanel from "../components/AuthSidePanel";
+import { Link, useSearchParams } from "react-router-dom";
 import { resetPassword } from "../api/auth";
 import { showError } from "../utils/alerts";
-
-const ERROR_MESSAGES = {
-  "El token de restablecimiento ha expirado": {
-    title: "El enlace ha expirado",
-    desc: "El enlace de restablecimiento que recibiste ya no es válido porque ha pasado más de 1 hora.",
-  },
-  "Token de restablecimiento inválido": {
-    title: "El enlace no es válido",
-    desc: "El enlace de restablecimiento no es correcto o ya fue utilizado.",
-  },
-};
-
-function getPasswordStrength(pw) {
-  if (!pw) return { level: 0, label: "", color: "" };
-  let score = 0;
-  if (pw.length >= 6) score++;
-  if (pw.length >= 8) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-
-  if (score <= 2) return { level: 1, label: "Débil", color: "#dc2626" };
-  if (score <= 3) return { level: 2, label: "Media", color: "#f59e0b" };
-  return { level: 3, label: "Fuerte", color: "#16a34a" };
-}
+import { getPasswordStrength } from "../utils/validators";
+import { resetPasswordErrorMessages as ERROR_MESSAGES } from "../utils/errorMessages";
 
 function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -55,36 +33,8 @@ function ResetPasswordPage() {
   if (!token) {
     return (
       <main className="auth-page">
-        <div className="auth-left">
-          <div className="auth-left__bg">
-            <div className="auth-circle auth-circle--1" />
-            <div className="auth-circle auth-circle--2" />
-            <div className="auth-circle auth-circle--3" />
-            <div className="auth-circle auth-circle--4" />
-          </div>
-          <div className="auth-left__inner">
-            <h1 className="auth-left__title">Bienvenido a E-Shop</h1>
-            <p className="auth-left__desc">
-              Compra productos de calidad, administra tus pedidos y disfruta una experiencia moderna.
-            </p>
-            <ul className="auth-benefits">
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Compra segura</span>
-              </li>
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Envíos rápidos</span>
-              </li>
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Soporte 24/7</span>
-              </li>
-            </ul>
-            <p className="auth-left__footnote">Más de 1000 clientes satisfechos.</p>
-          </div>
-        </div>
-        <div className="auth-right">
+        <AuthSidePanel />
+<div className="auth-right">
           <div className="auth-card ve-card">
             <div className="ve-state">
               <div className="ve-icon ve-icon--error">
@@ -116,8 +66,8 @@ function ResetPasswordPage() {
       showError("Campo requerido", "Por favor ingresa una nueva contraseña.");
       return;
     }
-    if (password.length < 6) {
-      showError("Contraseña débil", "La contraseña debe tener al menos 6 caracteres.");
+    if (password.length < 8) {
+      showError("Contraseña débil", "La contraseña debe tener al menos 8 caracteres.");
       return;
     }
     if (password !== confirmPassword) {
@@ -150,36 +100,8 @@ function ResetPasswordPage() {
   if (status === "success") {
     return (
       <main className="auth-page">
-        <div className="auth-left">
-          <div className="auth-left__bg">
-            <div className="auth-circle auth-circle--1" />
-            <div className="auth-circle auth-circle--2" />
-            <div className="auth-circle auth-circle--3" />
-            <div className="auth-circle auth-circle--4" />
-          </div>
-          <div className="auth-left__inner">
-            <h1 className="auth-left__title">Bienvenido a E-Shop</h1>
-            <p className="auth-left__desc">
-              Compra productos de calidad, administra tus pedidos y disfruta una experiencia moderna.
-            </p>
-            <ul className="auth-benefits">
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Compra segura</span>
-              </li>
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Envíos rápidos</span>
-              </li>
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Soporte 24/7</span>
-              </li>
-            </ul>
-            <p className="auth-left__footnote">Más de 1000 clientes satisfechos.</p>
-          </div>
-        </div>
-        <div className="auth-right">
+        <AuthSidePanel />
+<div className="auth-right">
           <div className="auth-card ve-card">
             <div className="ve-state">
               <div className="ve-icon ve-icon--success">
@@ -204,36 +126,8 @@ function ResetPasswordPage() {
   if (status === "error") {
     return (
       <main className="auth-page">
-        <div className="auth-left">
-          <div className="auth-left__bg">
-            <div className="auth-circle auth-circle--1" />
-            <div className="auth-circle auth-circle--2" />
-            <div className="auth-circle auth-circle--3" />
-            <div className="auth-circle auth-circle--4" />
-          </div>
-          <div className="auth-left__inner">
-            <h1 className="auth-left__title">Bienvenido a E-Shop</h1>
-            <p className="auth-left__desc">
-              Compra productos de calidad, administra tus pedidos y disfruta una experiencia moderna.
-            </p>
-            <ul className="auth-benefits">
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Compra segura</span>
-              </li>
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Envíos rápidos</span>
-              </li>
-              <li className="auth-benefits__item">
-                <span className="auth-benefits__icon">✓</span>
-                <span>Soporte 24/7</span>
-              </li>
-            </ul>
-            <p className="auth-left__footnote">Más de 1000 clientes satisfechos.</p>
-          </div>
-        </div>
-        <div className="auth-right">
+        <AuthSidePanel />
+<div className="auth-right">
           <div className="auth-card ve-card">
             <div className="ve-state">
               <div className="ve-icon ve-icon--error">
@@ -257,36 +151,8 @@ function ResetPasswordPage() {
 
   return (
     <main className="auth-page">
-      <div className="auth-left">
-        <div className="auth-left__bg">
-          <div className="auth-circle auth-circle--1" />
-          <div className="auth-circle auth-circle--2" />
-          <div className="auth-circle auth-circle--3" />
-          <div className="auth-circle auth-circle--4" />
-        </div>
-        <div className="auth-left__inner">
-          <h1 className="auth-left__title">Bienvenido a E-Shop</h1>
-          <p className="auth-left__desc">
-            Compra productos de calidad, administra tus pedidos y disfruta una experiencia moderna.
-          </p>
-          <ul className="auth-benefits">
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Compra segura</span>
-            </li>
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Envíos rápidos</span>
-            </li>
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Soporte 24/7</span>
-            </li>
-          </ul>
-          <p className="auth-left__footnote">Más de 1000 clientes satisfechos.</p>
-        </div>
-      </div>
-      <div className="auth-right">
+      <AuthSidePanel />
+<div className="auth-right">
         <div className="auth-card">
           <h2 className="auth-card__title">Restablece tu contraseña</h2>
           <p className="auth-card__subtitle">
@@ -314,7 +180,7 @@ function ResetPasswordPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                   autoComplete="new-password"
                   required
                   aria-label="Nueva contraseña"

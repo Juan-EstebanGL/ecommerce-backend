@@ -1,64 +1,46 @@
 const reviewService = require("../services/review.service");
-const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   createReviewSchema,
   updateReviewSchema,
   reviewParamsSchema,
+  reviewProductParamsSchema,
 } = require("../validations/review.validation");
-const {
-  getZodErrorMessage,
-} = require("../validations/validation.helper");
+const { validate } = require("../validations/validation.helper");
 
 const getProductReviews = asyncHandler(async (req, res) => {
-  const validation = reviewParamsSchema.safeParse({
-    params: req.params,
-  });
+  const data = validate(reviewProductParamsSchema, { params: req.params });
 
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
-
-  const reviews = await reviewService.getProductReviews(
-    validation.data.params.id
-  );
+  const reviews = await reviewService.getProductReviews(data.params.id);
 
   return res.json(reviews);
 }, "Error obteniendo reseñas");
 
 const createReview = asyncHandler(async (req, res) => {
-  const validation = createReviewSchema.safeParse({
+  const data = validate(createReviewSchema, {
     params: req.params,
     body: req.body || {},
   });
 
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
-
   const review = await reviewService.createReview(
     req.userId,
-    validation.data.params.id,
-    validation.data.body
+    data.params.id,
+    data.body
   );
 
   return res.status(201).json(review);
 }, "Error creando reseña");
 
 const updateReview = asyncHandler(async (req, res) => {
-  const validation = updateReviewSchema.safeParse({
+  const data = validate(updateReviewSchema, {
     params: req.params,
     body: req.body || {},
   });
 
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
-
   const review = await reviewService.updateReview(
     req.userId,
-    validation.data.params.id,
-    validation.data.body
+    data.params.id,
+    data.body
   );
 
   return res.json(review);
@@ -71,17 +53,11 @@ const getAllReviews = asyncHandler(async (req, res) => {
 }, "Error obteniendo reseñas");
 
 const deleteReview = asyncHandler(async (req, res) => {
-  const validation = reviewParamsSchema.safeParse({
-    params: req.params,
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(reviewParamsSchema, { params: req.params });
 
   await reviewService.deleteReview(
     req.userId,
-    validation.data.params.id,
+    data.params.id,
     req.userRole
   );
 

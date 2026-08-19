@@ -1,12 +1,11 @@
 const categoryService = require("../services/category.service");
-const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   categoryParamsSchema,
   createCategorySchema,
   updateCategorySchema,
 } = require("../validations/category.validation");
-const { getZodErrorMessage } = require("../validations/validation.helper");
+const { validate } = require("../validations/validation.helper");
 
 const getCategories = asyncHandler(async (req, res) => {
   const categories = await categoryService.getCategories();
@@ -14,52 +13,36 @@ const getCategories = asyncHandler(async (req, res) => {
 }, "Error obteniendo categorías");
 
 const getCategoryById = asyncHandler(async (req, res) => {
-  const validation = categoryParamsSchema.safeParse({ params: req.params });
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(categoryParamsSchema, { params: req.params });
 
-  const category = await categoryService.getCategoryById(
-    validation.data.params.id
-  );
+  const category = await categoryService.getCategoryById(data.params.id);
   return res.json(category);
 }, "Error obteniendo categoría");
 
 const createCategory = asyncHandler(async (req, res) => {
-  const validation = createCategorySchema.safeParse({ body: req.body || {} });
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(createCategorySchema, { body: req.body || {} });
 
-  const category = await categoryService.createCategory(validation.data.body);
+  const category = await categoryService.createCategory(data.body);
   return res.status(201).json(category);
 }, "Error creando categoría");
 
 const updateCategory = asyncHandler(async (req, res) => {
-  const validation = updateCategorySchema.safeParse({
+  const data = validate(updateCategorySchema, {
     params: req.params,
     body: req.body || {},
   });
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
 
   const category = await categoryService.updateCategory(
-    validation.data.params.id,
-    validation.data.body
+    data.params.id,
+    data.body
   );
   return res.json(category);
 }, "Error actualizando categoría");
 
 const deleteCategory = asyncHandler(async (req, res) => {
-  const validation = categoryParamsSchema.safeParse({ params: req.params });
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(categoryParamsSchema, { params: req.params });
 
-  const result = await categoryService.deleteCategory(
-    validation.data.params.id
-  );
+  const result = await categoryService.deleteCategory(data.params.id);
   return res.json(result);
 }, "Error eliminando categoría");
 

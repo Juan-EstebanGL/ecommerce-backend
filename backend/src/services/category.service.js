@@ -116,11 +116,12 @@ const updateCategory = async (id, data) => {
     throw new AppError("Ya existe otra categoría con ese nombre", 409);
   }
 
-  try {
-    if (publicId && existingCategory.publicId && existingCategory.publicId !== publicId) {
-      await cloudinaryService.deleteImage(existingCategory.publicId);
-    }
+  const previousPublicId = existingCategory.publicId;
+  const hasNewImage = Boolean(
+    publicId && previousPublicId && publicId !== previousPublicId
+  );
 
+  try {
     const category = await prisma.category.update({
       where: { id },
       data: {
@@ -130,6 +131,10 @@ const updateCategory = async (id, data) => {
       },
     });
 
+    if (hasNewImage) {
+      await cloudinaryService.deleteImage(previousPublicId).catch(() => {});
+    }
+
     return {
       id: category.id,
       name: category.name,
@@ -138,7 +143,7 @@ const updateCategory = async (id, data) => {
       publicId: category.publicId,
     };
   } catch (error) {
-    if (publicId && publicId !== existingCategory.publicId) {
+    if (publicId && publicId !== previousPublicId) {
       await cloudinaryService.deleteImage(publicId).catch(() => {});
     }
     throw error;
@@ -155,11 +160,12 @@ const deleteCategory = async (id) => {
     );
   }
 
+  await prisma.category.delete({ where: { id } });
+
   if (category.publicId) {
     await cloudinaryService.deleteImage(category.publicId).catch(() => {});
   }
 
-  await prisma.category.delete({ where: { id } });
   return { message: "Categoría eliminada" };
 };
 

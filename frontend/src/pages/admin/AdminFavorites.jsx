@@ -31,23 +31,19 @@ export default function AdminFavorites() {
     return () => { cancelled = true; };
   }, []);
 
-  const allProducts = data?.products || [];
-
   const filtered = useMemo(() => {
+    const allProducts = data?.products || [];
+
     if (!debouncedSearch.trim()) return allProducts;
     const q = debouncedSearch.toLowerCase().trim();
     return allProducts.filter(
       (p) => p.name.toLowerCase().includes(q)
     );
-  }, [allProducts, debouncedSearch]);
+  }, [data, debouncedSearch]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [totalPages, page]);
 
   function handlePageChange(newPage) {
     setPage(newPage);

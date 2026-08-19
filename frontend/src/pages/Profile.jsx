@@ -22,15 +22,16 @@ import {
   validatePhone,
   filterPhoneDigits,
 } from "../utils/validators";
+import {
+  ACCEPTED_IMAGE_TYPES as ACCEPTED,
+  MAX_IMAGE_SIZE as MAX_SIZE,
+} from "../utils/imageUpload";
 
 const ROLES = {
   admin: "Administrador",
   user: "Usuario",
   moderator: "Moderador",
 };
-
-const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-const MAX_SIZE = 5 * 1024 * 1024;
 
 const EMPTY_ADDRESS = {
   label: "",
@@ -60,7 +61,6 @@ function Profile() {
   const [originalForm, setOriginalForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
   const [profileTouched, setProfileTouched] = useState({});
   const [profileLoading, setProfileLoading] = useState(false);
-  const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
 
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
@@ -191,7 +191,7 @@ function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    if (!ACCEPTED.includes(file.type)) {
       showError("Formato no válido. Usa JPG, PNG o WebP.");
       return;
     }
@@ -253,13 +253,12 @@ function Profile() {
     setOriginalForm(form);
     setProfileTouched({});
     setEditingProfile(true);
-    setProfileSuccess(false);
     setProfileSaved(false);
   }
 
   async function handleSaveProfile(e) {
     e.preventDefault();
-    setProfileSuccess(false);
+    setProfileSaved(false);
 
     if (!isProfileDirty) {
       showWarning("Sin cambios", "No hay cambios para guardar.");
@@ -289,7 +288,6 @@ function Profile() {
       });
       updateUser(res.data);
       setOriginalForm({ ...profileForm });
-      setProfileSuccess(true);
       setProfileSaved(true);
       setEditingProfile(false);
       showSuccess("Perfil actualizado");

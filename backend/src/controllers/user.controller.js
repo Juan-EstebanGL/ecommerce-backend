@@ -1,6 +1,15 @@
 const userService = require("../services/user.service");
 const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
+const {
+  userIdParamsSchema,
+  updateUserRoleSchema,
+  updateProfileSchema,
+  changePasswordSchema,
+  createAddressSchema,
+  updateAddressSchema,
+} = require("../validations/user.validation");
+const { validate } = require("../validations/validation.helper");
 
 const getUsers = asyncHandler(async (req, res) => {
   const { page, limit } = req.query;
@@ -9,21 +18,22 @@ const getUsers = asyncHandler(async (req, res) => {
 }, "Error obteniendo usuarios");
 
 const updateUserRole = asyncHandler(async (req, res) => {
-  const targetId = parseInt(req.params.id, 10);
-  if (isNaN(targetId)) throw new AppError("ID inválido", 400);
+  const data = validate(updateUserRoleSchema, {
+    params: req.params,
+    body: req.body || {},
+  });
 
-  const { role } = req.body || {};
-  if (!role) throw new AppError("El campo role es requerido", 400);
-
-  const updated = await userService.updateUserRole(req.userId, targetId, role);
+  const updated = await userService.updateUserRole(
+    data.params.id,
+    data.body.role
+  );
   return res.json(updated);
 }, "Error actualizando rol");
 
 const deleteUser = asyncHandler(async (req, res) => {
-  const targetId = parseInt(req.params.id, 10);
-  if (isNaN(targetId)) throw new AppError("ID inválido", 400);
+  const data = validate(userIdParamsSchema, { params: req.params });
 
-  const result = await userService.deleteUser(req.userId, targetId);
+  const result = await userService.deleteUser(req.userId, data.params.id);
   return res.json(result);
 }, "Error eliminando usuario");
 
@@ -47,42 +57,24 @@ const deleteAvatar = asyncHandler(async (req, res) => {
 }, "Error eliminando avatar");
 
 const updateProfile = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email, phone } = req.body || {};
-
-  if (email !== undefined && email !== null) {
-    if (typeof email !== "string" || !email.trim()) {
-      throw new AppError("El correo electrónico no puede estar vacío", 400);
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      throw new AppError("El formato del correo electrónico no es válido", 400);
-    }
-  }
+  const data = validate(updateProfileSchema, { body: req.body || {} });
 
   const updated = await userService.updateProfile(req.userId, {
-    firstName,
-    lastName,
-    email: email ? email.trim() : email,
-    phone,
+    firstName: data.body.firstName,
+    lastName: data.body.lastName,
+    email: data.body.email ? data.body.email.toLowerCase() : data.body.email,
+    phone: data.body.phone,
   });
 
   return res.json(updated);
 }, "Error actualizando perfil");
 
 const changePassword = asyncHandler(async (req, res) => {
-  const { currentPassword, newPassword } = req.body || {};
-
-  if (!currentPassword || !newPassword) {
-    throw new AppError("Todos los campos son requeridos", 400);
-  }
-
-  if (newPassword.length < 8) {
-    throw new AppError("La nueva contraseña debe tener al menos 8 caracteres", 400);
-  }
+  const data = validate(changePasswordSchema, { body: req.body || {} });
 
   const result = await userService.changePassword(req.userId, {
-    currentPassword,
-    newPassword,
+    currentPassword: data.body.currentPassword,
+    newPassword: data.body.newPassword,
   });
 
   return res.json(result);
@@ -94,63 +86,55 @@ const getAddresses = asyncHandler(async (req, res) => {
 }, "Error obteniendo direcciones");
 
 const createAddress = asyncHandler(async (req, res) => {
-  const { label, recipient, phone, street, city, state, postalCode, instructions, isDefault } = req.body || {};
-
-  if (!label || !label.trim()) throw new AppError("El nombre de la dirección es requerido", 400);
-  if (!recipient || !recipient.trim()) throw new AppError("El destinatario es requerido", 400);
-  if (!street || !street.trim()) throw new AppError("La dirección es requerida", 400);
-  if (!city || !city.trim()) throw new AppError("La ciudad es requerida", 400);
-  if (!state || !state.trim()) throw new AppError("El departamento es requerido", 400);
+  const data = validate(createAddressSchema, { body: req.body || {} });
 
   const address = await userService.createAddress(req.userId, {
-    label: label.trim(),
-    recipient: recipient.trim(),
-    phone: phone?.trim() || null,
-    street: street.trim(),
-    city: city.trim(),
-    state: state.trim(),
-    postalCode: postalCode?.trim() || null,
-    instructions: instructions?.trim() || null,
-    isDefault: !!isDefault,
+    label: data.body.label,
+    recipient: data.body.recipient,
+    phone: data.body.phone || null,
+    street: data.body.street,
+    city: data.body.city,
+    state: data.body.state,
+    postalCode: data.body.postalCode || null,
+    instructions: data.body.instructions || null,
+    isDefault: !!data.body.isDefault,
   });
 
   return res.status(201).json(address);
 }, "Error creando dirección");
 
 const updateAddress = asyncHandler(async (req, res) => {
-  const addressId = parseInt(req.params.id, 10);
-  if (isNaN(addressId)) throw new AppError("ID inválido", 400);
+  const data = validate(updateAddressSchema, {
+    params: req.params,
+    body: req.body || {},
+  });
 
-  const { label, recipient, phone, street, city, state, postalCode, instructions, isDefault } = req.body || {};
-
-  const updated = await userService.updateAddress(req.userId, addressId, {
-    label: label?.trim(),
-    recipient: recipient?.trim(),
-    phone: phone?.trim(),
-    street: street?.trim(),
-    city: city?.trim(),
-    state: state?.trim(),
-    postalCode: postalCode?.trim(),
-    instructions: instructions?.trim(),
-    isDefault,
+  const updated = await userService.updateAddress(req.userId, data.params.id, {
+    label: data.body.label,
+    recipient: data.body.recipient,
+    phone: data.body.phone,
+    street: data.body.street,
+    city: data.body.city,
+    state: data.body.state,
+    postalCode: data.body.postalCode,
+    instructions: data.body.instructions,
+    isDefault: data.body.isDefault,
   });
 
   return res.json(updated);
 }, "Error actualizando dirección");
 
 const deleteAddress = asyncHandler(async (req, res) => {
-  const addressId = parseInt(req.params.id, 10);
-  if (isNaN(addressId)) throw new AppError("ID inválido", 400);
+  const data = validate(userIdParamsSchema, { params: req.params });
 
-  const result = await userService.deleteAddress(req.userId, addressId);
+  const result = await userService.deleteAddress(req.userId, data.params.id);
   return res.json(result);
 }, "Error eliminando dirección");
 
 const setDefaultAddress = asyncHandler(async (req, res) => {
-  const addressId = parseInt(req.params.id, 10);
-  if (isNaN(addressId)) throw new AppError("ID inválido", 400);
+  const data = validate(userIdParamsSchema, { params: req.params });
 
-  const updated = await userService.setDefaultAddress(req.userId, addressId);
+  const updated = await userService.setDefaultAddress(req.userId, data.params.id);
   return res.json(updated);
 }, "Error cambiando dirección predeterminada");
 

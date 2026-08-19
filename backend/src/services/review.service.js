@@ -1,5 +1,42 @@
 const prisma = require("../lib/prisma");
 const AppError = require("../utils/AppError");
+const { paginate } = require("../utils/pagination");
+const { assertOwnerOrAdmin } = require("../utils/ownership");
+
+const REVIEW_USER_SELECT = {
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  avatarUrl: true,
+};
+
+const reviewUserInclude = {
+  user: {
+    select: REVIEW_USER_SELECT,
+  },
+};
+
+const formatReview = (review) => {
+  if (!review) {
+    return review;
+  }
+
+  return {
+    id: review.id,
+    rating: review.rating,
+    comment: review.comment,
+    createdAt: review.createdAt,
+    updatedAt: review.updatedAt,
+    user: {
+      id: review.user.id,
+      email: review.user.email,
+      firstName: review.user.firstName,
+      lastName: review.user.lastName,
+      avatarUrl: review.user.avatarUrl,
+    },
+  };
+};
 
 const getProductReviews = async (productId) => {
   const product = await prisma.product.findUnique({
@@ -12,32 +49,11 @@ const getProductReviews = async (productId) => {
 
   const reviews = await prisma.review.findMany({
     where: { productId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-        },
-      },
-    },
+    include: reviewUserInclude,
     orderBy: { createdAt: "desc" },
   });
 
-  return reviews.map((review) => ({
-    id: review.id,
-    rating: review.rating,
-    comment: review.comment,
-    createdAt: review.createdAt,
-    updatedAt: review.updatedAt,
-    user: {
-      id: review.user.id,
-      email: review.user.email,
-      firstName: review.user.firstName,
-      lastName: review.user.lastName,
-    },
-  }));
+  return reviews.map(formatReview);
 };
 
 const createReview = async (userId, productId, data) => {
@@ -69,31 +85,10 @@ const createReview = async (userId, productId, data) => {
       userId,
       productId,
     },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-        },
-      },
-    },
+    include: reviewUserInclude,
   });
 
-  return {
-    id: review.id,
-    rating: review.rating,
-    comment: review.comment,
-    createdAt: review.createdAt,
-    updatedAt: review.updatedAt,
-    user: {
-      id: review.user.id,
-      email: review.user.email,
-      firstName: review.user.firstName,
-      lastName: review.user.lastName,
-    },
-  };
+  return formatReview(review);
 };
 
 const getReviewById = async (reviewId) => {
@@ -108,29 +103,13 @@ const getReviewById = async (reviewId) => {
   return review;
 };
 
-const ensureReviewOwner = (review, userId, userRole) => {
-  if (userRole !== "ADMIN" && review.userId !== userId) {
-    throw new AppError("No autorizado", 403);
-  }
-};
-
 const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
-  const pageNum = Math.max(1, parseInt(page, 10) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 8));
-  const skip = (pageNum - 1) * limitNum;
+  const { pageNum, limitNum, skip } = paginate(page, limit, 8);
 
   const [reviews, total, avgResult, totalFiveStar, totalOneStar] = await Promise.all([
     prisma.review.findMany({
       include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-          },
-        },
+        ...reviewUserInclude,
         product: {
           select: {
             id: true,
@@ -151,17 +130,7 @@ const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
 
   return {
     data: reviews.map((review) => ({
-      id: review.id,
-      rating: review.rating,
-      comment: review.comment,
-      createdAt: review.createdAt,
-      user: {
-        id: review.user.id,
-        email: review.user.email,
-        firstName: review.user.firstName,
-        lastName: review.user.lastName,
-        avatarUrl: review.user.avatarUrl,
-      },
+      ...formatReview(review),
       product: {
         id: review.product.id,
         name: review.product.name,
@@ -184,7 +153,7 @@ const getAllReviews = async ({ page = 1, limit = 8 } = {}) => {
 const updateReview = async (userId, reviewId, data) => {
   const review = await getReviewById(reviewId);
 
-  ensureReviewOwner(review, userId);
+  assertOwnerOrAdmin(undefined, userId, review.userId, "No autorizado");
 
   const updated = await prisma.review.update({
     where: { id: reviewId },
@@ -192,49 +161,20 @@ const updateReview = async (userId, reviewId, data) => {
       rating: data.rating,
       comment: data.comment,
     },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-        },
-      },
-    },
+    include: reviewUserInclude,
   });
 
-  return {
-    id: updated.id,
-    rating: updated.rating,
-    comment: updated.comment,
-    createdAt: updated.createdAt,
-    updatedAt: updated.updatedAt,
-    user: {
-      id: updated.user.id,
-      email: updated.user.email,
-      firstName: updated.user.firstName,
-      lastName: updated.user.lastName,
-    },
-  };
+  return formatReview(updated);
 };
 
 const deleteReview = async (userId, reviewId, userRole) => {
   const review = await getReviewById(reviewId);
 
-  ensureReviewOwner(review, userId, userRole);
+  assertOwnerOrAdmin(userRole, userId, review.userId, "No autorizado");
 
-  try {
-    await prisma.review.delete({
-      where: { id: reviewId },
-    });
-  } catch (error) {
-    if (error.code === "P2025") {
-      throw new AppError("Reseña no encontrada", 404);
-    }
-
-    throw error;
-  }
+  await prisma.review.delete({
+    where: { id: reviewId },
+  });
 };
 
 module.exports = {

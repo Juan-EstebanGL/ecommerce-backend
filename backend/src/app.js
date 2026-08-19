@@ -1,11 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const swaggerUi = require("swagger-ui-express");
 const env = require("./config/env");
 
 const authRoutes = require("./routes/auth.routes");
-const testRoutes = require("./routes/test.routes");
-const authDevRoutes = require("./routes/auth.dev.routes");
 const productRoutes = require("./routes/product.routes");
 const cartRoutes = require("./routes/cart.routes");
 const orderRoutes = require("./routes/order.routes");
@@ -16,10 +13,16 @@ const userRoutes = require("./routes/user.routes");
 const adminRoutes = require("./routes/admin.routes");
 const categoryRoutes = require("./routes/category.routes");
 const errorMiddleware = require("./middleware/error.middleware");
-const swaggerSpec = require("./config/swagger");
+
+let swaggerUi = null;
+let swaggerSpec = null;
+
+if (env.NODE_ENV === "development") {
+  swaggerUi = require("swagger-ui-express");
+  swaggerSpec = require("./config/swagger");
+}
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 const localOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
@@ -33,7 +36,7 @@ const allowedOrigins = env.FRONTEND_URL
 console.log("[app] Iniciando servidor Express...");
 console.log(
   "[app] Rutas registradas: /auth, /products, /cart, /orders, /favorites, /upload" +
-    (env.NODE_ENV === "development" ? ", /test, /auth/dev" : "")
+    (env.NODE_ENV === "development" ? ", /test, /auth/dev, /api-docs" : "")
 );
 
 app.use(
@@ -49,15 +52,20 @@ app.use(
 );
 app.use(express.json());
 
-// Log temporal para depurar que rutas entran al backend
-app.use((req, res, next) => {
-  console.log(`[app] ${req.method} ${req.originalUrl}`);
-  next();
-});
+if (env.NODE_ENV === "development") {
+  // Log de depuración solo en desarrollo
+  app.use((req, res, next) => {
+    console.log(`[app] ${req.method} ${req.originalUrl}`);
+    next();
+  });
+}
 
 app.use("/auth", authRoutes);
 
 if (env.NODE_ENV === "development") {
+  const testRoutes = require("./routes/test.routes");
+  const authDevRoutes = require("./routes/auth.dev.routes");
+
   console.log("[auth.dev] Dev auth routes loaded → POST /auth/dev/*");
   app.use("/test", testRoutes);
   app.use("/auth/dev", authDevRoutes);
@@ -72,7 +80,10 @@ app.use("/upload", uploadRoutes);
 app.use("/users", userRoutes);
 app.use("/admin", adminRoutes);
 app.use("/categories", categoryRoutes);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+if (swaggerUi && swaggerSpec) {
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
 
 app.get("/", (req, res) => {
   res.send("API funcionando 🚀");

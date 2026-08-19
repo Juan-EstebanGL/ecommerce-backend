@@ -1,34 +1,11 @@
 const prisma = require("../lib/prisma");
 const AppError = require("../utils/AppError");
-
-const productSelect = {
-  id: true,
-  name: true,
-  price: true,
-  stock: true,
-  imageUrl: true,
-};
+const { productListItemSelect, formatProductListItem } = require("../utils/productListItem");
 
 const cartItemInclude = {
   product: {
-    select: productSelect,
+    select: productListItemSelect,
   },
-};
-
-const formatCartItem = (cartItem) => {
-  if (!cartItem) {
-    return cartItem;
-  }
-
-  return {
-    ...cartItem,
-    product: cartItem.product
-      ? {
-          ...cartItem.product,
-          price: Number(cartItem.product.price),
-        }
-      : cartItem.product,
-  };
 };
 
 const addToCart = async (userId, payload) => {
@@ -86,7 +63,7 @@ const addToCart = async (userId, payload) => {
       });
 
   return {
-    cartItem: formatCartItem(cartItem),
+    cartItem: formatProductListItem(cartItem),
     statusCode: existingCartItem ? 200 : 201,
   };
 };
@@ -102,7 +79,7 @@ const getCart = async (userId) => {
     },
   });
 
-  return items.map(formatCartItem);
+  return items.map(formatProductListItem);
 };
 
 const updateCartItem = async (userId, cartItemId, payload) => {
@@ -128,25 +105,17 @@ const updateCartItem = async (userId, cartItemId, payload) => {
     throw new AppError("Stock insuficiente", 400);
   }
 
-  try {
-    const updatedCartItem = await prisma.cartItem.update({
-      where: {
-        id,
-      },
-      data: {
-        quantity,
-      },
-      include: cartItemInclude,
-    });
+  const updatedCartItem = await prisma.cartItem.update({
+    where: {
+      id,
+    },
+    data: {
+      quantity,
+    },
+    include: cartItemInclude,
+  });
 
-    return formatCartItem(updatedCartItem);
-  } catch (error) {
-    if (error.code === "P2025") {
-      throw new AppError("Item del carrito no encontrado", 404);
-    }
-
-    throw error;
-  }
+  return formatProductListItem(updatedCartItem);
 };
 
 const deleteCartItem = async (userId, cartItemId) => {
@@ -166,19 +135,11 @@ const deleteCartItem = async (userId, cartItemId) => {
     throw new AppError("No autorizado", 403);
   }
 
-  try {
-    await prisma.cartItem.delete({
-      where: {
-        id,
-      },
-    });
-  } catch (error) {
-    if (error.code === "P2025") {
-      throw new AppError("Item del carrito no encontrado", 404);
-    }
-
-    throw error;
-  }
+  await prisma.cartItem.delete({
+    where: {
+      id,
+    },
+  });
 
   return {
     message: "Item eliminado del carrito",

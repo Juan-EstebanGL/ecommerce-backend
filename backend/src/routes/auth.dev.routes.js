@@ -3,8 +3,8 @@ const router = express.Router();
 const prisma = require("../lib/prisma");
 const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/AppError");
-const { generateToken, hashToken, getExpiryDate } = require("../services/token.service");
-const { sendVerificationEmail, sendPasswordResetEmail } = require("../services/email.service");
+const { generateVerificationData } = require("../services/auth.service");
+const { sendPasswordResetEmail, sendSafe } = require("../services/email.service");
 const { resetVerification } = require("../controllers/auth.controller");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,14 +14,6 @@ async function findUserByEmail(email) {
     where: { email },
     select: { id: true, email: true },
   });
-}
-
-async function sendSafe(fn) {
-  try {
-    await fn();
-  } catch (err) {
-    console.error("[dev-tools] Error enviando correo:", err.message);
-  }
 }
 
 // POST /auth/dev/unverify-email → reutiliza resetVerification del controlador
@@ -42,9 +34,7 @@ router.post(
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    const rawToken = generateToken();
-    const hashedToken = hashToken(rawToken);
-    const tokenExpires = getExpiryDate(1);
+    const { rawToken, hashedToken, tokenExpires } = generateVerificationData(1);
 
     await prisma.user.update({
       where: { id: user.id },

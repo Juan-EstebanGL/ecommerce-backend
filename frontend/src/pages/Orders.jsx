@@ -2,15 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getOrders } from "../api/orders";
 import Loader from "../components/Loader";
-
-const STATUS_LABELS = {
-  PENDING: "Pendiente",
-  PAID: "Pagado",
-  PROCESSING: "Procesando",
-  SHIPPED: "Enviado",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
-};
+import { ORDER_STATUS_LABELS as STATUS_LABELS } from "../utils/orderLabels";
 
 function Orders() {
   const [orders, setOrders] = useState([]);

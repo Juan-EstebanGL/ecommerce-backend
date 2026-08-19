@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { showWarning } from "../utils/alerts";
 
 function QuantityInput({ value, min = 1, max: maxProp, onChange, disabled = false }) {
   const max = maxProp ?? Infinity;
   const [localValue, setLocalValue] = useState(() => String(value));
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setLocalValue(String(value));
+  }
 
   const maxLength = max === Infinity ? undefined : String(max).length;
-
-  useEffect(() => {
-    setLocalValue(String(value));
-  }, [value]);
 
   const parsedLocal = parseInt(localValue, 10);
   const showHint = localValue !== "" && /^\d+$/.test(localValue) && parsedLocal > max;

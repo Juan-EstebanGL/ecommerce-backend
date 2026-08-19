@@ -4,6 +4,7 @@ const authSchema = z.object({
   email: z
     .string({ error: "El correo electrónico es obligatorio" })
     .trim()
+    .toLowerCase()
     .email("Ingrese un correo electrónico válido"),
   password: z
     .string({ error: "La contraseña es obligatoria" })
@@ -46,6 +47,7 @@ const emailOnlySchema = z.object({
   email: z
     .string({ error: "El correo electrónico es obligatorio" })
     .trim()
+    .toLowerCase()
     .email("Ingrese un correo electrónico válido"),
 });
 
@@ -59,6 +61,7 @@ const forgotPasswordSchema = z.object({
   email: z
     .string({ error: "El correo electrónico es obligatorio" })
     .trim()
+    .toLowerCase()
     .email("Ingrese un correo electrónico válido"),
 });
 
@@ -68,7 +71,7 @@ const resetPasswordSchema = z.object({
     .min(1, "El token no puede estar vacío"),
   password: z
     .string({ error: "La contraseña es obligatoria" })
-    .min(6, "La contraseña debe tener al menos 6 caracteres"),
+    .min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 const loginSchema = authSchema;

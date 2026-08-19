@@ -1,13 +1,11 @@
 const orderService = require("../services/order.service");
-const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   orderIdParamsSchema,
+  createOrderSchema,
   updateOrderStatusSchema,
 } = require("../validations/order.validation");
-const {
-  getZodErrorMessage,
-} = require("../validations/validation.helper");
+const { validate } = require("../validations/validation.helper");
 
 const getAllOrders = asyncHandler(async (req, res) => {
   const { page, limit } = req.query;
@@ -22,10 +20,10 @@ const getAllOrders = asyncHandler(async (req, res) => {
 }, "Error obteniendo todas las ordenes");
 
 const createOrder = asyncHandler(async (req, res) => {
-  const { addressId } = req.body || {};
+  const data = validate(createOrderSchema, { body: req.body || {} });
 
   const order = await orderService.createOrder(req.userId, {
-    addressId: addressId || null,
+    addressId: data.body.addressId || null,
   });
 
   return res.status(201).json({
@@ -43,17 +41,11 @@ const getMyOrders = asyncHandler(async (req, res) => {
 }, "Error obteniendo ordenes");
 
 const getOrderById = asyncHandler(async (req, res) => {
-  const validation = orderIdParamsSchema.safeParse({
-    params: req.params,
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(orderIdParamsSchema, { params: req.params });
 
   const order = await orderService.getOrderById(
     req.userId,
-    validation.data.params.id
+    data.params.id
   );
 
   return res.json({
@@ -62,20 +54,16 @@ const getOrderById = asyncHandler(async (req, res) => {
 }, "Error obteniendo orden");
 
 const updateOrderStatus = asyncHandler(async (req, res) => {
-  const validation = updateOrderStatusSchema.safeParse({
+  const data = validate(updateOrderStatusSchema, {
     params: req.params,
     body: req.body || {},
   });
 
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
-
   const order = await orderService.updateOrderStatus(
     req.userId,
     req.userRole,
-    validation.data.params.id,
-    validation.data.body.status
+    data.params.id,
+    data.body.status
   );
 
   return res.json({
@@ -85,18 +73,12 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 }, "Error actualizando estado de orden");
 
 const cancelOrder = asyncHandler(async (req, res) => {
-  const validation = orderIdParamsSchema.safeParse({
-    params: req.params,
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(orderIdParamsSchema, { params: req.params });
 
   const order = await orderService.cancelOrder(
     req.userId,
     req.userRole,
-    validation.data.params.id
+    data.params.id
   );
 
   return res.json({

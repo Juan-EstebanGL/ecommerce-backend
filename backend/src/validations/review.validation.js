@@ -1,16 +1,10 @@
 const { z } = require("zod");
+const { positiveInteger } = require("./common");
 
 const numberFromInput = (value) => {
   if (value === null) return NaN;
   if (typeof value === "string" && value.trim() === "") return NaN;
   return Number(value);
-};
-
-const positiveInteger = (message) => {
-  return z.preprocess(
-    numberFromInput,
-    z.number({ error: message }).int(message).positive(message)
-  );
 };
 
 const reviewRating = z.preprocess(
@@ -38,6 +32,12 @@ const reviewParamsSchema = z.object({
   }),
 });
 
+const reviewProductParamsSchema = z.object({
+  params: z.object({
+    id: positiveInteger("El ID del producto no es válido"),
+  }),
+});
+
 const createReviewSchema = z.object({
   params: z.object({
     id: positiveInteger("El ID del producto no es válido"),
@@ -56,4 +56,5 @@ module.exports = {
   createReviewSchema,
   updateReviewSchema,
   reviewParamsSchema,
+  reviewProductParamsSchema,
 };

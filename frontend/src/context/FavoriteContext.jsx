@@ -34,8 +34,34 @@ export function FavoriteProvider({ children }) {
   }, [user]);
 
   useEffect(() => {
-    refreshFavorites();
-  }, [refreshFavorites]);
+    let active = true;
+    (async () => {
+      if (!user) {
+        setFavorites([]);
+        setFavoriteIds(new Set());
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const response = await getFavorites({ limit: 9999 });
+        if (!active) return;
+        const data = response.data?.data || [];
+        setFavorites(data);
+        setFavoriteIds(new Set(data.map((f) => f.productId)));
+      } catch {
+        if (!active) return;
+        setFavorites([]);
+        setFavoriteIds(new Set());
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
   const isFavorite = useCallback((productId) => {
     return favoriteIds.has(productId);
@@ -104,6 +130,7 @@ export function FavoriteProvider({ children }) {
   );
 }
 
+/* eslint-disable react-refresh/only-export-components -- Patrón estándar de React Context: el hook del consumidor vive en el mismo archivo que el Provider (ver https://react.dev/reference/react/createContext). Separar el hook a src/hooks/ sería un refactor de otra fase. */
 export function useFavoriteContext() {
   const context = useContext(FavoriteContext);
 

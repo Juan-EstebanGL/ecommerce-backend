@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const AppError = require("../utils/AppError");
+const env = require("../config/env");
 
 const authMiddleware = (req, res, next) => {
   try {
@@ -14,10 +15,7 @@ const authMiddleware = (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     // verificar token
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, env.JWT_SECRET);
 
     // guardar userId en request
     req.userId = decoded.userId;

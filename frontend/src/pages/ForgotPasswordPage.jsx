@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import AuthSidePanel from "../components/AuthSidePanel";
 import { Link } from "react-router-dom";
 import { forgotPassword } from "../api/auth";
 import { showError } from "../utils/alerts";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { validateEmail } from "../utils/validators";
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -25,7 +25,7 @@ function ForgotPasswordPage() {
       showError("Por favor ingresa tu correo electrónico.");
       return;
     }
-    if (!EMAIL_RE.test(email.trim())) {
+    if (validateEmail(email.trim())) {
       showError("El formato del correo electrónico no es válido.");
       return;
     }
@@ -50,36 +50,8 @@ function ForgotPasswordPage() {
 
   return (
     <main className="auth-page">
-      <div className="auth-left">
-        <div className="auth-left__bg">
-          <div className="auth-circle auth-circle--1" />
-          <div className="auth-circle auth-circle--2" />
-          <div className="auth-circle auth-circle--3" />
-          <div className="auth-circle auth-circle--4" />
-        </div>
-        <div className="auth-left__inner">
-          <h1 className="auth-left__title">Bienvenido a E-Shop</h1>
-          <p className="auth-left__desc">
-            Compra productos de calidad, administra tus pedidos y disfruta una experiencia moderna.
-          </p>
-          <ul className="auth-benefits">
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Compra segura</span>
-            </li>
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Envíos rápidos</span>
-            </li>
-            <li className="auth-benefits__item">
-              <span className="auth-benefits__icon">✓</span>
-              <span>Soporte 24/7</span>
-            </li>
-          </ul>
-          <p className="auth-left__footnote">Más de 1000 clientes satisfechos.</p>
-        </div>
-      </div>
-      <div className="auth-right">
+      <AuthSidePanel />
+<div className="auth-right">
         <div className="auth-card fp-card">
           <div className="fp-icon">
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

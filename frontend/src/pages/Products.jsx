@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProducts } from "../api/products";
 import { getCategories } from "../api/categories";
@@ -29,7 +29,6 @@ function SkeletonCard() {
 function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,31 +40,7 @@ function Products() {
   const gridRef = useRef(null);
   const { refreshCartCount } = useCartContext();
 
-  useEffect(() => {
-    async function loadProducts() {
-      setLoading(true);
-      setError("");
-
-      try {
-        const [prodRes, catRes] = await Promise.all([
-          getProducts({ limit: 100 }),
-          getCategories().catch(() => ({ data: [] })),
-        ]);
-        const data = prodRes.data?.data || prodRes.data || [];
-        setProducts(data);
-        setFilteredProducts(data);
-        setCategories(catRes.data || []);
-      } catch (err) {
-        setError(err?.response?.data?.message || err?.message || "Error al cargar productos");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadProducts();
-  }, []);
-
-  useEffect(() => {
+  const filteredProducts = useMemo(() => {
     let filtered = products;
 
     if (searchQuery.trim()) {
@@ -84,9 +59,38 @@ function Products() {
       );
     }
 
-    setFilteredProducts(filtered);
-    setPage(1);
+    return filtered;
   }, [searchQuery, showOnlyAvailable, selectedCategory, products]);
+
+  const filterKey = `${searchQuery}|${showOnlyAvailable}|${selectedCategory}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
+  useEffect(() => {
+    async function loadProducts() {
+      setLoading(true);
+      setError("");
+
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          getProducts({ limit: 100 }),
+          getCategories().catch(() => ({ data: [] })),
+        ]);
+        const data = prodRes.data?.data || prodRes.data || [];
+        setProducts(data);
+        setCategories(catRes.data || []);
+      } catch (err) {
+        setError(err?.response?.data?.message || err?.message || "Error al cargar productos");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProducts();
+  }, []);
 
   function handleCategoryChange(catId) {
     setSelectedCategory(catId);

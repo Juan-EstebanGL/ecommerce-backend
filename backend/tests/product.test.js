@@ -1,12 +1,16 @@
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env.test") });
 
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const request = require("supertest");
 const app = require("../src/app");
 const prisma = require("../src/lib/prisma");
-const { assertSafeTestDatabase } = require("./testSafety");
+const {
+  clearDatabase,
+  registerUser,
+  loginUser,
+  createAdminUser,
+  createProduct,
+} = require("./helpers");
 
 const userCredentials = {
   email: "product-user@example.com",
@@ -16,55 +20,6 @@ const userCredentials = {
 const adminCredentials = {
   email: "product-admin@example.com",
   password: "password123",
-};
-
-const clearDatabase = async () => {
-  assertSafeTestDatabase();
-
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.cartItem.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.user.deleteMany();
-};
-
-const registerUser = async (email, password) => {
-  return request(app)
-    .post("/auth/register")
-    .send({ email, password });
-};
-
-const loginUser = async (email, password) => {
-  const response = await request(app)
-    .post("/auth/login")
-    .send({ email, password });
-
-  return response.body.token;
-};
-
-const createAdminUser = async (email, password) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      role: "ADMIN",
-    },
-  });
-
-  return jwt.sign(
-    { userId: user.id, role: "ADMIN" },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-};
-
-const createProduct = (token, productData) => {
-  return request(app)
-    .post("/products")
-    .set("Authorization", `Bearer ${token}`)
-    .send(productData);
 };
 
 describe("Products integration tests", () => {
@@ -93,9 +48,9 @@ describe("Products integration tests", () => {
 
     const response = await request(app).get("/products").expect(200);
 
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0]).toMatchObject({
+    expect(Array.isArray(response.body.data)).toBe(true);
+    expect(response.body.data.length).toBe(1);
+    expect(response.body.data[0]).toMatchObject({
       name: newProduct.name,
       price: newProduct.price,
       stock: newProduct.stock,
@@ -141,7 +96,7 @@ describe("Products integration tests", () => {
     const response = await request(app).get("/products/abc").expect(400);
 
     expect(response.body).toEqual({
-      message: "id debe ser un entero positivo",
+      message: "El ID del producto no es válido",
     });
   });
 

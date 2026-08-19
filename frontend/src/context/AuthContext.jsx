@@ -49,6 +49,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+/* eslint-disable react-refresh/only-export-components -- Patrón estándar de React Context: el hook del consumidor vive en el mismo archivo que el Provider (ver https://react.dev/reference/react/createContext). Separar el hook a src/hooks/ sería un refactor de otra fase. */
 export function useAuthContext() {
   const context = useContext(AuthContext);
   if (!context) {

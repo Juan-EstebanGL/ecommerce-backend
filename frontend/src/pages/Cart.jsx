@@ -35,22 +35,26 @@ function Cart() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadCart();
+    let active = true;
+    (async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await getCart();
+        if (!active) return;
+        setItems(response.data?.items || []);
+      } catch (err) {
+        if (!active) return;
+        setError(err?.response?.data?.message || err?.message || "Error al cargar el carrito");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, []);
-
-  async function loadCart() {
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await getCart();
-      setItems(response.data?.items || []);
-    } catch (err) {
-      setError(err?.response?.data?.message || err?.message || "Error al cargar el carrito");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleQtyChange(itemId, newQty) {
     const item = items.find((i) => i.id === itemId);
@@ -89,7 +93,7 @@ function Cart() {
       setItems((current) => current.filter((item) => item.id !== itemId));
       refreshCartCount();
       showSuccess("Producto eliminado del carrito");
-    } catch (err) {
+    } catch {
       showError("No fue posible eliminar el producto.");
     } finally {
       setActionId(null);
@@ -114,7 +118,7 @@ function Cart() {
       setItems([]);
       refreshCartCount();
       showSuccess("Carrito vaciado");
-    } catch (err) {
+    } catch {
       showError("No fue posible vaciar el carrito. Intenta de nuevo.");
       const cartResponse = await getCart();
       setItems(cartResponse.data?.items || []);

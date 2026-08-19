@@ -1,27 +1,18 @@
 const cartService = require("../services/cart.service");
-const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   addToCartSchema,
   updateCartItemSchema,
   cartItemParamsSchema,
 } = require("../validations/cart.validation");
-const {
-  getZodErrorMessage,
-} = require("../validations/validation.helper");
+const { validate } = require("../validations/validation.helper");
 
 const addToCart = asyncHandler(async (req, res) => {
-  const validation = addToCartSchema.safeParse({
-    body: req.body || {},
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(addToCartSchema, { body: req.body || {} });
 
   const { cartItem, statusCode } = await cartService.addToCart(
     req.userId,
-    validation.data.body
+    data.body
   );
 
   return res.status(statusCode).json(cartItem);
@@ -36,36 +27,26 @@ const getCart = asyncHandler(async (req, res) => {
 }, "Error obteniendo carrito");
 
 const updateCartItem = asyncHandler(async (req, res) => {
-  const validation = updateCartItemSchema.safeParse({
+  const data = validate(updateCartItemSchema, {
     params: req.params,
     body: req.body || {},
   });
 
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
-
   const updatedCartItem = await cartService.updateCartItem(
     req.userId,
-    validation.data.params.id,
-    validation.data.body
+    data.params.id,
+    data.body
   );
 
   return res.json(updatedCartItem);
 }, "Error actualizando item del carrito");
 
 const deleteCartItem = asyncHandler(async (req, res) => {
-  const validation = cartItemParamsSchema.safeParse({
-    params: req.params,
-  });
-
-  if (!validation.success) {
-    throw new AppError(getZodErrorMessage(validation.error), 400);
-  }
+  const data = validate(cartItemParamsSchema, { params: req.params });
 
   const result = await cartService.deleteCartItem(
     req.userId,
-    validation.data.params.id
+    data.params.id
   );
 
   return res.json(result);

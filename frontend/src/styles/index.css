@@ -23,13 +23,7 @@
 @import './components/badges.css';
 @import './components/modals.css';
 @import './components/pagination.css';
-@import './components/alerts.css';
-@import './components/dashboard.css';
 @import './components/dropdowns.css';
-@import './components/sidebar.css';
-@import './components/tags.css';
-@import './components/toast.css';
-@import './components/skeleton.css';
 @import './components/loading.css';
 @import './components/empty-state.css';
 @import './components/swal.css';

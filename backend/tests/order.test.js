@@ -1,12 +1,18 @@
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env.test") });
 
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const request = require("supertest");
 const app = require("../src/app");
 const prisma = require("../src/lib/prisma");
-const { assertSafeTestDatabase } = require("./testSafety");
+const {
+  clearDatabase,
+  registerUser,
+  loginUser,
+  createAdminUser,
+  createProduct,
+  addProductToCart,
+} = require("./helpers");
 
 const userCredentials = {
   email: "order-user@example.com",
@@ -16,62 +22,6 @@ const userCredentials = {
 const adminCredentials = {
   email: "order-admin@example.com",
   password: "password123",
-};
-
-const clearDatabase = async () => {
-  assertSafeTestDatabase();
-
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.cartItem.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.user.deleteMany();
-};
-
-const registerUser = async (email, password) => {
-  return request(app)
-    .post("/auth/register")
-    .send({ email, password });
-};
-
-const loginUser = async (email, password) => {
-  const response = await request(app)
-    .post("/auth/login")
-    .send({ email, password });
-
-  return response.body.token;
-};
-
-const createAdminUser = async (email, password) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      role: "ADMIN",
-    },
-  });
-
-  return jwt.sign(
-    { userId: user.id, role: "ADMIN" },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-};
-
-const createProduct = (token, productData) => {
-  return request(app)
-    .post("/products")
-    .set("Authorization", `Bearer ${token}`)
-    .send(productData);
-};
-
-const addProductToCart = (token, productId, quantity) => {
-  return request(app)
-    .post("/cart/add")
-    .set("Authorization", `Bearer ${token}`)
-    .send({ productId, quantity });
 };
 
 describe("Orders integration tests", () => {
@@ -631,7 +581,7 @@ describe("Orders integration tests", () => {
     });
   });
 
-  test("Admin no puede cancelar una orden por PATCH /status", async () => {
+  test("Admin puede cancelar una orden por PATCH /status restaurando stock", async () => {
     await registerUser(userCredentials.email, userCredentials.password);
     const userToken = await loginUser(
       userCredentials.email,
@@ -664,26 +614,30 @@ describe("Orders integration tests", () => {
       .patch(`/orders/${orderId}/status`)
       .set("Authorization", `Bearer ${adminToken}`)
       .send({ status: "CANCELLED" })
-      .expect(400);
+      .expect(200);
 
-    expect(response.body).toEqual({
-      message: "status invalido",
+    expect(response.body).toMatchObject({
+      message: "Estado de orden actualizado",
+      order: {
+        id: orderId,
+        status: "CANCELLED",
+      },
     });
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
     });
 
-    expect(order.status).toBe("PENDING");
+    expect(order.status).toBe("CANCELLED");
 
     const product = await prisma.product.findUnique({
       where: { id: productId },
     });
 
-    expect(product.stock).toBe(4);
+    expect(product.stock).toBe(6);
   });
 
-  test("Cancelacion por PATCH /cancel restaura stock y /status no lo hace", async () => {
+  test("Cancelacion por /status restaura stock y /cancel no permite cancelar dos veces", async () => {
     await registerUser(userCredentials.email, userCredentials.password);
     const userToken = await loginUser(
       userCredentials.email,
@@ -718,29 +672,30 @@ describe("Orders integration tests", () => {
 
     expect(productAfterCheckout.stock).toBe(5);
 
-    await request(app)
+    const statusCancelResponse = await request(app)
       .patch(`/orders/${orderId}/status`)
       .set("Authorization", `Bearer ${adminToken}`)
       .send({ status: "CANCELLED" })
-      .expect(400);
+      .expect(200);
 
-    const productAfterFailedStatusCancel = await prisma.product.findUnique({
+    expect(statusCancelResponse.body.order).toMatchObject({
+      id: orderId,
+      status: "CANCELLED",
+    });
+
+    const productAfterStatusCancel = await prisma.product.findUnique({
       where: { id: productId },
     });
 
-    expect(productAfterFailedStatusCancel.stock).toBe(5);
+    expect(productAfterStatusCancel.stock).toBe(8);
 
     const cancelResponse = await request(app)
       .patch(`/orders/${orderId}/cancel`)
       .set("Authorization", `Bearer ${userToken}`)
-      .expect(200);
+      .expect(400);
 
-    expect(cancelResponse.body).toMatchObject({
-      message: "Orden cancelada correctamente",
-      order: {
-        id: orderId,
-        status: "CANCELLED",
-      },
+    expect(cancelResponse.body).toEqual({
+      message: "Solo se pueden cancelar ordenes pendientes",
     });
 
     const productAfterCancel = await prisma.product.findUnique({

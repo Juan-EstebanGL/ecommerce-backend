@@ -8,8 +8,18 @@ const prisma = require("../src/lib/prisma");
 const { assertSafeTestDatabase } = require("./testSafety");
 
 const testUser = {
+  firstName: "Test",
+  lastName: "User",
   email: "user@example.com",
+  phone: "3001234567",
   password: "password123",
+};
+
+const verifyUser = async (email) => {
+  await prisma.user.update({
+    where: { email },
+    data: { emailVerified: true },
+  });
 };
 
 const clearDatabase = async () => {
@@ -69,6 +79,7 @@ describe("Auth integration tests", () => {
 
   test("POST /auth/login debe devolver un JWT válido", async () => {
     await request(app).post("/auth/register").send(testUser).expect(201);
+    await verifyUser(testUser.email);
 
     const response = await request(app)
       .post("/auth/login")
@@ -76,7 +87,7 @@ describe("Auth integration tests", () => {
       .expect(200);
 
     expect(response.body).toHaveProperty("token");
-    expect(response.body.user).toEqual({
+    expect(response.body.user).toMatchObject({
       id: expect.any(Number),
       email: testUser.email,
       role: "USER",
@@ -90,6 +101,7 @@ describe("Auth integration tests", () => {
 
   test("POST /auth/login debe fallar con password incorrecta", async () => {
     await request(app).post("/auth/register").send(testUser).expect(201);
+    await verifyUser(testUser.email);
 
     const response = await request(app)
       .post("/auth/login")

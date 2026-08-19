@@ -54,10 +54,6 @@ export default function AdminUsers() {
   const safePage = Math.min(page, totalPages);
   const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [totalPages, page]);
-
   async function refreshUsers() {
     setLoading(true);
     setError("");

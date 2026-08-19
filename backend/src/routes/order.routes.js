@@ -115,7 +115,7 @@ router.get("/", authMiddleware, getMyOrders);
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [PENDING, PAID, CANCELLED]
+ *                 enum: [PENDING, PAID, PROCESSING, SHIPPED, DELIVERED, CANCELLED]
  *           example:
  *             status: PAID
  *     responses:

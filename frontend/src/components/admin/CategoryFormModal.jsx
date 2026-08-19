@@ -2,9 +2,10 @@ import { useRef, useState } from "react";
 import { uploadImage } from "../../api/upload";
 import { createCategory, updateCategory } from "../../api/categories";
 import { showError, showSuccess } from "../../utils/alerts";
-
-const ACCEPTED = "image/jpeg,image/jpg,image/png,image/webp";
-const MAX_SIZE = 5 * 1024 * 1024;
+import {
+  ACCEPTED_IMAGE_TYPES as ACCEPTED,
+  MAX_IMAGE_SIZE as MAX_SIZE,
+} from "../../utils/imageUpload";
 
 const initialForm = { name: "", description: "" };
 

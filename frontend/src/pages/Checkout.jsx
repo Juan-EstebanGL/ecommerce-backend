@@ -15,6 +15,9 @@ import { useCartContext } from "../context/CartContext";
 
 const EXPRESS_SHIPPING_COST = 5000;
 
+const formatPrice = (price) =>
+  Number(price).toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
 const DELIVERY_OPTIONS = [
   {
     id: "standard",
@@ -36,7 +39,7 @@ const DELIVERY_OPTIONS = [
     label: "Envío express",
     desc: "Entrega en 24 horas",
     price: EXPRESS_SHIPPING_COST,
-    priceLabel: "$5.000",
+    priceLabel: `$${formatPrice(EXPRESS_SHIPPING_COST)}`,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
@@ -107,9 +110,6 @@ const EMPTY_ADDRESS = {
   instructions: "",
   isDefault: false,
 };
-
-const formatPrice = (price) =>
-  Number(price).toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
 function Checkout() {
   const [items, setItems] = useState([]);
@@ -559,7 +559,7 @@ function Checkout() {
                   {deliveryMethod === "standard" && (
                     <div className="co-summary__row co-summary__row--savings">
                       <span>Ahorro en envío</span>
-                      <span className="co-summary__savings">$5.000</span>
+                      <span className="co-summary__savings">${formatPrice(EXPRESS_SHIPPING_COST)}</span>
                     </div>
                   )}
                 </div>

@@ -26,5 +26,4 @@ module.exports = {
   hashToken,
   getExpiryDate,
   isTokenExpired,
-  DEFAULT_EXPIRY_HOURS,
 };

@@ -11,6 +11,12 @@ const {
   forgotPassword,
   resetPassword,
 } = require("../controllers/auth.controller");
+const {
+  loginLimiter,
+  registerLimiter,
+  emailLimiter,
+  passwordResetLimiter,
+} = require("../middleware/rateLimit.middleware");
 
 /**
  * @swagger
@@ -62,7 +68,7 @@ const {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/register", register);
+router.post("/register", registerLimiter, register);
 
 /**
  * @swagger
@@ -111,7 +117,7 @@ router.post("/register", register);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/login", login);
+router.post("/login", loginLimiter, login);
 
 /**
  * @swagger
@@ -148,7 +154,7 @@ router.post("/login", login);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/resend-verification", resendVerification);
+router.post("/resend-verification", emailLimiter, resendVerification);
 
 /**
  * @swagger
@@ -191,7 +197,7 @@ router.post("/resend-verification", resendVerification);
  *             example:
  *               message: Usuario no encontrado
  */
-router.post("/unverify-user", unverifyUser);
+router.post("/unverify-user", emailLimiter, unverifyUser);
 
 /**
  * @swagger
@@ -234,7 +240,7 @@ router.post("/unverify-user", unverifyUser);
  *             example:
  *               message: Usuario no encontrado
  */
-router.post("/reset-verification", resetVerification);
+router.post("/reset-verification", emailLimiter, resetVerification);
 
 /**
  * @swagger
@@ -298,7 +304,7 @@ router.get("/verify-email", verifyEmail);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/forgot-password", forgotPassword);
+router.post("/forgot-password", passwordResetLimiter, forgotPassword);
 
 /**
  * @swagger
@@ -336,6 +342,6 @@ router.post("/forgot-password", forgotPassword);
  *             example:
  *               message: Token de restablecimiento inválido
  */
-router.post("/reset-password", resetPassword);
+router.post("/reset-password", passwordResetLimiter, resetPassword);
 
 module.exports = router;

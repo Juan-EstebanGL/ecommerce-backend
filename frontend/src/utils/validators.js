@@ -51,3 +51,17 @@ export function validateConfirmPassword(value, password) {
 export function filterPhoneDigits(value) {
   return value.replace(/\D/g, "");
 }
+
+export function getPasswordStrength(pw) {
+  if (!pw) return { level: 0, label: "", color: "" };
+  let score = 0;
+  if (pw.length >= 6) score++;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+  if (score <= 2) return { level: 1, label: "Débil", color: "#dc2626" };
+  if (score <= 3) return { level: 2, label: "Media", color: "#f59e0b" };
+  return { level: 3, label: "Fuerte", color: "#16a34a" };
+}

@@ -20,8 +20,52 @@ Cuando se te pida trabajar en una vista (Login, Catálogo, Carrito, Dashboard, C
 
 # 2. Proyecto y Stack Tecnológico
 
-- **Frontend:** React, React Router, Vite, CSS Modular (estructurado dentro de `src/styles/`).
-- **Backend:** Node.js, Express, Prisma 7, PostgreSQL, JWT Authentication.
+- **Frontend:** React, React Router, Vite, CSS Modular (estructurado dentro de `src/styles/`), SweetAlert2 (js) para alertas.
+- **Backend:** Node.js, Express, Prisma 7, PostgreSQL, JWT Authentication, Zod (validaciones), Cloudinary (imágenes), Resend (emails).
+
+## Comandos
+
+- **Backend tests:** `npm test` (en `backend/`, sobre base `.env.test` — los tests DEBEN quedar 45/45).
+- **Frontend lint:** `npm run lint` (en `frontend/` — DEBE quedar en 0 errores).
+- **Frontend build:** `npm run build` (en `frontend/`).
+- El backend en `NODE_ENV=production` exige `JWT_SECRET` de al menos 32 caracteres (validado en `src/config/env.js`).
+
+## Arquitectura Backend (patrón consolidado en Fase 3)
+
+- **`src/controllers/`**: handlers HTTP delgados. Toda validación se hace con el wrapper `validate(schema, data)` de `src/validations/validation.helper.js` (lanza `AppError` 400 con el mensaje Zod). Los handlers NO contienen lógica de negocio ni `safeParse` manual.
+- **`src/services/`**: lógica de negocio. Cada servicio importa Prisma y puede usar helpers compartidos.
+- **`src/utils/`**: helpers reutilizables (`pagination.js` → `paginate`, `ownership.js` → `assertOwnerOrAdmin`, `productListItem.js` → `productListItemSelect`/`formatProductListItem`).
+- **`src/validations/`**: schemas Zod por recurso; `common.js` exporta `positiveInteger`.
+- **`src/constants/order.js`**: `ORDER_STATUS` y `ORDER_STATUS_LIST` (única fuente de verdad de estados de orden).
+- **`src/services/auth.service.js`**: lógica de autenticación centralizada (register/login/verify/reset). Los controllers de auth solo responden `{statusCode, body}`.
+- **`src/services/cloudinary.service.js`**: `uploadImage(buffer, mimetype, folder)` y `deleteImage(publicId)` — no usar `cloudinary.uploader` fuera de este archivo.
+- **`src/services/email.service.js`**: `sendSafe()` para envíos no críticos (silencia errores de Resend).
+- **Compras atómicas:** `prisma.$transaction` en checkout y en operaciones de direcciones con `isDefault`.
+- **Errores Prisma:** NO usar `try/catch` por `P2025` en servicios — el `error.middleware.js` ya normaliza P2025 → 404, P2002 → 409, P2003 → 409.
+
+## Contrato de la API (IMPORTANTE — corregido en Fase 3)
+
+- Todas las respuestas de error usan `{ "message": "Mensaje descriptivo" }` con el status HTTP adecuado.
+- Los errores operativos se lanzan con `AppError(mensaje, statusCode)` (ver `src/utils/AppError.js`).
+- La validación Zod produce errores 400 con `{ "message": <mensaje del primer issue> }`.
+- **NO migrar a `{ success, error }`**: el frontend y los tests consumen `{ message }`.
+- Los endpoints de auth devuelven `{statusCode, body}` desde el service; el controller responde `res.status(statusCode).json(body)`.
+
+## Seguridad aplicada (Fase 2)
+
+- **Rate limiting** en auth (`src/middleware/rateLimit.middleware.js`) — no deshabilitar.
+- **JWT** firmados con `JWT_SECRET` (32+ chars en producción) y payload mínimo `{ userId, role }`.
+- **Emails** de verificación/restablecimiento: token aleatorio hasheado en BD con expiración.
+- **Swagger** (`/api-docs`) y rutas de desarrollo (`/test`, `/auth/dev`) SOLO se cargan en `NODE_ENV=development`.
+- **Contraseñas:** mínimo 8 caracteres (backend Zod y frontend `utils/validators.js`).
+
+## Convenciones Frontend
+
+- **Validadores:** usar `src/utils/validators.js` (NO definir regex/validadores inline en páginas).
+- **Labels de estado de orden:** `src/utils/orderLabels.js` (`ORDER_STATUS_LABELS`).
+- **Errores de verificación/reset:** `src/utils/errorMessages.js`.
+- **Constantes de imagen:** `src/utils/imageUpload.js` (`ACCEPTED_IMAGE_TYPES`, `MAX_IMAGE_SIZE`).
+- **Panel lateral de auth:** componente compartido `src/components/AuthSidePanel.jsx`.
 
 ---
 
@@ -66,9 +110,7 @@ Cuando se te pida trabajar en una vista (Login, Catálogo, Carrito, Dashboard, C
 ## C. Backend, API & PostgreSQL (Prisma)
 - **Consultas Eficientes:** En las rutas de productos, órdenes y dashboard, usar `select` en Prisma para traer solo las columnas necesarias.
 - **Transacciones en Checkout:** Usar `prisma.$transaction` al procesar compras para actualizar stock y crear la orden atómicamente.
-- **Error Handling Pattern:** Todas las respuestas de la API Express deben responder en formato JSON estandarizado:
-  ```json
-  { "success": false, "error": "Mensaje descriptivo del error" }
+- **Error Handling Pattern:** Todas las respuestas de error de la API Express usan el contrato `{ "message": "Mensaje descriptivo" }` (ver sección 2). NO usar `{ success, error }`.
 
 # 5. Criterios Avanzados de Reconstrucción Visual
 
