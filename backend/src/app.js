@@ -29,9 +29,13 @@ const localOrigins = [
   "http://127.0.0.1:3000",
   "http://127.0.0.1:5173",
 ];
-const allowedOrigins = env.FRONTEND_URL
-  ? [env.FRONTEND_URL, ...localOrigins]
-  : localOrigins;
+const normalizeOrigin = (url = "") => url.replace(/\/+$/, "");
+
+const allowedOrigins = new Set(
+  [...localOrigins, ...(env.FRONTEND_URL ? [env.FRONTEND_URL] : [])].map(
+    normalizeOrigin
+  )
+);
 
 console.log("[app] Iniciando servidor Express...");
 console.log(
@@ -42,7 +46,7 @@ console.log(
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.has(normalizeOrigin(origin))) {
         return callback(null, true);
       }
 

@@ -13,7 +13,7 @@ const envSchema = z
     CLOUDINARY_API_SECRET: z.string().trim().min(1, "CLOUDINARY_API_SECRET es requerida"),
     RESEND_API_KEY: z.string().trim().min(1, "RESEND_API_KEY es requerida"),
     APP_URL: z.string().trim().min(1, "APP_URL es requerida"),
-    FRONTEND_URL: z.string().trim().optional(),
+    FRONTEND_URL: z.string().trim().url("FRONTEND_URL debe ser una URL válida").optional(),
     NODE_ENV: z.string().trim().optional(),
     PORT: z.string().trim().optional(),
   })
