@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import QuantityInput from "./QuantityInput";
 import { useFavoriteContext } from "../context/FavoriteContext";
 import { showSuccess } from "../utils/alerts";
+import { formatPrice } from "../utils/format";
 
 const CartIcon = () => (
   <svg className="pc__cart-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -48,7 +49,7 @@ function ProductCard({ product, onAddToCart, addingId, onFavoriteToggle }) {
       : { label: "Disponible", className: "pc__stock--available", dot: "pc__dot--available" }
     : { label: "Agotado", className: "pc__stock--empty", dot: "pc__dot--empty" };
 
-  const formattedPrice = Number(product.price).toLocaleString("es-CO");
+  const formattedPrice = formatPrice(product.price);
 
   const handleAdd = () => {
     if (!onAddToCart) return;

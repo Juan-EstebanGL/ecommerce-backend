@@ -1,10 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProducts } from "../api/products";
 import { getCategories } from "../api/categories";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
+import RollingLetters from "../components/RollingLetters";
 import { showWarning } from "../utils/alerts";
+
+const HeroBorder = lazy(() => import("../components/HeroBorder"));
 
 const categoryStyles = [
   { gradient: "linear-gradient(135deg, #0ea5a4, #3b82f6)", icon: (
@@ -121,18 +124,22 @@ function HomePage() {
     <main>
       {/* ── Hero ── */}
       <section className="hm-hero">
-        <div className="hm-hero__bg" />
-        <div className="hm-hero__glow hm-hero__glow--1" />
-        <div className="hm-hero__glow hm-hero__glow--2" />
-        <div className="hm-hero__glow hm-hero__glow--3" />
+        <Suspense fallback={null}>
+          <HeroBorder />
+        </Suspense>
         <div className="app-container hm-hero__inner">
           <div className="hm-hero__content">
             <span className="hm-hero__chip">Nueva colección 2026</span>
-            <h1 className="hm-hero__title">
-              Descubre productos que{" "}
-              <span className="hm-hero__title-accent">transforman</span>{" "}
-              tu experiencia
-            </h1>
+            <RollingLetters
+              className="hm-hero__title"
+              text="Descubre productos que transforman tu experiencia"
+              accent="transforman"
+              startFrom="bottom"
+              staggerFrom="center"
+              duration={0.6}
+              staggerChildren={0.035}
+              ease="power4.out"
+            />
             <p className="hm-hero__desc">
               Explora nuestra colección de tecnología, gaming y accesorios con
               envío rápido y compra 100% segura.
@@ -155,26 +162,6 @@ function HomePage() {
                 Ver ofertas
               </button>
             </div>
-          </div>
-          <div className="hm-hero__visual">
-            <div className="hm-hero__shape hm-hero__shape--1" />
-            <div className="hm-hero__shape hm-hero__shape--2" />
-            <div className="hm-hero__shape hm-hero__shape--3" />
-            <div className="hm-hero__shape hm-hero__shape--4" />
-            <div className="hm-hero__shape hm-hero__shape--5" />
-            <svg className="hm-hero__float-icon hm-hero__float-icon--cart" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
-            </svg>
-            <svg className="hm-hero__float-icon hm-hero__float-icon--box" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-              <line x1="12" y1="22.08" x2="12" y2="12" />
-            </svg>
-            <svg className="hm-hero__float-icon hm-hero__float-icon--shield" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
           </div>
         </div>
       </section>

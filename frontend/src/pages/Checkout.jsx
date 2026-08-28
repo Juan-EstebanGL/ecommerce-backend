@@ -11,12 +11,12 @@ import {
 } from "../api/users";
 import Loader from "../components/Loader";
 import { showSuccess, showError, showConfirm, showWarning } from "../utils/alerts";
+import { formatPrice as formatPriceValue } from "../utils/format";
 import { useCartContext } from "../context/CartContext";
 
 const EXPRESS_SHIPPING_COST = 5000;
 
-const formatPrice = (price) =>
-  Number(price).toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const formatPrice = (price) => formatPriceValue(price, { decimals: 0 });
 
 const DELIVERY_OPTIONS = [
   {

@@ -1,4 +1,6 @@
 import ProductStatusBadge from "./ProductStatusBadge";
+import AdminThumb from "./AdminThumb";
+import { formatPrice, ADMIN_LOCALE } from "../../utils/format";
 
 const placeholderImg = (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -42,29 +44,18 @@ export default function ProductTable({ products, onEdit, onDelete, deletingId })
             return (
               <tr key={product.id} className={isDeleting ? "ad-delete--fade-out" : ""}>
                 <td>
-                  <div className="ad-products-thumb">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          e.currentTarget.nextSibling.style.display = "flex";
-                        }}
-                      />
-                    ) : null}
-                    <span
-                      className="ad-products-thumb__placeholder"
-                      style={{ display: product.imageUrl ? "none" : "flex" }}
-                    >
-                      {placeholderImg}
-                    </span>
-                  </div>
+                  <AdminThumb
+                    imageUrl={product.imageUrl}
+                    alt={product.name}
+                    thumbClassName="ad-products-thumb"
+                    placeholderClassName="ad-products-thumb__placeholder"
+                  >
+                    {placeholderImg}
+                  </AdminThumb>
                 </td>
                 <td className="ad-products-cell-name">{product.name}</td>
                 <td className="ad-products-cell-price">
-                  ${Number(product.price).toLocaleString("es-CL")}
+                  ${formatPrice(product.price, { locale: ADMIN_LOCALE })}
                 </td>
                 <td>{product.stock}</td>
                 <td><ProductStatusBadge stock={product.stock} /></td>

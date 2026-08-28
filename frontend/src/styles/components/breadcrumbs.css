@@ -1,0 +1,35 @@
+/* ══════════════════════════════════════════════════════════
+   Breadcrumb — Soft Glass Premium
+   Generic breadcrumb (shared). Page-specific variants (pd-, fv-)
+   live in their respective page CSS files.
+   ══════════════════════════════════════════════════════════ */
+
+.breadcrumb {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb a:hover {
+  color: var(--brand);
+}
+
+.breadcrumb__sep {
+  color: var(--text-tertiary);
+  user-select: none;
+}
+
+.breadcrumb__current {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}

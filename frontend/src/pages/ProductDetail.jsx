@@ -8,6 +8,7 @@ import Card from "../components/Card";
 import ProductCard from "../components/ProductCard";
 import QuantityInput from "../components/QuantityInput";
 import { showSuccess, showError, showConfirm } from "../utils/alerts";
+import { formatPrice } from "../utils/format";
 import { useCartContext } from "../context/CartContext";
 import { useAuthContext } from "../context/AuthContext";
 import { useFavoriteContext } from "../context/FavoriteContext";
@@ -116,8 +117,6 @@ function ProductDetail() {
       setCartLoading(false);
     }
   };
-
-  const formatPrice = (price) => Number(price).toLocaleString("es-CO");
 
   const formatDate = (dateStr) => {
     const now = new Date();

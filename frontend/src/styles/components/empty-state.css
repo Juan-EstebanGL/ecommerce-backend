@@ -31,3 +31,17 @@
   line-height: 1.6;
   margin: 0 0 var(--space-lg);
 }
+
+/* ── Error state (shared utility) ── */
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.error-state h2 {
+  margin: 0;
+}

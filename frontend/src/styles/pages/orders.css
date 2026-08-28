@@ -554,6 +554,16 @@
   align-items: center;
   gap: 16px;
 }
+.od-error__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--danger);
+}
 .od-error__text {
   color: var(--danger);
   font-size: var(--fs-sm);

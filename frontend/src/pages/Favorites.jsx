@@ -5,7 +5,7 @@ import { getFavorites } from "../api/favorites";
 import { addToCart } from "../api/cart";
 import { useCartContext } from "../context/CartContext";
 import ProductCard from "../components/ProductCard";
-import Loader from "../components/Loader";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
 import Pagination from "../components/Pagination";
 import { showSuccess, showError, showWarning } from "../utils/alerts";
 
@@ -146,8 +146,10 @@ function Favorites() {
         </header>
 
         {loading && (
-          <div className="fv-loading">
-            <Loader />
+          <div className="pr-grid" aria-busy="true" aria-label="Cargando favoritos">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
           </div>
         )}
 
@@ -236,6 +238,17 @@ function Favorites() {
                 ? `No encontramos favoritos que coincidan con "${searchQuery}".`
                 : "No hay productos disponibles con el filtro seleccionado."}
             </p>
+            {(searchQuery || showOnlyAvailable) && (
+              <button
+                className="pr-empty__btn"
+                onClick={() => {
+                  setSearchQuery("");
+                  setShowOnlyAvailable(false);
+                }}
+              >
+                Limpiar filtros
+              </button>
+            )}
           </div>
         )}
 

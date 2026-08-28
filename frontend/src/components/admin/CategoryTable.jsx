@@ -1,3 +1,5 @@
+import AdminThumb from "./AdminThumb";
+
 const placeholderImg = (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
@@ -36,25 +38,14 @@ export default function CategoryTable({ categories, onEdit, onDelete, onView, de
             return (
               <tr key={category.id} className={isDeleting ? "ad-delete--fade-out" : ""}>
                 <td>
-                  <div className="ad-products-thumb">
-                    {category.imageUrl ? (
-                      <img
-                        src={category.imageUrl}
-                        alt={category.name}
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          e.currentTarget.nextSibling.style.display = "flex";
-                        }}
-                      />
-                    ) : null}
-                    <span
-                      className="ad-products-thumb__placeholder"
-                      style={{ display: category.imageUrl ? "none" : "flex" }}
-                    >
-                      {placeholderImg}
-                    </span>
-                  </div>
+                  <AdminThumb
+                    imageUrl={category.imageUrl}
+                    alt={category.name}
+                    thumbClassName="ad-categories-thumb"
+                    placeholderClassName="ad-categories-thumb__placeholder"
+                  >
+                    {placeholderImg}
+                  </AdminThumb>
                 </td>
                 <td className="ad-products-cell-name">{category.name}</td>
                 <td className="ad-categories-cell-desc">

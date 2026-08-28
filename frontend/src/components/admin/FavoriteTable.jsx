@@ -1,3 +1,5 @@
+import AdminThumb from "./AdminThumb";
+
 const placeholderImg = (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c0c4cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -44,25 +46,14 @@ export default function FavoriteTable({ products, onView }) {
           {products.map((product) => (
             <tr key={product.id}>
               <td>
-                <div className="ad-favorites-thumb">
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.nextSibling.style.display = "flex";
-                      }}
-                    />
-                  ) : null}
-                  <span
-                    className="ad-favorites-thumb__placeholder"
-                    style={{ display: product.imageUrl ? "none" : "flex" }}
-                  >
-                    {placeholderImg}
-                  </span>
-                </div>
+                <AdminThumb
+                  imageUrl={product.imageUrl}
+                  alt={product.name}
+                  thumbClassName="ad-favorites-thumb"
+                  placeholderClassName="ad-favorites-thumb__placeholder"
+                >
+                  {placeholderImg}
+                </AdminThumb>
               </td>
               <td className="ad-favorites-cell-name">{product.name}</td>
               <td className="ad-favorites-cell-count">{product.totalFavorites}</td>

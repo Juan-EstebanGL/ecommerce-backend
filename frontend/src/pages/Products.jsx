@@ -4,27 +4,12 @@ import { getProducts } from "../api/products";
 import { getCategories } from "../api/categories";
 import { addToCart } from "../api/cart";
 import ProductCard from "../components/ProductCard";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
 import Pagination from "../components/Pagination";
 import { useCartContext } from "../context/CartContext";
 import { showSuccess, showError, showWarning } from "../utils/alerts";
 
 const PAGE_SIZE = 20;
-
-function SkeletonCard() {
-  return (
-    <article className="pc pc--skeleton">
-      <div className="pc__media">
-        <div className="pc__skeleton-img" />
-      </div>
-      <div className="pc__body">
-        <div className="pc__skeleton-line pc__skeleton-line--short" />
-        <div className="pc__skeleton-line pc__skeleton-line--tiny" />
-        <div className="pc__skeleton-line pc__skeleton-line--medium" />
-        <div className="pc__skeleton-line pc__skeleton-line--tiny" />
-      </div>
-    </article>
-  );
-}
 
 function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -232,7 +217,7 @@ function Products() {
         {loading && (
           <div className="pr-grid" aria-busy="true" aria-label="Cargando productos">
             {Array.from({ length: 8 }).map((_, i) => (
-              <SkeletonCard key={i} />
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         )}

@@ -4,6 +4,7 @@ import { getOrderById } from "../api/orders";
 import Loader from "../components/Loader";
 import Button from "../components/Button";
 import { ORDER_STATUS_LABELS as STATUS_LABELS } from "../utils/orderLabels";
+import { formatPrice } from "../utils/format";
 
 const TIMELINE_STEPS = [
   { key: "PENDING", label: "Pedido recibido" },
@@ -108,7 +109,7 @@ function OrderDetail() {
         <div className="od-page__glow od-page__glow--purple" />
         <div className="app-container">
           <div className="od-error">
-            <div className="or-error__icon">
+            <div className="od-error__icon">
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
@@ -249,13 +250,13 @@ function OrderDetail() {
                             Cantidad: <strong>{qty}</strong>
                           </span>
                           <span className="od-item__meta-field">
-                            Precio: <strong>${unitPrice.toFixed(2)}</strong>
+                            Precio: <strong>${formatPrice(unitPrice)}</strong>
                           </span>
                         </div>
                       </div>
 
                       <div className="od-item__subtotal">
-                        ${(unitPrice * qty).toFixed(2)}
+                        ${formatPrice(unitPrice * qty)}
                       </div>
                     </div>
                   );
@@ -274,7 +275,7 @@ function OrderDetail() {
             <div className="od-summary__rows">
               <div className="od-summary__row">
                 <span>Productos ({items.length})</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>${formatPrice(subtotal)}</span>
               </div>
               <div className="od-summary__row">
                 <span>Envío</span>
@@ -289,7 +290,7 @@ function OrderDetail() {
             <div className="od-summary__total">
               <span>TOTAL</span>
               <span className="od-summary__total-value">
-                ${order.total.toFixed(2)}
+                ${formatPrice(order.total)}
               </span>
             </div>
 

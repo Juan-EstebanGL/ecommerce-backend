@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCategoryById } from "../../api/categories";
+import { formatPrice, ADMIN_LOCALE } from "../../utils/format";
 
 export default function CategoryDetailModal({ category: initialCategory, onClose }) {
   const [category, setCategory] = useState(initialCategory);
@@ -131,7 +132,7 @@ export default function CategoryDetailModal({ category: initialCategory, onClose
                           <span className="ad-modal__item-meta">Stock: {product.stock}</span>
                         </div>
                         <span className="ad-modal__item-price">
-                          ${Number(product.price).toLocaleString("es-CL")}
+                          ${formatPrice(product.price, { locale: ADMIN_LOCALE })}
                         </span>
                       </div>
                     ))}

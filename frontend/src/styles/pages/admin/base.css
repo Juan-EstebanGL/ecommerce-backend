@@ -356,13 +356,6 @@
 [data-theme="light"] .ad-orders-status-option--danger:hover {
   background: rgba(239, 68, 68, 0.06);
 }
-[data-theme="light"] .ad-orders-modal__item {
-  background: rgba(0, 0, 0, 0.02);
-  border-color: var(--ad-border);
-}
-[data-theme="light"] .ad-orders-modal__item:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
 [data-theme="light"] .ad-orders-modal__item-media {
   background: rgba(0, 0, 0, 0.03);
 }
@@ -428,13 +421,6 @@
 [data-theme="light"] .ad-products-search__clear {
   background: rgba(0, 0, 0, 0.04);
 }
-[data-theme="light"] .ad-products-count {
-  background: rgba(0, 0, 0, 0.02);
-}
-[data-theme="light"] .ad-products-thumb {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: var(--ad-border);
-}
 [data-theme="light"] .ad-favorites-thumb {
   background: rgba(0, 0, 0, 0.03);
 }
@@ -446,6 +432,10 @@
 }
 [data-theme="light"] .ad-categories-detail-img {
   background: rgba(0, 0, 0, 0.03);
+}
+[data-theme="light"] .ad-categories-thumb {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: var(--ad-border);
 }
 [data-theme="light"] .ad-categories-detail-body::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.15);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getDashboard } from "../../api/admin";
 import OrderStatusBadge from "../../components/admin/OrderStatusBadge";
+import { formatPrice, ADMIN_LOCALE } from "../../utils/format";
 import CountUpModule from "react-countup";
 const CountUp = CountUpModule.default || CountUpModule;
 import {
@@ -8,17 +9,31 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
 
+const CHART_COLORS = {
+  green: "#4ade80",
+  greenDark: "#16a34a",
+  cyan: "#22d3ee",
+  amber: "#fbbf24",
+  red: "#f87171",
+  pink: "#f472b6",
+  axis: "#94a3b8",
+  tooltipText: "#f1f5f9",
+  starEmpty: "rgba(255,255,255,0.1)",
+  grid: "rgba(255,255,255,0.04)",
+  dotStroke: "rgba(15,23,42,0.8)",
+};
+
 const STATUS_META = {
   pending:    { label: "Pendientes",  color: "#60a5fa", bg: "rgba(96,165,250,0.12)" },
-  paid:       { label: "Pagadas",    color: "#4ade80", bg: "rgba(74,222,128,0.12)" },
+  paid:       { label: "Pagadas",    color: CHART_COLORS.green, bg: "rgba(74,222,128,0.12)" },
   processing: { label: "Procesando", color: "#fb923c", bg: "rgba(251,146,60,0.12)" },
   shipped:    { label: "Enviadas",   color: "#a78bfa", bg: "rgba(167,139,250,0.12)" },
   delivered:  { label: "Entregadas", color: "#34d399", bg: "rgba(52,211,153,0.12)" },
-  cancelled:  { label: "Canceladas", color: "#f87171", bg: "rgba(248,113,113,0.12)" },
+  cancelled:  { label: "Canceladas", color: CHART_COLORS.red, bg: "rgba(248,113,113,0.12)" },
 };
 
 function formatCurrency(value) {
-  return "$" + Number(value).toLocaleString("es-CL");
+  return "$" + formatPrice(value, { locale: ADMIN_LOCALE });
 }
 
 function formatDate(dateStr) {
@@ -84,7 +99,7 @@ const tooltipStyle = {
   backdropFilter: "blur(16px)",
   boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
   fontSize: "0.82rem",
-  color: "#f1f5f9",
+  color: CHART_COLORS.tooltipText,
   padding: "10px 14px",
 };
 
@@ -254,7 +269,7 @@ export default function AdminDashboard() {
           <div className="ad-glass ad-dash-revenue-panel">
             <div className="ad-dash-section__header">
               <h2 className="ad-dash-section__title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CHART_COLORS.green} strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Ingresos
               </h2>
             </div>
@@ -267,15 +282,15 @@ export default function AdminDashboard() {
             </div>
             <ResponsiveContainer width="100%" height={120}>
               <BarChart data={[{ name: "Ingresos", value: stats.revenue }]} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={(v) => "$" + (v / 1000).toFixed(0) + "k"} tickLine={false} axisLine={false} width={45} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: CHART_COLORS.axis }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: CHART_COLORS.axis }} tickFormatter={(v) => "$" + (v / 1000).toFixed(0) + "k"} tickLine={false} axisLine={false} width={45} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(v) => [formatCurrency(v), "Ingresos"]} />
                 <Bar dataKey="value" fill="url(#barGrad)" radius={[8, 8, 0, 0]} barSize={44} />
                 <defs>
                   <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#4ade80" />
-                    <stop offset="100%" stopColor="#16a34a" />
+                    <stop offset="0%" stopColor={CHART_COLORS.green} />
+                    <stop offset="100%" stopColor={CHART_COLORS.greenDark} />
                   </linearGradient>
                 </defs>
               </BarChart>
@@ -285,7 +300,7 @@ export default function AdminDashboard() {
           <div className="ad-glass ad-dash-line-panel">
             <div className="ad-dash-section__header">
               <h2 className="ad-dash-section__title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CHART_COLORS.cyan} strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 Evolución de ventas
               </h2>
               <span className="ad-dash-section__count">12 meses</span>
@@ -293,15 +308,15 @@ export default function AdminDashboard() {
             {monthlyRevenue && monthlyRevenue.length > 0 ? (
               <ResponsiveContainer width="100%" height={140}>
                 <LineChart data={monthlyRevenue} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} interval={0} />
-                  <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={(v) => "$" + (v / 1000).toFixed(0) + "k"} tickLine={false} axisLine={false} width={45} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v) => [formatCurrency(v), "Ingresos"]} labelStyle={{ fontWeight: 600, color: "#f1f5f9" }} />
-                  <Line type="monotone" dataKey="revenue" stroke="url(#lineGrad)" strokeWidth={2.5} dot={{ r: 3, fill: "#4ade80", stroke: "rgba(15,23,42,0.8)", strokeWidth: 2 }} activeDot={{ r: 5, fill: "#4ade80", stroke: "#fff", strokeWidth: 2 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: CHART_COLORS.axis }} tickLine={false} axisLine={false} interval={0} />
+                  <YAxis tick={{ fontSize: 10, fill: CHART_COLORS.axis }} tickFormatter={(v) => "$" + (v / 1000).toFixed(0) + "k"} tickLine={false} axisLine={false} width={45} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v) => [formatCurrency(v), "Ingresos"]} labelStyle={{ fontWeight: 600, color: CHART_COLORS.tooltipText }} />
+                  <Line type="monotone" dataKey="revenue" stroke="url(#lineGrad)" strokeWidth={2.5} dot={{ r: 3, fill: CHART_COLORS.green, stroke: CHART_COLORS.dotStroke, strokeWidth: 2 }} activeDot={{ r: 5, fill: CHART_COLORS.green, stroke: "#fff", strokeWidth: 2 }} />
                   <defs>
                     <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#4ade80" />
-                      <stop offset="100%" stopColor="#22d3ee" />
+                      <stop offset="0%" stopColor={CHART_COLORS.green} />
+                      <stop offset="100%" stopColor={CHART_COLORS.cyan} />
                     </linearGradient>
                   </defs>
                 </LineChart>
@@ -318,7 +333,7 @@ export default function AdminDashboard() {
         <div className="ad-glass ad-dash-insights__stock">
           <div className="ad-dash-section__header">
             <h2 className="ad-dash-section__title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CHART_COLORS.red} strokeWidth="2" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               Poco stock
             </h2>
             <span className="ad-dash-section__count">{lowStockProducts.length}</span>
@@ -350,7 +365,7 @@ export default function AdminDashboard() {
         <div className="ad-glass ad-dash-insights__fav">
           <div className="ad-dash-section__header">
             <h2 className="ad-dash-section__title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f472b6" strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CHART_COLORS.pink} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
               Más guardados
             </h2>
             <span className="ad-dash-section__count">{mostFavoritedProducts.length}</span>
@@ -371,7 +386,7 @@ export default function AdminDashboard() {
                   </div>
                   <span className="ad-dash-stock-row__name">{p.name}</span>
                   <span className="ad-dash-stock-row__fav">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#f472b6" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill={CHART_COLORS.pink} stroke="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
                     {p.favorites}
                   </span>
                 </div>
@@ -383,7 +398,7 @@ export default function AdminDashboard() {
         <div className="ad-glass ad-dash-insights__rated">
           <div className="ad-dash-section__header">
             <h2 className="ad-dash-section__title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CHART_COLORS.amber} strokeWidth="2" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               Mejor calificados
             </h2>
             <span className="ad-dash-section__count">{topRatedProducts.length}</span>
@@ -405,7 +420,7 @@ export default function AdminDashboard() {
                   <span className="ad-dash-stock-row__name">{p.name}</span>
                   <div className="ad-dash-stock-row__rating">
                     {Array.from({ length: 5 }).map((_, s) => (
-                      <svg key={s} width="11" height="11" viewBox="0 0 24 24" fill={s < Math.round(p.averageRating) ? "#fbbf24" : "rgba(255,255,255,0.1)"} stroke="none">
+                      <svg key={s} width="11" height="11" viewBox="0 0 24 24" fill={s < Math.round(p.averageRating) ? CHART_COLORS.amber : CHART_COLORS.starEmpty} stroke="none">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                       </svg>
                     ))}
@@ -455,7 +470,7 @@ export default function AdminDashboard() {
         <div className="ad-glass ad-dash-activity__reviews">
           <div className="ad-dash-section__header">
             <h2 className="ad-dash-section__title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CHART_COLORS.amber} strokeWidth="2" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               Últimas reseñas
             </h2>
             <span className="ad-dash-section__count">{recentReviews.length}</span>
@@ -498,7 +513,7 @@ export default function AdminDashboard() {
                   <div className="ad-dash-review__product">{r.producto.name}</div>
                   <div className="ad-dash-review__stars">
                     {Array.from({ length: 5 }).map((_, s) => (
-                      <svg key={s} width="13" height="13" viewBox="0 0 24 24" fill={s < r.rating ? "#fbbf24" : "rgba(255,255,255,0.1)"} stroke="none">
+                      <svg key={s} width="13" height="13" viewBox="0 0 24 24" fill={s < r.rating ? CHART_COLORS.amber : CHART_COLORS.starEmpty} stroke="none">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                       </svg>
                     ))}

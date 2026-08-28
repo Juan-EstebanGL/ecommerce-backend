@@ -16,13 +16,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Loading ── */
-.fv-loading {
-  display: flex;
-  justify-content: center;
-  padding: 100px 0;
-}
-
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .fv-breadcrumb {

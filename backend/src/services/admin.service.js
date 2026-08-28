@@ -133,7 +133,7 @@ const getDashboard = async () => {
   const productMap = new Map(products.map((p) => [p.id, p]));
 
   const statusMap = Object.fromEntries(
-    ORDER_STATUS.map((status) => [status, 0])
+    Object.values(ORDER_STATUS).map((status) => [status, 0])
   );
 
   for (const entry of ordersByStatus) {

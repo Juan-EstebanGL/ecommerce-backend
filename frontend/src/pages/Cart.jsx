@@ -4,6 +4,7 @@ import { getCart, updateCartItem, removeCartItem } from "../api/cart";
 import Loader from "../components/Loader";
 import QuantityInput from "../components/QuantityInput";
 import { showSuccess, showError, showConfirm } from "../utils/alerts";
+import { formatPrice as formatPriceValue } from "../utils/format";
 import { useCartContext } from "../context/CartContext";
 
 const TrashIcon = () => (
@@ -135,7 +136,7 @@ function Cart() {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const isEmpty = !loading && items.length === 0;
 
-  const formatPrice = (price) => Number(price).toLocaleString("es-CO", { minimumFractionDigits: 2 });
+  const formatPrice = (price) => formatPriceValue(price, { decimals: 2 });
 
   return (
     <main className="ct-page">

@@ -7,6 +7,7 @@ import {
   ACCEPTED_IMAGE_TYPES as ACCEPTED,
   MAX_IMAGE_SIZE as MAX_SIZE,
 } from "../../utils/imageUpload";
+import AdminFormModal from "./AdminFormModal";
 
 const initialForm = { name: "", price: "", stock: "", categoryId: "" };
 
@@ -121,24 +122,11 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
     }
   }
 
-  if (!isOpen) return null;
-
   const isEdit = mode === "edit";
 
   return (
-    <div className="ad-form-overlay" onClick={onClose}>
-      <div className="ad-form-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ad-form-modal__header">
-          <h2>{isEdit ? "Editar producto" : "Nuevo producto"}</h2>
-          <button className="ad-form-modal__close" onClick={onClose} aria-label="Cerrar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-
-        <form className="ad-form" onSubmit={handleSubmit} noValidate>
+    <AdminFormModal title={isEdit ? "Editar producto" : "Nuevo producto"} isOpen={isOpen} onClose={onClose}>
+      <form className="ad-form" onSubmit={handleSubmit} noValidate>
           <div className="ad-form__body">
             <div className="ad-form__left">
               <div className="ad-form__group">
@@ -251,8 +239,7 @@ export default function ProductFormModal({ mode = "create", product = null, isOp
               )}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </AdminFormModal>
   );
 }

@@ -42,7 +42,7 @@ export default function UserTable({ users, onView, onRoleToggle, onDelete, delet
                         src={user.avatarUrl}
                         alt=""
                         className="ad-user-avatar__img"
-                        onError={(e) => { e.target.style.display = "none"; e.target.nextElementSibling.style.display = "flex"; }}
+                        onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.nextElementSibling.style.display = "flex"; }}
                       />
                     ) : null}
                     <span

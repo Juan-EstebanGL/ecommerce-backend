@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getOrders } from "../api/orders";
 import Loader from "../components/Loader";
 import { ORDER_STATUS_LABELS as STATUS_LABELS } from "../utils/orderLabels";
+import { formatPrice } from "../utils/format";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
@@ -146,7 +147,7 @@ function Orders() {
                     <div className="orc__stat">
                       <span className="orc__stat-label">Total</span>
                       <span className="orc__stat-value orc__stat-value--price">
-                        ${order.total.toFixed(2)}
+                        ${formatPrice(order.total)}
                       </span>
                     </div>
                   </div>

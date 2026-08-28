@@ -164,7 +164,7 @@
 /* ── Dark theme specific overrides ── */
 
 [data-theme="dark"] .navbar {
-  background: #0a0e1a;
+  background: var(--background);
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -173,15 +173,15 @@
 }
 
 [data-theme="dark"] .navbar__link:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--hover-bg);
 }
 
 [data-theme="dark"] .navbar__auth-link:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--hover-bg);
 }
 
 [data-theme="dark"] .navbar__hamburger:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--hover-bg);
 }
 
 [data-theme="dark"] .navbar__dropdown-item:hover {
@@ -189,11 +189,11 @@
 }
 
 [data-theme="dark"] .navbar__dropdown-item--danger:hover {
-  background: rgba(248, 113, 113, 0.12);
+  background: var(--danger-light);
 }
 
 [data-theme="dark"] .navbar__drawer-link:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--hover-bg);
 }
 
 [data-theme="dark"] .navbar__drawer-link--active {
@@ -201,11 +201,11 @@
 }
 
 [data-theme="dark"] .navbar__drawer-logout:hover {
-  background: rgba(248, 113, 113, 0.12);
+  background: var(--danger-light);
 }
 
 [data-theme="dark"] .navbar__drawer-auth-link:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--hover-bg);
 }
 
 [data-theme="dark"] .btn--ghost {
@@ -265,7 +265,7 @@
 }
 
 [data-theme="dark"] .footer {
-  background: #060a14;
+  background: var(--hero-bg);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 

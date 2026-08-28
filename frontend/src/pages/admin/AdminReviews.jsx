@@ -3,6 +3,7 @@ import { getAdminReviews, deleteReview } from "../../api/reviews";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import ReviewTable from "../../components/admin/ReviewTable";
 import ReviewRating from "../../components/admin/ReviewRating";
+import AdminDetailModal from "../../components/admin/AdminDetailModal";
 import Pagination from "../../components/Pagination";
 import useDebounce from "../../hooks/useDebounce";
 
@@ -266,23 +267,8 @@ function ReviewViewModal({ review, onClose }) {
   if (!review) return null;
 
   return (
-    <div className="ad-modal-overlay" onClick={onClose}>
-      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ad-modal__header">
-          <div className="ad-modal__header-icon">⭐</div>
-          <div className="ad-modal__header-text">
-            <h2 className="ad-modal__title">Detalles de la reseña</h2>
-            <p className="ad-modal__subtitle">Reseña de producto</p>
-          </div>
-          <button className="ad-modal__close" onClick={onClose} aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="ad-modal__body">
+    <AdminDetailModal icon="⭐" title="Detalles de la reseña" subtitle="Reseña de producto" onClose={onClose}>
+      <div className="ad-modal__body">
           {review.product && (
             <div className="ad-modal__media-row">
               <div className="ad-modal__media-thumb">
@@ -348,11 +334,6 @@ function ReviewViewModal({ review, onClose }) {
             </>
           )}
         </div>
-
-        <div className="ad-modal__footer">
-          <button className="ad-modal__btn" onClick={onClose}>Cerrar</button>
-        </div>
-      </div>
-    </div>
+    </AdminDetailModal>
   );
 }

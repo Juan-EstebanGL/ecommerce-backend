@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import ReviewRating from "./ReviewRating";
+import AdminThumb from "./AdminThumb";
 
 const placeholderImg = (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c0c4cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -104,26 +105,15 @@ export default function ReviewTable({ reviews, onView, onDelete, deletingId }) {
             return (
               <tr key={review.id} className={isDeleting ? "ad-delete--fade-out" : ""}>
                 <td>
-                  <div className="ad-reviews-cell-product">
-                    <div className="ad-reviews-product-thumb">
-                      {review.product?.imageUrl ? (
-                        <img
-                          src={review.product.imageUrl}
-                          alt={review.product.name}
-                          loading="lazy"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            e.currentTarget.nextSibling.style.display = "flex";
-                          }}
-                        />
-                      ) : null}
-                      <span
-                        className="ad-reviews-product-thumb__placeholder"
-                        style={{ display: review.product?.imageUrl ? "none" : "flex" }}
+                    <div className="ad-reviews-cell-product">
+                      <AdminThumb
+                        imageUrl={review.product?.imageUrl}
+                        alt={review.product?.name}
+                        thumbClassName="ad-reviews-product-thumb"
+                        placeholderClassName="ad-reviews-product-thumb__placeholder"
                       >
                         {placeholderImg}
-                      </span>
-                    </div>
+                      </AdminThumb>
                     <ExpandableText
                       text={review.product?.name}
                       className="ad-reviews-product-name"

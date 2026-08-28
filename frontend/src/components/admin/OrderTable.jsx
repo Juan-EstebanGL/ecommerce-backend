@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import OrderStatusBadge from "./OrderStatusBadge";
+import { formatPrice, ADMIN_LOCALE } from "../../utils/format";
 
 const STATUS_TRANSITIONS = {
   PENDING: ["PAID", "CANCELLED"],
@@ -96,7 +97,7 @@ export default function OrderTable({ orders, onView, onStatusChange, loadingId }
                 </td>
                 <td>{order.items?.length || 0}</td>
                 <td className="ad-orders-cell-total">
-                  ${Number(order.total).toLocaleString("es-CL")}
+                  ${formatPrice(order.total, { locale: ADMIN_LOCALE })}
                 </td>
                 <td><OrderStatusBadge status={order.status} /></td>
                 <td className="ad-orders-cell-date">

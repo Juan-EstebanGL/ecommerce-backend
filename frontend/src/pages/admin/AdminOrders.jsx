@@ -2,9 +2,11 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { getAdminOrders, updateOrderStatus } from "../../api/orders";
 import { showConfirm, showError, showSuccess } from "../../utils/alerts";
 import OrderTable from "../../components/admin/OrderTable";
+import AdminDetailModal from "../../components/admin/AdminDetailModal";
 import Pagination from "../../components/Pagination";
 import useDebounce from "../../hooks/useDebounce";
 import { ORDER_STATUS_LABELS as STATUS_LABELS } from "../../utils/orderLabels";
+import { formatPrice, ADMIN_LOCALE } from "../../utils/format";
 
 const PAGE_SIZE = 8;
 
@@ -286,23 +288,8 @@ function OrderViewModal({ order, onClose }) {
   const st = statusMap[order.status] || { cls: "ad-modal__badge--neutral", label: order.status };
 
   return (
-    <div className="ad-modal-overlay" onClick={onClose}>
-      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ad-modal__header">
-          <div className="ad-modal__header-icon">📋</div>
-          <div className="ad-modal__header-text">
-            <h2 className="ad-modal__title">Orden #{order.id}</h2>
-            <p className="ad-modal__subtitle">Detalle del pedido</p>
-          </div>
-          <button className="ad-modal__close" onClick={onClose} aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="ad-modal__body">
+    <AdminDetailModal icon="📋" title={`Orden #${order.id}`} subtitle="Detalle del pedido" onClose={onClose}>
+      <div className="ad-modal__body">
           <div className="ad-modal__grid">
             <div className="ad-modal__field">
               <span className="ad-modal__label">Estado</span>
@@ -316,7 +303,7 @@ function OrderViewModal({ order, onClose }) {
             <div className="ad-modal__field">
               <span className="ad-modal__label">Total</span>
               <span className="ad-modal__value ad-modal__value--price">
-                ${Number(order.total).toLocaleString("es-CL")}
+                ${formatPrice(order.total, { locale: ADMIN_LOCALE })}
               </span>
             </div>
             <div className="ad-modal__field">
@@ -370,11 +357,11 @@ function OrderViewModal({ order, onClose }) {
                     <div className="ad-modal__item-info">
                       <span className="ad-modal__item-name">{item.productName}</span>
                       <span className="ad-modal__item-meta">
-                        {item.quantity} x ${Number(item.productPrice).toLocaleString("es-CL")}
+                        {item.quantity} x ${formatPrice(item.productPrice, { locale: ADMIN_LOCALE })}
                       </span>
                     </div>
                     <span className="ad-modal__item-price">
-                      ${(item.quantity * Number(item.productPrice)).toLocaleString("es-CL")}
+                      ${formatPrice(item.quantity * Number(item.productPrice), { locale: ADMIN_LOCALE })}
                     </span>
                   </div>
                 ))}
@@ -382,11 +369,6 @@ function OrderViewModal({ order, onClose }) {
             </>
           )}
         </div>
-
-        <div className="ad-modal__footer">
-          <button className="ad-modal__btn" onClick={onClose}>Cerrar</button>
-        </div>
-      </div>
-    </div>
+    </AdminDetailModal>
   );
 }
