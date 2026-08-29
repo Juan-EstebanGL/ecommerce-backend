@@ -630,6 +630,10 @@
   overflow: visible;
 }
 
+.ad-sidebar[hidden] {
+  display: flex;
+}
+
 .ad-sidebar::before {
   content: "";
   position: absolute;
